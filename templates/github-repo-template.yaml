@@ -1,0 +1,89 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: github-repo-demo-template-v3
+  title: Create GitHub Repository with GitOps Configs
+  description: Automatically provisions a new codebase and seeds tracking manifests straight into ArgoCD.
+spec:
+  owner: user:default/ivaylob84
+  type: service
+
+  parameters:
+    - title: Provide Repository Information
+      required:
+        - repoName
+        - repoOwner
+        - serviceImage
+        - servicePort
+      properties:
+        repoName:
+          title: Repository Name
+          type: string
+          description: Unique name for your new application codebase
+          maxLength: 50
+          pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
+        repoOwner:
+          title: Repository Owner
+          type: string
+          description: Your GitHub organization or account name
+          default: IvayloB84
+        description:
+          title: Description
+          type: string
+        serviceImage:
+          title: Service Container Image
+          type: string
+          default: "nginx:alpine"
+        servicePort:
+          title: Service Container Port
+          type: integer
+          default: 80
+
+  steps:
+    # 📝 Step 1: Natively fetch skeleton manifests from your secure, private repository path
+    - id: fetch-skeleton
+      name: Render Template Configuration Files
+      action: fetch:template
+      input:
+        url: https://github.com/IvayloB84/backstage-templates
+        values:
+          repoName: ${{ parameters.repoName }}
+          repoOwner: ${{ parameters.repoOwner }}
+          description: ${{ parameters.description }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
+
+    # 🔗 Step 2: Open a Pull Request against your central GitOps hub FIRST
+    - id: publish-gitops-manifest
+      name: Submit Automated Deployment Manifest to Central GitOps Hub
+      action: publish:github:pull-request
+      input:
+        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        sourcePath: ./argocd-application.yaml
+        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
+        branchName: 'argo-sync-${{ parameters.repoName }}'
+        title: 'infra: register automated deployment loops for ${{ parameters.repoName }}'
+        description: ${{ parameters.description }}
+
+    # 🐙 Step 3: ATOMIC PROVISION - Create the new repository ONLY if your PR and file loads succeed
+    - id: publish
+      name: Provision Production Repository on GitHub
+      action: publish:github
+      input:
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoVisibility: public
+        defaultBranch: main
+
+    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
+    - id: wait-for-github
+      name: Synchronizing Cloud Repository State
+      action: debug:wait
+      input:
+        seconds: 7
+
+    # 📁 Step 5: REGISTER - Catalog mapping executes cleanly now that files sit in the repository root
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
