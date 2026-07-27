@@ -59,6 +59,7 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        update: true
         sourcePath: ./argocd-application.yaml
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
         branchName: 'argo-sync-${{ parameters.repoName }}'
