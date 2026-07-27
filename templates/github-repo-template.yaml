@@ -45,7 +45,7 @@ spec:
       name: Render Template Configuration Files
       action: fetch:template
       input:
-        url: https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton
+        url: https://github.com/${{ parameters.repoOwner }}/backstage-templates
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
@@ -60,7 +60,7 @@ spec:
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         update: true
-        sourcePath: ./argocd-application.yaml
+        sourcePath: ./skeleton/argocd-application.yaml
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
         branchName: 'argo-sync-${{ parameters.repoName }}'
         title: 'infra: register automated deployment loops for ${{ parameters.repoName }}'
@@ -74,6 +74,7 @@ spec:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         repoVisibility: public
         defaultBranch: main
+        sourcePath: ./skeleton
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
