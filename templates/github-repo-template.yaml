@@ -62,7 +62,7 @@ spec:
         update: true
         sourcePath: ./skeleton/argocd-application.yaml
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
-        branchName: 'argo-sync-${{ parameters.repoName }}'
+        branchName: 'argo-sync-${{ parameters.repoName }}-${{ tomorrow().slice(11,19) | replace(":", "-") }}'
         title: 'infra: register automated deployment loops for ${{ parameters.repoName }}'
         description: ${{ parameters.description or 'Automated infrastructure GitOps deployment registration manifest.' }}
 
