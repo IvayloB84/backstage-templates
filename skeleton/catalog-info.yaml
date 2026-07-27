@@ -2,7 +2,8 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: ${{ values.repoName | lower }}
-  description: ${{ values.description | dump }}
+  description: >-
+    ${{ values.description or 'Automated infrastructure GitOps deployment registration manifest.' }}
   annotations:
     argocd/app-name: ${{ values.repoName }}
 spec:
