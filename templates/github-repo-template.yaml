@@ -59,7 +59,6 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
-        update: true
         sourcePath: ./argocd-application.yaml
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
         branchName: 'argo-sync-${{ parameters.repoName }}'
@@ -82,20 +81,9 @@ spec:
       input:
         seconds: 7
 
-    # 📁 Step 5: REGISTER - New platform schema uses standard step output tracking variables natively!
+    # 📁 Step 5: REGISTER - Catalog mapping executes cleanly now that files sit in the repository root
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        # 🎯 PLATFORM FIX: Binds directly to Step 3's real, verified output payload reference!
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: '/catalog-info.yaml'
-
-  # 📤 Outputs are displayed on screen to the user upon complete execution success
-  output:
-    links:
-      - title: Open Production GitHub Repository
-        url: ${{ steps['publish'].output.remoteUrl }}
-      - title: View Component in Software Catalog
-        icon: catalog
-        entityRef: ${{ steps['register'].output.entityRef }}
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'

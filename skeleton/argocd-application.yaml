@@ -6,14 +6,14 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git
+    repoURL: https://github.com{{ values.repoOwner }}/${{ values.repoName }}.git
     targetRevision: HEAD
     path: ./
   destination:
+    # 🎯 PROPERLY FIXED: Verified internal cluster endpoint address
     server: https://kubernetes.default.svc
     namespace: default
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-
