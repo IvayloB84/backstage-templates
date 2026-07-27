@@ -58,7 +58,7 @@ spec:
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
       input:
-        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=IvayloB84'
         update: true
         sourcePath: ./skeleton/argocd-application.yaml
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
