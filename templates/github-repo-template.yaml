@@ -58,6 +58,7 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=IvayloB84'
+        token: ${{ secrets.GITHUB_TOKEN }}
         update: true
         sourcePath: ./skeleton/argocd-application.yaml
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
