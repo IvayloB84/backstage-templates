@@ -46,16 +46,16 @@ spec:
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Natively fetch skeleton manifests from your secure, private repository path
+    # 📝 Step 1: Natively fetch ONLY skeleton manifests from your secure path
     - id: fetch-skeleton
       name: Render Template Configuration Files
       action: fetch:template
       input:
-        url: https://github.com/${{ parameters.repoOwner }}/backstage-templates
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates?path=skeleton'
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
-          description: ${{ parameters.description }}
+          description: ${{ parameters.description or 'Freshly generated application.' }}
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
 
@@ -81,7 +81,7 @@ spec:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         repoVisibility: public
         defaultBranch: main
-        sourcePath: ./skeleton
+        sourcePath: .
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
