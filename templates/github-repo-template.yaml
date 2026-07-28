@@ -39,13 +39,13 @@ spec:
           type: integer
           default: 80
   steps:
-# 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
+    # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
     - id: generate-uuid
       name: Generating Unique Session Token
       action: debug:log
       input:
-        extra: "Session tracking verified: ${{ parameters.repoName }}-${{ 'now' | date('X') }}"
-        
+        extra: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
+
     # 📝 Step 1: Natively fetch skeleton manifests from your secure, private repository path
     - id: fetch-skeleton
       name: Render Template Configuration Files
@@ -95,4 +95,5 @@ spec:
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
