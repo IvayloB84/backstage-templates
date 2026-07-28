@@ -53,7 +53,7 @@ spec:
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates?path=skeleton'
         copyWithoutRender:
-          - 'github-repo-template.yaml'
+          - github-repo-template.yaml
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
