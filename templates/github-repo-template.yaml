@@ -45,7 +45,7 @@ spec:
       action: debug:log
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
-        
+
     # 📝 Step 1: Natively fetch skeleton manifests from your secure, private repository path
     - id: fetch-skeleton
       name: Render Template Configuration Files
@@ -67,7 +67,7 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=IvayloB84'
         token: ${{ secrets.GITHUB_TOKEN }}
         update: true
-        sourcePath: ./skeleton/argocd-application.yaml
+        sourcePath: '' 
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
         branchName: 'argo-sync-${{ parameters.repoName }}'
         title: 'infra: register automated deployment loops for ${{ parameters.repoName }}'
