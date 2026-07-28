@@ -5,6 +5,7 @@ metadata:
   description: ${{ values.description | dump }}
   annotations:
     argocd/app-name: ${{ values.repoName }}
+    backstage.io/kubernetes-id: ${{ values.repoName }}
 spec:
   type: service
   lifecycle: production
