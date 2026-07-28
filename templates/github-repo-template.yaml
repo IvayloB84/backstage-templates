@@ -44,8 +44,8 @@ spec:
       name: Generating Unique Session Token
       action: debug:log
       input:
-        extra: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
-
+        message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
+        
     # 📝 Step 1: Natively fetch skeleton manifests from your secure, private repository path
     - id: fetch-skeleton
       name: Render Template Configuration Files
