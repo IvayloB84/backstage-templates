@@ -96,3 +96,12 @@ spec:
       action: catalog:register
       input:
         catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+
+  # 🎯 JUST ADD THIS TO THE VERY END OF YOUR FILE (Leave Step 5 exactly as it is)
+  output:
+    links:
+      - title: Open Fresh Repository on GitHub
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open Backstage Catalog Entity
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
