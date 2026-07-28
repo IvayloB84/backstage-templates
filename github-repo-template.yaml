@@ -51,7 +51,7 @@ spec:
       name: Render Template Configuration Files
       action: fetch:template
       input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/skeleton'
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
