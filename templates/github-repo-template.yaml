@@ -88,9 +88,9 @@ spec:
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
-        seconds: 7
+        seconds: 15
 
-    # 📁 Step 5: REGISTER - Catalog mapping executes cleanly now that files sit in the repository root
+    # 📁 Step 5: REGISTER
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
