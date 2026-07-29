@@ -13,20 +13,16 @@ spec:
       required:
         - repoName
         - repoOwner
-        - serviceType
-        - serviceImage
-        - servicePort
+        - serviceType # Only require the initial selector at the top level
       properties:
         repoName:
           title: Repository Name
           type: string
-          description: Unique name for your new application codebase
           maxLength: 50
           pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
         repoOwner:
           title: Repository Owner
           type: string
-          description: Your GitHub organization or account name
           default: IvayloB84
         description:
           title: Description
@@ -39,11 +35,34 @@ spec:
         serviceType:
           oneOf:
             - properties:
-                serviceImage: {type: string, default: "nginx:alpine"}
-                servicePort: {type: integer, default: 80}
+                serviceType:
+                  enum: [nginx]
+                serviceImage: 
+                  title: Service Container Image
+                  type: string
+                  default: "nginx:alpine"
+                servicePort: 
+                  title: Service Container Port
+                  type: integer
+                  default: 80
+              required:
+                - serviceImage
+                - servicePort # Enforce requirement ONLY when Nginx is picked
             - properties:
-                serviceImage: {type: string, default: "postgres:16-alpine"}
-                servicePort: {type: integer, default: 5432}
+                serviceType:
+                  enum: [postgres]
+                serviceImage: 
+                  title: Service Container Image
+                  type: string
+                  default: "postgres:16-alpine"
+                servicePort: 
+                  title: Service Container Port
+                  type: integer
+                  default: 5432
+              required:
+                - serviceImage
+                - servicePort # Enforce requirement ONLY when Postgres is picked
+
   steps:
     # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
     - id: generate-uuid
