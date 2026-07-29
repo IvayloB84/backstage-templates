@@ -13,6 +13,7 @@ spec:
       required:
         - repoName
         - repoOwner
+        - serviceType
         - serviceImage
         - servicePort
       properties:
@@ -30,14 +31,19 @@ spec:
         description:
           title: Description
           type: string
-        serviceImage:
-          title: Service Container Image
-          type: string
-          default: "nginx:alpine"
-        servicePort:
-          title: Service Container Port
-          type: integer
-          default: 80
+        serviceType:
+          title: Select Base Service Stack
+          enum: [nginx, postgres, java, redis]
+          enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
+      dependencies:
+        serviceType:
+          oneOf:
+            - properties:
+                serviceImage: {type: string, default: "nginx:alpine"}
+                servicePort: {type: integer, default: 80}
+            - properties:
+                serviceImage: {type: string, default: "postgres:16-alpine"}
+                servicePort: {type: integer, default: 5432}
   steps:
     # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
     - id: generate-uuid
