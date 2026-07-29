@@ -35,37 +35,25 @@ spec:
         serviceType:
           oneOf:
             - properties:
-                serviceType:
-                  enum: [nginx]
+                serviceType: { enum: [nginx] }
                 serviceImage: { type: string, default: "nginx:alpine" }
-                servicePort: { type: integer, default: 80 }
-              required:
-                - serviceImage
-                - servicePort
+                servicePort: { type: integer, default: 80, minimum: 1 } # ⚡ Isolated Nginx definition
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum: [postgres]
+                serviceType: { enum: [postgres] }
                 serviceImage: { type: string, default: "postgres:16-alpine" }
-                servicePort: { type: integer, default: 5432 }
-              required:
-                - serviceImage
-                - servicePort
+                servicePort: { type: integer, default: 5432, minimum: 1 } # ⚡ Isolated Postgres definition
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum: [java]
+                serviceType: { enum: [java] }
                 serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
-                servicePort: { type: integer, default: 8080 }
-              required:
-                - serviceImage
-                - servicePort
+                servicePort: { type: integer, default: 8080, minimum: 1 } # ⚡ Isolated Java definition
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum: [redis]
+                serviceType: { enum: [redis] }
                 serviceImage: { type: string, default: "redis:alpine" }
-                servicePort: { type: integer, default: 6379 }
-              required:
-                - serviceImage
-                - servicePort
+                servicePort: { type: integer, default: 6379, minimum: 1 } # ⚡ Isolated Redis definition
+              required: [serviceImage, servicePort]
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string

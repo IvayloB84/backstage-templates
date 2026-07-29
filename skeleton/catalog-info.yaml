@@ -1,13 +1,13 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.repoName }}
-  description: ${{ values.description | dump }}
+  name: ${{ values.repoName | dump }}
   annotations:
-    argocd/app-name: ${{ values.repoName }}
-    backstage.io/kubernetes-id: ${{ values.repoName }}
+    # 🔗 Connects the item tabs to our configured cluster definitions
+    backstage.io/kubernetes-id: 'k3s-pilot'
+    backstage.io/kubernetes-label-selector: 'app=${{ values.repoName }}'
+    argocd/app-name: '${{ values.repoName }}'
 spec:
   type: service
-  lifecycle: production
-  owner: user:default/ivaylob84
-
+  lifecycle: experimental
+  owner: IvayloB84
