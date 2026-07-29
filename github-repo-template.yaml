@@ -13,7 +13,7 @@ spec:
       required:
         - repoName
         - repoOwner
-        - serviceType # Only require the initial selector at the top level
+        - serviceType
       properties:
         repoName:
           title: Repository Name
@@ -37,31 +37,35 @@ spec:
             - properties:
                 serviceType:
                   enum: [nginx]
-                serviceImage: 
-                  title: Service Container Image
-                  type: string
-                  default: "nginx:alpine"
-                servicePort: 
-                  title: Service Container Port
-                  type: integer
-                  default: 80
+                serviceImage: { type: string, default: "nginx:alpine" }
+                servicePort: { type: integer, default: 80 }
               required:
                 - serviceImage
-                - servicePort # Enforce requirement ONLY when Nginx is picked
+                - servicePort
             - properties:
                 serviceType:
                   enum: [postgres]
-                serviceImage: 
-                  title: Service Container Image
-                  type: string
-                  default: "postgres:16-alpine"
-                servicePort: 
-                  title: Service Container Port
-                  type: integer
-                  default: 5432
+                serviceImage: { type: string, default: "postgres:16-alpine" }
+                servicePort: { type: integer, default: 5432 }
               required:
                 - serviceImage
-                - servicePort # Enforce requirement ONLY when Postgres is picked
+                - servicePort
+            - properties:
+                serviceType:
+                  enum: [java]
+                serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
+                servicePort: { type: integer, default: 8080 }
+              required:
+                - serviceImage
+                - servicePort
+            - properties:
+                serviceType:
+                  enum: [redis]
+                serviceImage: { type: string, default: "redis:alpine" }
+                servicePort: { type: integer, default: 6379 }
+              required:
+                - serviceImage
+                - servicePort
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
