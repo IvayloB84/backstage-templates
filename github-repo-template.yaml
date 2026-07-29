@@ -36,34 +36,34 @@ spec:
           oneOf:
             - properties:
                 serviceType: { enum: [nginx] }
-                serviceImage: { type: string, default: "nginx:alpine" }
-                servicePort: { type: integer, default: 80, minimum: 1 } # ⚡ Isolated Nginx definition
-              required: [serviceImage, servicePort]
+                nginxImage: { type: string, title: "Nginx Image", default: "nginx:alpine" }
+                nginxPort: { type: integer, title: "Nginx Port", default: 80, minimum: 1 }
+              required: [nginxImage, nginxPort]
             - properties:
                 serviceType: { enum: [postgres] }
-                serviceImage: { type: string, default: "postgres:16-alpine" }
-                servicePort: { type: integer, default: 5432, minimum: 1 } # ⚡ Isolated Postgres definition
-              required: [serviceImage, servicePort]
+                postgresImage: { type: string, title: "PostgreSQL Image", default: "postgres:16-alpine" }
+                postgresPort: { type: integer, title: "PostgreSQL Port", default: 5432, minimum: 1 }
+              required: [postgresImage, postgresPort]
             - properties:
                 serviceType: { enum: [java] }
-                serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
-                servicePort: { type: integer, default: 8080, minimum: 1 } # ⚡ Isolated Java definition
-              required: [serviceImage, servicePort]
+                javaImage: { type: string, title: "Java Image", default: "eclipse-temurin:21-jre" }
+                javaPort: { type: integer, title: "Java Port", default: 8080, minimum: 1 }
+              required: [javaImage, javaPort]
             - properties:
                 serviceType: { enum: [redis] }
-                serviceImage: { type: string, default: "redis:alpine" }
-                servicePort: { type: integer, default: 6379, minimum: 1 } # ⚡ Isolated Redis definition
-              required: [serviceImage, servicePort]
+                redisImage: { type: string, title: "Redis Image", default: "redis:alpine" }
+                redisPort: { type: integer, title: "Redis Port", default: 6379, minimum: 1 }
+              required: [redisImage, redisPort]
 
   steps:
-    # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
+    # Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
     - id: generate-uuid
       name: Generating Unique Session Token
       action: debug:log
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Natively fetch ONLY skeleton manifests from your secure path
+    # Step 1: Natively fetch ONLY skeleton manifests from your secure path
     - id: fetch-skeleton
       name: Render Template Configuration Files
       action: fetch:template
@@ -76,7 +76,7 @@ spec:
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
 
-    # 🔗 Step 2: Open a Pull Request against your central GitOps hub FIRST
+    # Step 2: Open a Pull Request against your central GitOps hub FIRST
     - id: publish-gitops-manifest
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
@@ -90,7 +90,7 @@ spec:
         title: 'infra: register automated deployment loops for ${{ parameters.repoName }}'
         description: ${{ parameters.description or 'Automated infrastructure GitOps deployment registration manifest.' }}
 
-    # 🐙 Step 3: ATOMIC PROVISION - Create the new repository ONLY if your PR and file loads succeed
+    # Step 3: ATOMIC PROVISION - Create the new repository ONLY if your PR and file loads succeed
     - id: publish
       name: Provision Production Repository on GitHub
       action: publish:github
@@ -100,21 +100,21 @@ spec:
         defaultBranch: main
         sourcePath: .
 
-    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
+    # Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
         seconds: 15
 
-    # 📁 Step 5: REGISTER
+    # Step 5: REGISTER
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
       input:
         catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
 
-  # 🎯 JUST ADD THIS TO THE VERY END OF YOUR FILE (Leave Step 5 exactly as it is)
+  # JUST ADD THIS TO THE VERY END OF YOUR FILE (Leave Step 5 exactly as it is)
   output:
     links:
       - title: Open Fresh Repository on GitHub
