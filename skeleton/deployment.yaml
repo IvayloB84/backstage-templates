@@ -2,21 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${{ values.repoName }}
-  namespace: default
   labels:
-    backstage.io/kubernetes-id: ${{ values.repoName }}
+    app: ${{ values.repoName }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      backstage.io/kubernetes-id: ${{ values.repoName }}
+      app: ${{ values.repoName }}
   template:
     metadata:
       labels:
-        backstage.io/kubernetes-id: ${{ values.repoName }}
+        app: ${{ values.repoName }}
     spec:
       containers:
-        - name: app
-          image: ${{ values.image }}
+        - name: app-container
+          # Maps the image selection from the dropdown form dynamically
+          image: ${{ values.serviceImage }}
           ports:
-            - containerPort: ${{ values.port }}
+            # Maps the specific port selection from the dropdown form dynamically
+            - containerPort: ${{ values.servicePort }}

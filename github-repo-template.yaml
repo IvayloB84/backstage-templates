@@ -73,8 +73,8 @@ spec:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
           description: ${{ parameters.description or 'Freshly generated application.' }}
-          image: ${{ parameters.serviceImage }}
-          port: ${{ parameters.servicePort }}
+          image: ${{ parameters.nginxImage or parameters.postgresImage or parameters.javaImage or parameters.redisImage }}
+          port: ${{ parameters.nginxPort or parameters.postgresPort or parameters.javaPort or parameters.redisPort }}
 
     # Step 2: Open a Pull Request against your central GitOps hub FIRST
     - id: publish-gitops-manifest
