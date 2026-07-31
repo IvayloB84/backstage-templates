@@ -99,9 +99,6 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
         sourcePath: '.'
-        topics:
-          - kubernetes-enabled
-          - ${{ parameters.serviceType }}
 
     # ⏳ Step 3: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
