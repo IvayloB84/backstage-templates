@@ -87,6 +87,7 @@ spec:
           description: ${{ parameters.description or 'Freshly generated application.' }}
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
+          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
     # 🔗 Step 2: Open a Pull Request against your central GitOps hub FIRST
     - id: publish-gitops-manifest
