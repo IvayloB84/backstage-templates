@@ -102,23 +102,25 @@ spec:
 
       # 📝 Step 3: AUTOMATICALLY APPEND THE NEW APP TO THE CENTRAL ROSTER FILE
     - id: append-to-roster
-      name: Register in Central GitOps Roster File
-      action: publish:github:file
+      name: Submit Automated Deployment Manifest to Central GitOps Hub      
+      action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
-        branchName: 'main'
-        sourcePath: 'k8s/app-config.json'  # Reads the generic app data from the skeleton
-        targetPath: 'argocd-apps/apps-roster.json'  # Appends it straight to your file generator roster!
+        branchName: 'infra/add-${{ parameters.repoName }}'
+        sourcePath: 'k8s'       
+        title: "infra: register new service ${{ parameters.repoName }}"
+        description: "Automated configuration generation from the software scaffold portal."        
+        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
 
-    # ⏳ Step 3: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
+    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
         seconds: 15
 
-    # 📁 Step 4: REGISTER
+    # 📁 Step 5: REGISTER
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
