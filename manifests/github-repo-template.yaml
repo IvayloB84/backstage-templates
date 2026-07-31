@@ -1,7 +1,7 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: github-repo-demo-template-v3
+  name: github-repo-demo-template-v4
   title: Create GitHub Repository with GitOps Configs
   description: Automatically provisions a new codebase and seeds tracking manifests straight into ArgoCD.
 spec:
@@ -13,31 +13,60 @@ spec:
       required:
         - repoName
         - repoOwner
-        - serviceImage
-        - servicePort
+        - serviceType
       properties:
         repoName:
           title: Repository Name
           type: string
-          description: Unique name for your new application codebase
           maxLength: 50
           pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
         repoOwner:
           title: Repository Owner
           type: string
-          description: Your GitHub organization or account name
           default: IvayloB84
         description:
           title: Description
           type: string
-        serviceImage:
-          title: Service Container Image
-          type: string
-          default: "nginx:alpine"
-        servicePort:
-          title: Service Container Port
-          type: integer
-          default: 80
+        serviceType:
+          title: Select Base Service Stack
+          enum: [nginx, postgres, java, redis]
+          enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
+      dependencies:
+        serviceType:
+          oneOf:
+            - properties:
+                serviceType:
+                  enum: [nginx]
+                serviceImage: { type: string, default: "nginx:alpine" }
+                servicePort: { type: integer, default: 80 }
+              required:
+                - serviceImage
+                - servicePort
+            - properties:
+                serviceType:
+                  enum: [postgres]
+                serviceImage: { type: string, default: "postgres:16-alpine" }
+                servicePort: { type: integer, default: 5432 }
+              required:
+                - serviceImage
+                - servicePort
+            - properties:
+                serviceType:
+                  enum: [java]
+                serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
+                servicePort: { type: integer, default: 8080 }
+              required:
+                - serviceImage
+                - servicePort
+            - properties:
+                serviceType:
+                  enum: [redis]
+                serviceImage: { type: string, default: "redis:alpine" }
+                servicePort: { type: integer, default: 6379 }
+              required:
+                - serviceImage
+                - servicePort
+
   steps:
     # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
     - id: generate-uuid
@@ -51,7 +80,7 @@ spec:
       name: Render Template Configuration Files
       action: fetch:template
       input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates?path=skeleton'
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
@@ -96,3 +125,12 @@ spec:
       action: catalog:register
       input:
         catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+
+  # 🎯 JUST ADD THIS TO THE VERY END OF YOUR FILE (Leave Step 5 exactly as it is)
+  output:
+    links:
+      - title: Open Fresh Repository on GitHub
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open Backstage Catalog Entity
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
