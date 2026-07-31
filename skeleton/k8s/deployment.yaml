@@ -16,7 +16,7 @@ spec:
         app: ${{ values.repoName }}
     spec:
       containers:
-        - name: app
+        - name: app-container
           image: ${{ values.image }}
           ports:
             - containerPort: ${{ values.port }}
