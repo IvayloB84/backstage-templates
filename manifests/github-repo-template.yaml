@@ -98,10 +98,9 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: 'main'
         sourcePath: '.'
-        repoParams:
-          topics:
-            - kubernetes-enabled
-            - ${{ parameters.serviceType }}
+        topics:
+          - kubernetes-enabled
+          - ${{ parameters.serviceType }}
 
     # 🐙 Step 3: ATOMIC PROVISION - Create the new repository ONLY if your PR and file loads succeed
     - id: publish
