@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git
+    repoURL: 'https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git'
     targetRevision: HEAD
     path: ./
     directory:
@@ -18,3 +18,4 @@ spec:
     automated:
       prune: true
       selfHeal: true
+      # Triggering fresh sync with fixed exclusion pattern
