@@ -4,19 +4,33 @@ metadata:
   name: ${{ values.repoName }}
   namespace: default
   labels:
-    backstage.io/kubernetes-id: ${{ values.repoName }}
+    app: ${{ values.repoName }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      backstage.io/kubernetes-id: ${{ values.repoName }}
+      app: ${{ values.repoName }}
   template:
     metadata:
       labels:
-        backstage.io/kubernetes-id: ${{ values.repoName }}
+        app: ${{ values.repoName }}
     spec:
       containers:
         - name: app
           image: ${{ values.image }}
           ports:
             - containerPort: ${{ values.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${{ values.repoName }}
+  namespace: default
+  labels:
+    app: ${{ values.repoName }}
+spec:
+  ports:
+    - port: ${{ values.port }}
+      targetPort: ${{ values.port }}
+  selector:
+    app: ${{ values.repoName }}
