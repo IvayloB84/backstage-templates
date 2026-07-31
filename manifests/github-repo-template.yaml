@@ -96,7 +96,7 @@ spec:
       input:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
-        branchName: 'main'
+        defaultBranch: 'main'
         sourcePath: '.'
         topics:
           - kubernetes-enabled
