@@ -124,9 +124,9 @@ spec:
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/skeleton/catalog-info.yaml'
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
 
-  # 🎯 JUST ADD THIS TO THE VERY END OF YOUR FILE (Leave Step 5 exactly as it is)
+  # 🎯 Output for the final step with GitHub reposiry and catalog link
   output:
     links:
       - title: Open Fresh Repository on GitHub
