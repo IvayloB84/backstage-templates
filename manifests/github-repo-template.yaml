@@ -90,11 +90,12 @@ spec:
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
     # 🔗 Step 2: Open a Pull Request against your central GitOps hub FIRST
-    - id: publish-gitops-manifest
-      name: Submit Automated Deployment Manifest to Central GitOps Hub
+    - id: publish
+      name: Provision Production Repository on GitHub and Stamp GitOps Topics
       action: publish:github
       input:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
         sourcePath: '.'
@@ -102,24 +103,14 @@ spec:
           - kubernetes-enabled
           - ${{ parameters.serviceType }}
 
-    # 🐙 Step 3: ATOMIC PROVISION - Create the new repository ONLY if your PR and file loads succeed
-    - id: publish
-      name: Provision Production Repository on GitHub
-      action: publish:github
-      input:
-        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
-        repoVisibility: public
-        defaultBranch: main
-        sourcePath: .
-
-    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
+    # ⏳ Step 3: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
         seconds: 15
 
-    # 📁 Step 5: REGISTER
+    # 📁 Step 4: REGISTER
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
