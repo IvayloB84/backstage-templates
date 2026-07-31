@@ -92,16 +92,16 @@ spec:
     # 🔗 Step 2: Open a Pull Request against your central GitOps hub FIRST
     - id: publish-gitops-manifest
       name: Submit Automated Deployment Manifest to Central GitOps Hub
-      action: publish:github:pull-request
+      action: publish:github
       input:
-        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=IvayloB84'
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
-        update: true
-        sourcePath: '' 
-        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
-        branchName: 'argo-sync-${{ parameters.repoName }}'
-        title: 'infra: register automated deployment loops for ${{ parameters.repoName }}'
-        description: ${{ parameters.description or 'Automated infrastructure GitOps deployment registration manifest.' }}
+        branchName: 'main'
+        sourcePath: '.'
+        repoParams:
+          topics:
+            - kubernetes-enabled
+            - ${{ parameters.serviceType }}
 
     # 🐙 Step 3: ATOMIC PROVISION - Create the new repository ONLY if your PR and file loads succeed
     - id: publish
