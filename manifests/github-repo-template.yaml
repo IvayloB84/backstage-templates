@@ -5,7 +5,7 @@ metadata:
   title: Create GitHub Repository with GitOps Configs
   description: Automatically provisions a new codebase and seeds tracking manifests straight into ArgoCD.
 spec:
-  owner: user:default/ivaylob84
+  owner: user:default/IvayloB84
   type: service
 
   parameters:
