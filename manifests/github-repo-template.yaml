@@ -100,6 +100,17 @@ spec:
         defaultBranch: 'main'
         sourcePath: '.'
 
+      # 📝 Step 3: AUTOMATICALLY APPEND THE NEW APP TO THE CENTRAL ROSTER FILE
+    - id: append-to-roster
+      name: Register in Central GitOps Roster File
+      action: publish:github:file
+      input:
+        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branchName: 'main'
+        sourcePath: 'k8s/app-config.json'  # Reads the generic app data from the skeleton
+        targetPath: 'argocd-apps/apps-roster.json'  # Appends it straight to your file generator roster!
+
     # ⏳ Step 3: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
