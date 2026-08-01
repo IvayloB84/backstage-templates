@@ -102,7 +102,7 @@ spec:
 
       # 📝 Step 3: AUTOMATICALLY APPEND THE NEW APP TO THE CENTRAL ROSTER FILE
     - id: append-to-roster
-      name: Submit Automated Deployment Manifest to Central GitOps Hub      
+      name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
