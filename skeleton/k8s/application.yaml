@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ${{ values.repoName }}
+  name: {{ values.repoName }}
   namespace: argocd
 spec:
   project: default
@@ -11,7 +11,7 @@ spec:
     path: ./
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: {{ values.namespace | default('default') }}
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
