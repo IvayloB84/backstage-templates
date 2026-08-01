@@ -134,8 +134,8 @@ spec:
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        repoUrl: 'https://github.com{{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
-
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+        
   # 🎯 Output links visible upon successful workflow completion
   output:
     links:
