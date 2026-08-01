@@ -38,6 +38,7 @@ spec:
         ownerNamespace:
           type: string
           default: 'user:default'
+          ui:widget: hidden
 
       dependencies:
         serviceType:
