@@ -6,13 +6,15 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git
+    repoURL: https://github.com/{{ values.repoOwner }}/{{ values.repoName }}.git
     targetRevision: HEAD
     path: ./
   destination:
     server: https://kubernetes.default.svc
     namespace: default
   syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
