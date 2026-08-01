@@ -107,8 +107,7 @@ spec:
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
-        branchName: 'infra/add-${{ parameters.repoName }}'
-        sourcePath: 'k8s'       
+        branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
