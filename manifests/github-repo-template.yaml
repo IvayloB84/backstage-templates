@@ -31,51 +31,36 @@ spec:
           title: Select Base Service Stack
           enum: [nginx, postgres, java, redis]
           enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
+        serviceImage:
+          type: string
+        servicePort:
+          type: integer
+        ownerNamespace:
+          type: string
+          default: 'user:default'
+
       dependencies:
         serviceType:
           oneOf:
             - properties:
-                serviceType:
-                  enum: [nginx]
+                serviceType: { enum: [nginx] }
                 serviceImage: { type: string, default: "nginx:alpine" }
                 servicePort: { type: integer, default: 80 }
-              required:
-                - serviceImage
-                - servicePort
             - properties:
-                serviceType:
-                  enum: [postgres]
+                serviceType: { enum: [postgres] }
                 serviceImage: { type: string, default: "postgres:16-alpine" }
                 servicePort: { type: integer, default: 5432 }
-              required:
-                - serviceImage
-                - servicePort
             - properties:
-                serviceType:
-                  enum: [java]
+                serviceType: { enum: [java] }
                 serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
                 servicePort: { type: integer, default: 8080 }
-              required:
-                - serviceImage
-                - servicePort
             - properties:
-                serviceType:
-                  enum: [redis]
+                serviceType: { enum: [redis] }
                 serviceImage: { type: string, default: "redis:alpine" }
                 servicePort: { type: integer, default: 6379 }
-              required:
-                - serviceImage
-                - servicePort
 
   steps:
-    # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
-    - id: generate-uuid
-      name: Generating Unique Session Token
-      action: debug:log
-      input:
-        message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
-
-    # 📝 Step 1: Natively fetch ONLY skeleton manifests from your secure path
+    # 📝 Step 1: Ingest the unified skeleton template tree from your remote repository
     - id: fetch-skeleton
       name: Render Template Configuration Files
       action: fetch:template
@@ -87,11 +72,11 @@ spec:
           description: ${{ parameters.description or 'Freshly generated application.' }}
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
-          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
+          ownerNamespace: ${{ parameters.ownerNamespace }}
 
-    # 🔗 Step 2: Open a Pull Request against your central GitOps hub FIRST
+    # 🚀 Step 2: Instantiates the new repository and pushes ALL code components safely
     - id: publish
-      name: Provision Production Repository on GitHub and Stamp GitOps Topics
+      name: Provision Production Repository on GitHub
       action: publish:github
       input:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
@@ -100,7 +85,7 @@ spec:
         defaultBranch: 'main'
         sourcePath: '.'
 
-      # 📝 Step 3: AUTOMATICALLY APPEND THE NEW APP TO THE CENTRAL ROSTER FILE
+    # 🚀 Step 3: Open an isolated tracking PR to your central cluster layout roster repo
     - id: append-to-roster
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
@@ -109,28 +94,30 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
-        description: "Automated configuration generation from the software scaffold portal."        
+        description: "Automated GitOps config registration for ${{ parameters.repoName }}."        
+        sourcePath: 'k8s/application.yaml'
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
 
-    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
+    # ⏳ Step 4: Await GitHub system index tracking propagation
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
-        seconds: 15
+        seconds: 10
 
-    # 📁 Step 5: REGISTER
+    # 📁 Step 5: Securely logs the metadata card to your active platform panel
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+        repoUrl: 'github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
 
-  # 🎯 Output for the final step with GitHub reposiry and catalog link
   output:
     links:
       - title: Open Fresh Repository on GitHub
         url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open Central GitOps Infrastructure PR
+        url: ${{ steps['append-to-roster'].output.remoteUrl }}
       - title: Open Backstage Catalog Entity
         icon: catalog
         entityRef: ${{ steps['register'].output.entityRef }}
