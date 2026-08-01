@@ -120,8 +120,8 @@ spec:
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
         sourcePath: '.'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}'
-
+        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
+        
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
@@ -135,7 +135,7 @@ spec:
       action: catalog:register
       input:
         catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
-        
+
   # 🎯 Output links visible upon successful workflow completion
   output:
     links:
