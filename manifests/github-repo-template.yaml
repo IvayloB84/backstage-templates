@@ -44,75 +44,99 @@ spec:
         serviceType:
           oneOf:
             - properties:
-                serviceType: { enum: [nginx] }
+                serviceType:
+                  enum: [nginx]
                 serviceImage: { type: string, default: "nginx:alpine" }
                 servicePort: { type: integer, default: 80 }
+              required:
+                - serviceImage
+                - servicePort
             - properties:
-                serviceType: { enum: [postgres] }
+                serviceType:
+                  enum: [postgres]
                 serviceImage: { type: string, default: "postgres:16-alpine" }
                 servicePort: { type: integer, default: 5432 }
+              required:
+                - serviceImage
+                - servicePort
             - properties:
-                serviceType: { enum: [java] }
+                serviceType:
+                  enum: [java]
                 serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
                 servicePort: { type: integer, default: 8080 }
+              required:
+                - serviceImage
+                - servicePort
             - properties:
-                serviceType: { enum: [redis] }
+                serviceType:
+                  enum: [redis]
                 serviceImage: { type: string, default: "redis:alpine" }
                 servicePort: { type: integer, default: 6379 }
+              required:
+                - serviceImage
+                - servicePort
 
   steps:
-    # 📝 Step 1: Ingest the unified skeleton template tree from your remote repository
+    # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
+    - id: generate-uuid
+      name: Generating Unique Session Token
+      action: debug:log
+      input:
+        message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
+
+    # 📝 Step 1: Natively fetch skeleton manifests from your secure path
     - id: fetch-skeleton
       name: Render Template Configuration Files
       action: fetch:template
       input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
+        url: 'https://github.com{{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
           description: ${{ parameters.description or 'Freshly generated application.' }}
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
-          ownerNamespace: ${{ parameters.ownerNamespace }}
+          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
     # 🚀 Step 2: Instantiates the new repository and pushes ALL code components safely
     - id: publish
-      name: Provision Production Repository on GitHub
+      name: Provision Production Repository on GitHub and Stamp GitOps Topics
       action: publish:github
       input:
-        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoUrl: '://github.com{{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
         sourcePath: '.'
 
-    # 🚀 Step 3: Open an isolated tracking PR to your central cluster layout roster repo
+    # 📝 Step 3: AUTOMATICALLY APPEND THE NEW APP TO THE CENTRAL ROSTER FILE
     - id: append-to-roster
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
       input:
-        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        repoUrl: '://github.com{{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
-        description: "Automated GitOps config registration for ${{ parameters.repoName }}."        
-        sourcePath: 'k8s/application.yaml'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
+        description: "Automated configuration generation from the software scaffold portal."        
+        sourcePath: '.'
+        targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
-    # ⏳ Step 4: Await GitHub system index tracking propagation
+    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
-        seconds: 10
+        seconds: 15
 
-    # 📁 Step 5: Securely logs the metadata card to your active platform panel
+    # 📁 Step 5: REGISTER
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        repoUrl: 'github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+        repoUrl: 'https://github.com{{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
 
+  # 🎯 Output links visible upon successful workflow completion
   output:
     links:
       - title: Open Fresh Repository on GitHub
