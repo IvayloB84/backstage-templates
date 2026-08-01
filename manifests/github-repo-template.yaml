@@ -103,7 +103,7 @@ spec:
       name: Provision Production Repository on GitHub and Stamp GitOps Topics
       action: publish:github
       input:
-        repoUrl: '://github.com{{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
@@ -114,7 +114,7 @@ spec:
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
       input:
-        repoUrl: '://github.com{{ parameters.repoOwner }}'
+        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
