@@ -2,13 +2,12 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: "${{ values.repoName }}"
-  description: "Automated microservice deployment tracking pipeline."
+  description: "${{ values.description }}"
   annotations:
     github.com/project-slug: "${{ values.repoOwner }}/${{ values.repoName }}"
     argocd/app-name: "${{ values.repoName }}"
     backstage.io/kubernetes-label-selector: "app=${{ values.repoName }}"
-    
 spec:
   type: service
   lifecycle: experimental
-  owner: "${{ values.ownerNamespace if values.ownerNamespace else 'user:default' }}/${{ values.repoOwner }}"
+  owner: "${{ values.ownerNamespace if values.ownerNamespace else 'user:default' }}"
