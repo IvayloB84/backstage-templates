@@ -1,3 +1,0 @@
-{
-  "repoOwner": "${{ values.repoOwner }}"
-}
