@@ -10,4 +10,4 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: "${{ values.ownerNamespace if values.ownerNamespace else 'user:default' }}"
+  owner: "user:default/${{ values.repoOwner }}"
