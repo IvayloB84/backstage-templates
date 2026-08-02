@@ -87,15 +87,21 @@ spec:
           port: ${{ parameters.servicePort }}
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
-    # 📝 Step 1B: Prepare GitOps directory structure without duplicating app codebase
+    # 📝 Step 1B: RESTORED TO MORNING WORKING BASELINE
     - id: fetch-skeleton-gitops
       name: Render Central Infrastructure GitOps Files
       action: fetch:template
       input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton/.argocd-allow-list'
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
         targetPath: './gitops'
         values:
           repoName: ${{ parameters.repoName }}
+          repoOwner: ${{ parameters.repoOwner }}
+          description: ${{ parameters.description or 'Freshly generated application.' }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
+          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
+
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
