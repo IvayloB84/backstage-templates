@@ -44,52 +44,41 @@ spec:
         serviceType:
           oneOf:
             - properties:
-                serviceType:
-                  enum: [nginx]
+                serviceType: { enum: [nginx] }
                 serviceImage: { type: string, default: "nginx:alpine" }
                 servicePort: { type: integer, default: 80 }
-              required:
-                - serviceImage
-                - servicePort
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum: [postgres]
+                serviceType: { enum: [postgres] }
                 serviceImage: { type: string, default: "postgres:16-alpine" }
                 servicePort: { type: integer, default: 5432 }
-              required:
-                - serviceImage
-                - servicePort
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum: [java]
+                serviceType: { enum: [java] }
                 serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
                 servicePort: { type: integer, default: 8080 }
-              required:
-                - serviceImage
-                - servicePort
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum: [redis]
+                serviceType: { enum: [redis] }
                 serviceImage: { type: string, default: "redis:alpine" }
                 servicePort: { type: integer, default: 6379 }
-              required:
-                - serviceImage
-                - servicePort
+              required: [serviceImage, servicePort]
 
   steps:
-    # 🎲 Step 0: CACHE BUSTER - Generate a completely unique, timestamped dynamic string
+    # 🎲 Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
       name: Generating Unique Session Token
       action: debug:log
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Natively fetch skeleton manifests from your secure path
-    - id: fetch-skeleton
-      name: Render Template Configuration Files
+    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
+    - id: fetch-skeleton-app
+      name: Render Codebase Repository Skeleton
       action: fetch:template
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
+        targetPath: './app'
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
@@ -98,7 +87,22 @@ spec:
           port: ${{ parameters.servicePort }}
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
-    # 🚀 Step 2: Instantiates the new repository and pushes ALL code components safely
+    # 📝 Step 1B: Render identical skeleton files into an isolated directory for the GitOps payload
+    - id: fetch-skeleton-gitops
+      name: Render Central Infrastructure GitOps Files
+      action: fetch:template
+      input:
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
+        targetPath: './gitops'
+        values:
+          repoName: ${{ parameters.repoName }}
+          repoOwner: ${{ parameters.repoOwner }}
+          description: ${{ parameters.description or 'Freshly generated application.' }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
+          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
+
+    # 🚀 Step 2: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
       name: Provision Production Repository on GitHub and Stamp GitOps Topics
       action: publish:github
@@ -107,9 +111,9 @@ spec:
         repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
-        sourcePath: '.'
+        sourcePath: './app'
 
-    # 📝 Step 3: AUTOMATICALLY APPEND THE NEW APP TO THE CENTRAL ROSTER FILE
+    # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
     - id: append-to-roster
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
@@ -119,10 +123,12 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: '.'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
-        
-    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs and branch indexing to fully propagate
+        # 🔒 FIXED ISOLATION: Reads from the protected gitops folder bucket
+        sourcePath: './gitops'
+        # 🔒 FIXED ROUTING: Lands as a filled directory containing files inside argocd-apps/
+        targetPath: 'argocd-apps/${{ parameters.repoName }}'
+
+    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
@@ -136,7 +142,6 @@ spec:
       input:
         catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
 
-  # 🎯 Output links visible upon successful workflow completion
   output:
     links:
       - title: Open Fresh Repository on GitHub
