@@ -72,7 +72,7 @@ spec:
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
+    # 📝 Step 1: Render skeleton files into an isolated directory for the application codebase repository
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
@@ -86,18 +86,6 @@ spec:
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
-
-    # 📝 Step 1B: Just write a single placeholder file to create the directory structure.
-    - id: create-gitops-dir
-      name: Prepare Central Infrastructure GitOps Placeholder
-      action: fetch:template:content # ◄ Switches to a plain text content injection
-      input:
-        targetPath: './gitops/placeholder.md'
-        content: |
-          # GitOps Registration Entry for ${{ parameters.repoName }}
-          This directory acts exclusively as an automation trigger for the 
-          backstage-automation-engine ApplicationSet controller.
-          The cluster live state actively tracks configurations inside the developer repository.
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
@@ -132,8 +120,8 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './gitops'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}'
+        sourcePath: './app/.argocd-allow-list'
+        targetPath: 'argocd-apps/${{ parameters.repoName }}/.argocd-allow-list'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
     - id: wait-for-github
