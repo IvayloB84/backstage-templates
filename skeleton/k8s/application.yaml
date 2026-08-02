@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: "${{ values.repoName }}"
-  # 🔒 LOCK IN: Kept in argocd namespace so your parent app-of-apps tracks it
+  # LOCK IN: Kept in argocd namespace so your parent app-of-apps tracks it
   namespace: argocd
 spec:
   project: default
@@ -12,7 +12,7 @@ spec:
     path: .
   destination:
     server: 'https://kubernetes.default.svc'
-    # ☸️ LANDING ZONE: Where your actual app code pod runs inside the cluster
+    # LANDING ZONE: Where your actual app code pod runs inside the cluster
     namespace: default
   syncPolicy:
     syncOptions:
