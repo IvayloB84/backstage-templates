@@ -87,22 +87,6 @@ spec:
           port: ${{ parameters.servicePort }}
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
-    # 📝 Step 1B: RESTORED TO MORNING WORKING BASELINE
-    - id: fetch-skeleton-gitops
-      name: Render Central Infrastructure GitOps Files
-      action: fetch:template
-      input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
-        targetPath: './gitops'
-        values:
-          repoName: ${{ parameters.repoName }}
-          repoOwner: ${{ parameters.repoOwner }}
-          description: ${{ parameters.description or 'Freshly generated application.' }}
-          image: ${{ parameters.serviceImage }}
-          port: ${{ parameters.servicePort }}
-          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
-
-
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
       name: Provision Production Repository on GitHub and Stamp GitOps Topics
@@ -136,7 +120,7 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './gitops'
+        sourcePath: './k8s'
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
