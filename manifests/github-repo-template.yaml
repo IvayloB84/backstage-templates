@@ -72,7 +72,7 @@ spec:
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Render skeleton files into an isolated directory for the application codebase repository
+    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
@@ -86,6 +86,16 @@ spec:
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
+
+    # 📝 Step 1B: Prepare GitOps directory structure without duplicating app codebase
+    - id: fetch-skeleton-gitops
+      name: Render Central Infrastructure GitOps Files
+      action: fetch:template
+      input:
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton/.argocd-allow-list'
+        targetPath: './gitops'
+        values:
+          repoName: ${{ parameters.repoName }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
@@ -120,8 +130,8 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './app/.argocd-allow-list'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}/.argocd-allow-list'
+        sourcePath: './app'
+        targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
     - id: wait-for-github
