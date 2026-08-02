@@ -106,7 +106,7 @@ spec:
         repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
-        sourcePath: './app'
+        sourcePath: '.' 
 
     # 🔗 Step 2B: Instantly wire up your ngrok proxy link
     - id: create-webhook
@@ -130,7 +130,7 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './app'
+        sourcePath: './gitops'
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
