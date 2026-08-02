@@ -8,7 +8,7 @@ spec:
   project: default
   source:
     repoURL: "https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
-    targetRevision: HEAD
+    targetRevision: "infra/add-${{ values.repoName }}"
     path: .
   destination:
     server: 'https://kubernetes.default.svc'
