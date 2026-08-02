@@ -78,7 +78,7 @@ spec:
       action: fetch:template
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
-        targetPath: './app'
+        targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
