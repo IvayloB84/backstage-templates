@@ -5,7 +5,7 @@ metadata:
   title: Deactivate Cluster Deployment (Safe)
   description: Pauses cluster deployments and clears the ArgoCD board without touching or deleting the developer's GitHub codebase repository.
 spec:
-  owner: platform-team
+  owner: guest
   type: service
 
   parameters:
