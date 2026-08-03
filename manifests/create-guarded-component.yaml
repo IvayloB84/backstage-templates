@@ -15,8 +15,6 @@ spec:
         - repoOwner
         - sizeProfile
         - serviceType
-        - serviceImage
-        - servicePort
       properties:
         repoName:
           title: Component or Repository Name
@@ -51,29 +49,39 @@ spec:
           enumNames:
             - "NGINX Web Server"
             - "PostgreSQL Database"
-            - "Java Runtime (OpenJDK 21)"
+            - "Java Runtime"
             - "Redis Cache Cluster"
           default: nginx
-          
-        # FIXED: We calculate the defaults here using dynamic frontend values, allowing you to edit them freely if needed!
+        
         serviceImage:
           title: Target Container Image
           type: string
-          dependencies:
-            serviceType:
-              nginx: "nginx:alpine"
-              postgres: "postgres:16-alpine"
-              java: "eclipse-temurin:21-jre"
-              redis: "redis:alpine"
         servicePort:
           title: Target Container Port
           type: integer
-          dependencies:
-            serviceType:
-              nginx: 80
-              postgres: 5432
-              java: 8080
-              redis: 6379
+
+      allOf:
+        - oneOf:
+            - properties:
+                serviceType: { enum: [nginx] }
+                serviceImage: { type: string, default: "nginx:alpine" }
+                servicePort: { type: integer, default: 80 }
+              required: [serviceImage, servicePort]
+            - properties:
+                serviceType: { enum: [postgres] }
+                serviceImage: { type: string, default: "postgres:16-alpine" }
+                servicePort: { type: integer, default: 5432 }
+              required: [serviceImage, servicePort]
+            - properties:
+                serviceType: { enum: [java] }
+                serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
+                servicePort: { type: integer, default: 8080 }
+              required: [serviceImage, servicePort]
+            - properties:
+                serviceType: { enum: [redis] }
+                serviceImage: { type: string, default: "redis:alpine" }
+                servicePort: { type: integer, default: 6379 }
+              required: [serviceImage, servicePort]
 
   steps:
     # --- PHASE 1: GENERATE & PUBLISH NEW APPLICATION REPOSITORY ---
