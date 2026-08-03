@@ -115,8 +115,10 @@ spec:
       name: Spin Up Brand-New GitHub Repository
       action: publish:github
       input:
-        repoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}"
-        sourcePath: ./app-repo
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoVisibility: public
+        token: ${{ secrets.GITHUB_TOKEN }}
+        sourcePath: '.'
         description: "Application codebase repository for ${{ parameters.repoName }} created by Backstage."
 
     # --- PHASE 2: GENERATE ARGOCD APPLICATION MANIFEST FOR THE CENTRAL INFRA PR ---
