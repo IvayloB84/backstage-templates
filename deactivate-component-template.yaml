@@ -1,0 +1,45 @@
+apiVersion: scaffold.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: deactivate-component
+  title: Deactivate Cluster Deployment (Safe)
+  description: Pauses cluster deployments and clears the ArgoCD board without touching or deleting the developer's GitHub codebase repository.
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Component Selection
+      required:
+        - componentName
+      properties:
+        componentName:
+          title: Component Name
+          type: string
+          description: Input the exact name of the application folder to remove from argocd-apps (e.g., quantum-mesh-node).
+
+  steps:
+    # 📥 STEP 1: Fetch your TRUE central infrastructure repository
+    - id: fetch-infra-repo
+      name: Fetch Central GitOps Infrastructure Repository
+      action: fetch:plain
+      input:
+        url: "https://github.com/IvayloB84/ArgoCD-RootApps"
+
+    # 🧹 STEP 2: Erase ONLY the tracking directory from the argocd-apps folder
+    - id: remove-gitops-folder
+      name: Remove ArgoCD Dashboard Tracking Manifest
+      action: fs:delete
+      input:
+        paths:
+          - "argocd-apps/${{ parameters.componentName }}"
+
+    # 🚀 STEP 3: Push the clean state back to your main infrastructure repository
+    - id: push-infra-repo
+      name: Submit Cluster Clean-up Request
+      action: publish:github:pull-request
+      input:
+        repoUrl: "https://github.com/IvayloB84/ArgoCD-RootApps"
+        branchName: "deactivate/${{ parameters.componentName }}"
+        title: "chore(deactivate): pause cluster deployment for ${{ parameters.componentName }}"
+        description: "Automated cluster resource cleanup initiated via Backstage. Codebase repository remains completely untouched and safe on GitHub."
