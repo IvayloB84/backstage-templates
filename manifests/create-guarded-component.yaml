@@ -3,19 +3,18 @@ kind: Template
 metadata:
   name: create-guarded-component
   title: Generate Component with Resource Limits
-  description: Automatically provisions a new codebase with strict, automated cluster CPU and RAM limits to prevent node exhaustion.
+  description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
 spec:
-  owner: user:guest
+  owner: user:default/IvayloB84
   type: service
 
   parameters:
-    - title: Core Specifications
+    - title: Component Profile
       required:
         - repoName
         - repoOwner
         - sizeProfile
-        - serviceImage
-        - servicePort
+        - serviceType
       properties:
         repoName:
           title: Component or Repository Name
@@ -29,18 +28,6 @@ spec:
           title: Description
           type: string
           description: Optional description for the repository.
-        serviceImage:
-          title: Service Container Image
-          type: string
-          description: Example, nginx:latest
-        servicePort:
-          title: Service Port
-          type: integer
-          default: 80
-        ownerNamespace:
-          title: Owner Namespace
-          type: string
-          default: user:default
         sizeProfile:
           title: Cluster Resource Allocation Profile
           type: string
@@ -53,36 +40,103 @@ spec:
             - "Standard Node"
             - "Large Node"
           default: standard
+        serviceType:
+          title: Application Stack
+          type: string
+          enum:
+            - nginx
+            - postgres
+            - java
+            - redis
+          enumNames:
+            - "NGINX Web Server"
+            - "PostgreSQL Database"
+            - "Java Runtime (OpenJDK 21)"
+            - "Redis Cache Cluster"
+          default: nginx
+
+    - title: Advanced Container Specifications
+      required:
+        - serviceImage
+        - servicePort
+      allOf:
+        - if:
+            properties:
+              serviceType:
+                const: nginx
+          then:
+            properties:
+              serviceImage:
+                title: Container Image
+                type: string
+                default: "nginx:alpine"
+              servicePort:
+                title: Container Port
+                type: integer
+                default: 80
+        - if:
+            properties:
+              serviceType:
+                const: postgres
+          then:
+            properties:
+              serviceImage:
+                title: Container Image
+                type: string
+                default: "postgres:16-alpine"
+              servicePort:
+                title: Container Port
+                type: integer
+                default: 5432
+        - if:
+            properties:
+              serviceType:
+                const: java
+          then:
+            properties:
+              serviceImage:
+                title: Container Image
+                type: string
+                default: "eclipse-temurin:21-jre"
+              servicePort:
+                title: Container Port
+                type: integer
+                default: 8080
+        - if:
+            properties:
+              serviceType:
+                const: redis
+          then:
+            properties:
+              serviceImage:
+                title: Container Image
+                type: string
+                default: "redis:alpine"
+              servicePort:
+                title: Container Port
+                type: integer
+                default: 6379
 
   steps:
-    # 🎲 Step 0: CACHE BUSTER - Initialize task session token
-    - id: generate-uuid
-      name: Generating Unique Session Token
-      action: debug:log
-      input:
-        message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
-
-    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
-    - id: fetch-skeleton-app
-      name: Render Codebase Repository Skeleton
+    # --- PHASE 1: GENERATE & PUBLISH NEW APPLICATION REPOSITORY ---
+    - id: fetch-app-skeleton
+      name: Render Dynamic Codebase Files
       action: fetch:template
       input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
-        targetPath: '.'
+        url: ../skeleton
+        targetPath: ./app-repo
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
           description: ${{ parameters.description or 'Freshly generated application.' }}
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
-          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
-    # 🛠️ Step 1B: Inject Guarded Resource Limits into the workspace before publishing
     - id: merge-resource-limits
-      name: Merge Structural Resource Limits Into Manifest
+      name: Apply Selected Resource Profile Limits
       action: roadiehq:utils:merge
       input:
-        path: "k8s/base-deployment.yaml"
+        path: "app-repo/k8s/base-deployment.yaml"
         content:
           spec:
             template:
@@ -97,62 +151,43 @@ spec:
                         cpu: "100m"
                         memory: "128Mi"
 
-    # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
-    - id: publish
-      name: Provision Production Repository on GitHub and Stamp GitOps Topics
+    - id: publish-new-repo
+      name: Spin Up Brand-New GitHub Repository
       action: publish:github
       input:
-        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
-        repoVisibility: public
-        token: ${{ secrets.GITHUB_TOKEN }}
-        defaultBranch: 'main'
-        sourcePath: '.' 
+        allowedHosts:
+          - github.com
+        repoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}"
+        sourcePath: ./app-repo
+        description: "Application codebase repository for ${{ parameters.repoName }} created by Backstage."
 
-    # 🔗 Step 2B: Instantly wire up your ngrok proxy link
-    - id: create-webhook
-      name: Link Developer Repo to ArgoCD Webhook
-      action: github:webhook
+    # --- PHASE 2: GENERATE ARGOCD APPLICATION MANIFEST FOR THE CENTRAL INFRA PR ---
+    - id: create-argocd-manifest
+      name: Construct ArgoCD App Configuration Mapping
+      action: fetch:template
       input:
-        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
-        webhookUrl: 'https://reason-ricotta-clicker.ngrok-free.dev/api/webhook'
-        contentType: 'json'
-        events:
-          - push
-        token: ${{ secrets.GITHUB_TOKEN }}
+        url: ../skeleton
+        targetPath: ./argocd-mapping
+        values:
+          repoName: ${{ parameters.repoName }}
+          repoOwner: ${{ parameters.repoOwner }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
 
-    # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
-    - id: append-to-roster
-      name: Submit Automated Deployment Manifest to Central GitOps Hub
+    - id: push-to-infra-root
+      name: Submit Automated GitOps Infrastructure Mapping
       action: publish:github:pull-request
       input:
-        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        branchName: 'infra/add-${{ parameters.repoName }}'      
-        title: "infra: register new service ${{ parameters.repoName }}"
-        description: "Automated configuration generation from the software scaffold portal using strict Roadie object merge guardrails."        
-        sourcePath: './k8s'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}'
-
-    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
-    - id: wait-for-github
-      name: Synchronizing Cloud Repository State
-      action: debug:wait
-      input:
-        seconds: 15
-
-    # 📁 Step 5: REGISTER
-    - id: register
-      name: Register in Backstage Catalog
-      action: catalog:register
-      input:
-        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+        repoUrl: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps"
+        branchName: "infra/add-${{ parameters.repoName }}"
+        sourcePath: ./argocd-mapping/k8s
+        targetPath: "argocd-apps/${{ parameters.repoName }}"
+        title: "chore(gitops): map dynamic application metadata for ${{ parameters.repoName }}"
+        description: "Automated declaration registering the target repository with ArgoCD Root Application structures."
 
   output:
     links:
-      - title: Open Fresh Repository on GitHub
-        url: ${{ steps['publish'].output.remoteUrl }}
-      - title: Open Central GitOps Infrastructure PR
-        url: ${{ steps['append-to-roster'].output.remoteUrl }}
-      - title: Open Backstage Catalog Entity
-        icon: catalog
-        entityRef: ${{ steps['register'].output.entityRef }}
+      - title: Go to New Application Repository
+        url: ${{ steps['publish-new-repo'].output.remoteUrl }}
+      - title: Review Infrastructure GitOps PR
+        url: ${{ steps['push-to-infra-root'].output.remoteUrl }}

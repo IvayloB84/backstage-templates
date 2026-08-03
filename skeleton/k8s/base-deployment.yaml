@@ -1,18 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: skeleton-service
+  name: ${{ values.repoName }}-deployment
   namespace: default
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: core-service
+      app: ${{ values.repoName }}
   template:
     metadata:
       labels:
-        app: core-service
+        app: ${{ values.repoName }}
     spec:
       containers:
         - name: application
-          image: nginx:alpine
+          image: ${{ values.image }}
+          ports:
+            - containerPort: ${{ values.port }}
+          resources: {} 
