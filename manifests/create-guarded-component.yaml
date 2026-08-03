@@ -54,7 +54,6 @@ spec:
           default: nginx
 
     # STEP 2 IS FLATTENED: Backstage processes these values directly via backend string interpolation fallback 
-    # if the frontend schema conditional state drops out. This allows developers to overwrite the defaults manually.
     - title: Custom Override Specifications
       required:
         - serviceImage
