@@ -11,13 +11,36 @@ spec:
   parameters:
     - title: Core Specifications
       required:
-        - componentName
+        - repoName
+        - repoOwner
         - sizeProfile
+        - serviceImage
+        - servicePort
       properties:
-        componentName:
+        repoName:
           title: Component or Repository Name
           type: string
           description: Example, vector-mesh-router
+        repoOwner:
+          title: GitHub Owner/Organization
+          type: string
+          description: Your GitHub username or organization name.
+        description:
+          title: Description
+          type: string
+          description: Optional description for the repository.
+        serviceImage:
+          title: Service Container Image
+          type: string
+          description: Example, nginx:latest
+        servicePort:
+          title: Service Port
+          type: integer
+          default: 80
+        ownerNamespace:
+          title: Owner Namespace
+          type: string
+          default: user:default
         sizeProfile:
           title: Cluster Resource Allocation Profile
           type: string
@@ -32,13 +55,29 @@ spec:
           default: standard
 
   steps:
-    - id: fetch-base
-      name: Fetch Base Deployment Infrastructure Blueprint
+    # 🎲 Step 0: CACHE BUSTER - Initialize task session token
+    - id: generate-uuid
+      name: Generating Unique Session Token
+      action: debug:log
+      input:
+        message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
+
+    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
+    - id: fetch-skeleton-app
+      name: Render Codebase Repository Skeleton
       action: fetch:template
       input:
-        url: ../skeleton
-        targetPath: .
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
+        targetPath: '.'
+        values:
+          repoName: ${{ parameters.repoName }}
+          repoOwner: ${{ parameters.repoOwner }}
+          description: ${{ parameters.description or 'Freshly generated application.' }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
+          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
 
+    # 🛠️ Step 1B: Inject Guarded Resource Limits into the workspace before publishing
     - id: merge-resource-limits
       name: Merge Structural Resource Limits Into Manifest
       action: roadiehq:utils:merge
@@ -58,11 +97,62 @@ spec:
                         cpu: "100m"
                         memory: "128Mi"
 
-    - id: push-to-infra
-      name: Submit Automated GitOps Infrastructure Manifest
+    # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
+    - id: publish
+      name: Provision Production Repository on GitHub and Stamp GitOps Topics
+      action: publish:github
+      input:
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoVisibility: public
+        token: ${{ secrets.GITHUB_TOKEN }}
+        defaultBranch: 'main'
+        sourcePath: '.' 
+
+    # 🔗 Step 2B: Instantly wire up your ngrok proxy link
+    - id: create-webhook
+      name: Link Developer Repo to ArgoCD Webhook
+      action: github:webhook
+      input:
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        webhookUrl: 'https://reason-ricotta-clicker.ngrok-free.dev/api/webhook'
+        contentType: 'json'
+        events:
+          - push
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
+    - id: append-to-roster
+      name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
       input:
-        repoUrl: "github.com?repo=ArgoCD-RootApps&owner=IvayloB84"
-        branchName: "infra/add-${{ parameters.componentName }}"
-        title: "chore(gitops): provision application manifests with dynamic resource boundaries for ${{ parameters.componentName }}"
-        description: "Automated deployment manifest generated via Backstage using strict Roadie object merge guardrails."
+        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branchName: 'infra/add-${{ parameters.repoName }}'      
+        title: "infra: register new service ${{ parameters.repoName }}"
+        description: "Automated configuration generation from the software scaffold portal using strict Roadie object merge guardrails."        
+        sourcePath: './k8s'
+        targetPath: 'argocd-apps/${{ parameters.repoName }}'
+
+    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
+    - id: wait-for-github
+      name: Synchronizing Cloud Repository State
+      action: debug:wait
+      input:
+        seconds: 15
+
+    # 📁 Step 5: REGISTER
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Open Fresh Repository on GitHub
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open Central GitOps Infrastructure PR
+        url: ${{ steps['append-to-roster'].output.remoteUrl }}
+      - title: Open Backstage Catalog Entity
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
