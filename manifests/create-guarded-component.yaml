@@ -36,14 +36,14 @@ spec:
       name: Fetch Base Deployment Infrastructure Blueprint
       action: fetch:plain
       input:
-        url: "https://github.com/IvayloB84/ArgoCD-RootApps"
+        url: "https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/skeleton/k8s/base-deployment.yaml"
       targetPath: "manifests"
 
     - id: merge-resource-limits
       name: Merge Structural Resource Limits Into Manifest
       action: roadiehq:utils:merge
       input:
-        path: "https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/skeleton/k8s/base-deployment.yaml"
+        path: "manifests/base-deployment.yaml"
         content:
           spec:
             template:
