@@ -37,12 +37,13 @@ spec:
       action: fetch:plain
       input:
         url: "https://github.com/IvayloB84/ArgoCD-RootApps"
+      targetPath: "manifests"
 
     - id: merge-resource-limits
       name: Merge Structural Resource Limits Into Manifest
       action: roadiehq:utils:merge
       input:
-        path: "base-deployment.yaml"
+        path: "manifests/base-deployment.yaml"
         content:
           spec:
             template:
