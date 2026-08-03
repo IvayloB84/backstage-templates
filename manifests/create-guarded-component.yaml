@@ -5,7 +5,7 @@ metadata:
   title: Generate Component with Resource Limits
   description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
 spec:
-  owner: user:default/IvayloB84
+  owner: user:default
   type: service
 
   parameters:
@@ -24,11 +24,8 @@ spec:
           title: GitHub Owner/Organization
           type: string
           description: Your GitHub username or organization name.
-          default: IvayloB84
-        description:
-          title: Description
-          type: string
-          description: Optional description for the repository.
+          ui:field: OwnerPicker
+          default: "IvayloB84"
         sizeProfile:
           title: Cluster Resource Allocation Profile
           type: string
@@ -37,9 +34,9 @@ spec:
             - standard
             - large
           enumNames:
-            - "Tiny Node"
-            - "Standard Node"
-            - "Large Node"
+            - "Tiny Node (CPU: 250m, Mem: 256Mi)"
+            - "Standard Node (CPU: 500m, Mem: 512Mi)"
+            - "Large Node (CPU: 1000m, Mem: 1Gi)"
           default: standard
         serviceType:
           title: Application Stack
@@ -50,73 +47,29 @@ spec:
             - java
             - redis
           enumNames:
-            - "NGINX Web Server"
-            - "PostgreSQL Database"
-            - "Java Runtime (OpenJDK 21)"
-            - "Redis Cache Cluster"
+            - "NGINX Web Server (nginx:alpine | Port 80)"
+            - "PostgreSQL Database (postgres:16-alpine | Port 5432)"
+            - "Java Runtime (eclipse-temurin:21-jre | Port 8080)"
+            - "Redis Cache Cluster (redis:alpine | Port 6379)"
           default: nginx
 
-    - title: Advanced Container Specifications
+    # STEP 2 IS FLATTENED: Backstage processes these values directly via backend string interpolation fallback 
+    # if the frontend schema conditional state drops out. This allows developers to overwrite the defaults manually.
+    - title: Custom Override Specifications
       required:
         - serviceImage
         - servicePort
-      allOf:
-        - if:
-            properties:
-              serviceType:
-                const: nginx
-          then:
-            properties:
-              serviceImage:
-                title: Container Image
-                type: string
-                default: "nginx:alpine"
-              servicePort:
-                title: Container Port
-                type: integer
-                default: 80
-        - if:
-            properties:
-              serviceType:
-                const: postgres
-          then:
-            properties:
-              serviceImage:
-                title: Container Image
-                type: string
-                default: "postgres:16-alpine"
-              servicePort:
-                title: Container Port
-                type: integer
-                default: 5432
-        - if:
-            properties:
-              serviceType:
-                const: java
-          then:
-            properties:
-              serviceImage:
-                title: Container Image
-                type: string
-                default: "eclipse-temurin:21-jre"
-              servicePort:
-                title: Container Port
-                type: integer
-                default: 8080
-        - if:
-            properties:
-              serviceType:
-                const: redis
-          then:
-            properties:
-              serviceImage:
-                title: Container Image
-                type: string
-                default: "redis:alpine"
-              servicePort:
-                title: Container Port
-                type: integer
-                default: 6379
+      properties:
+        serviceImage:
+          title: Target Container Image
+          type: string
+          description: "Leave blank to accept the profile default selected on page 1."
+          default: "nginx:alpine"
+        servicePort:
+          title: Target Container Port
+          type: integer
+          description: "Leave blank to accept the profile default selected on page 1."
+          default: 80
 
   steps:
     # --- PHASE 1: GENERATE & PUBLISH NEW APPLICATION REPOSITORY ---
@@ -130,8 +83,14 @@ spec:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
           description: ${{ parameters.description or 'Freshly generated application.' }}
-          image: ${{ parameters.serviceImage }}
-          port: ${{ parameters.servicePort }}
+          image: >-
+            ${{ 'postgres:16-alpine' if parameters.serviceType == 'postgres' 
+            else ('eclipse-temurin:21-jre' if parameters.serviceType == 'java' 
+            else ('redis:alpine' if parameters.serviceType == 'redis' else 'nginx:alpine')) }}
+          port: >-
+            ${{ 5432 if parameters.serviceType == 'postgres' 
+            else (8080 if parameters.serviceType == 'java' 
+            else (6379 if parameters.serviceType == 'redis' else 80)) }}
 
     - id: merge-resource-limits
       name: Apply Selected Resource Profile Limits
@@ -172,8 +131,14 @@ spec:
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
-          image: ${{ parameters.serviceImage }}
-          port: ${{ parameters.servicePort }}
+          image: >-
+            ${{ 'postgres:16-alpine' if parameters.serviceType == 'postgres' 
+            else ('eclipse-temurin:21-jre' if parameters.serviceType == 'java' 
+            else ('redis:alpine' if parameters.serviceType == 'redis' else 'nginx:alpine')) }}
+          port: >-
+            ${{ 5432 if parameters.serviceType == 'postgres' 
+            else (8080 if parameters.serviceType == 'java' 
+            else (6379 if parameters.serviceType == 'redis' else 80)) }}
 
     - id: push-to-infra-root
       name: Submit Automated GitOps Infrastructure Mapping
