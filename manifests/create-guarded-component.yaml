@@ -5,7 +5,7 @@ metadata:
   title: Generate Component with Resource Limits
   description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
 spec:
-  owner: user:default
+  owner: user:default/IvayloB84
   type: service
 
   parameters:
@@ -42,10 +42,8 @@ spec:
           
         serviceType:
           title: Select Base Service Stack
-          type: string
           enum: [nginx, postgres, java, redis]
           enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
-          default: nginx
         serviceImage:
           type: string
         servicePort:
