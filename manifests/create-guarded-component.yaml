@@ -4,6 +4,8 @@ metadata:
   name: create-guarded-component
   title: Generate Component with Resource Limits
   description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
+  annotations:
+    argocd/app-name: "github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}"
 spec:
   owner: user:default/IvayloB84
   type: service
