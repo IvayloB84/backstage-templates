@@ -39,20 +39,6 @@ spec:
             - "Standard Node (CPU: 500m, Mem: 512Mi)"
             - "Large Node (CPU: 1000m, Mem: 1Gi)"
           default: standard
-        serviceType:
-          title: Select Application Stack
-          type: string
-          enum:
-            - nginx
-            - postgres
-            - java
-            - redis
-          enumNames:
-            - "NGINX Web Server"
-            - "PostgreSQL Database"
-            - "Java Runtime (OpenJDK 21)"
-            - "Redis Cache Cluster"
-          default: nginx
       allOf:
         - if:
             properties:
