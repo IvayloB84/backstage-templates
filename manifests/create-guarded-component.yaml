@@ -34,10 +34,10 @@ spec:
   steps:
     - id: fetch-base
       name: Fetch Base Deployment Infrastructure Blueprint
-      action: fetch:plain:file
+      action: fetch:template
       input:
-        url: "https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/create-guarded-component.yaml"
-        targetPath: "manifests/base-deployment.yaml"
+        url: ../skeleton
+        targetPath: "manifests"
 
     - id: merge-resource-limits
       name: Merge Structural Resource Limits Into Manifest
