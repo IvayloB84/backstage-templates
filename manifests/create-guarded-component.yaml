@@ -4,19 +4,19 @@ metadata:
   name: create-guarded-component
   title: Generate Component with Resource Limits
   description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
-  annotations:
-    argocd/app-name: "${{ values.repoOwner }}/ArgoCD-RootApps"
 spec:
   owner: user:default/IvayloB84
   type: service
 
   parameters:
-    - title: Component Profile
+    - title: Dynamic Component Specifications
       required:
         - repoName
         - repoOwner
         - sizeProfile
         - serviceType
+        - serviceImage
+        - servicePort
       properties:
         repoName:
           title: Component or Repository Name
@@ -49,28 +49,31 @@ spec:
             - java
             - redis
           enumNames:
-            - "NGINX Web Server (nginx:alpine | Port 80)"
-            - "PostgreSQL Database (postgres:16-alpine | Port 5432)"
-            - "Java Runtime (eclipse-temurin:21-jre | Port 8080)"
-            - "Redis Cache Cluster (redis:alpine | Port 6379)"
+            - "NGINX Web Server"
+            - "PostgreSQL Database"
+            - "Java Runtime (OpenJDK 21)"
+            - "Redis Cache Cluster"
           default: nginx
-
-    # STEP 2 IS FLATTENED: Backstage processes these values directly via backend string interpolation fallback 
-    - title: Custom Override Specifications
-      required:
-        - serviceImage
-        - servicePort
-      properties:
+          
+        # FIXED: We calculate the defaults here using dynamic frontend values, allowing you to edit them freely if needed!
         serviceImage:
           title: Target Container Image
           type: string
-          description: "Leave blank to accept the profile default selected on page 1."
-          default: "nginx:alpine"
+          dependencies:
+            serviceType:
+              nginx: "nginx:alpine"
+              postgres: "postgres:16-alpine"
+              java: "eclipse-temurin:21-jre"
+              redis: "redis:alpine"
         servicePort:
           title: Target Container Port
           type: integer
-          description: "Leave blank to accept the profile default selected on page 1."
-          default: 80
+          dependencies:
+            serviceType:
+              nginx: 80
+              postgres: 5432
+              java: 8080
+              redis: 6379
 
   steps:
     # --- PHASE 1: GENERATE & PUBLISH NEW APPLICATION REPOSITORY ---
@@ -84,14 +87,8 @@ spec:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
           description: ${{ parameters.description or 'Freshly generated application.' }}
-          image: >-
-            ${{ 'postgres:16-alpine' if parameters.serviceType == 'postgres' 
-            else ('eclipse-temurin:21-jre' if parameters.serviceType == 'java' 
-            else ('redis:alpine' if parameters.serviceType == 'redis' else 'nginx:alpine')) }}
-          port: >-
-            ${{ 5432 if parameters.serviceType == 'postgres' 
-            else (8080 if parameters.serviceType == 'java' 
-            else (6379 if parameters.serviceType == 'redis' else 80)) }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
 
     - id: merge-resource-limits
       name: Apply Selected Resource Profile Limits
@@ -132,14 +129,8 @@ spec:
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
-          image: >-
-            ${{ 'postgres:16-alpine' if parameters.serviceType == 'postgres' 
-            else ('eclipse-temurin:21-jre' if parameters.serviceType == 'java' 
-            else ('redis:alpine' if parameters.serviceType == 'redis' else 'nginx:alpine')) }}
-          port: >-
-            ${{ 5432 if parameters.serviceType == 'postgres' 
-            else (8080 if parameters.serviceType == 'java' 
-            else (6379 if parameters.serviceType == 'redis' else 80)) }}
+          image: ${{ parameters.serviceImage }}
+          port: ${{ parameters.servicePort }}
 
     - id: push-to-infra-root
       name: Submit Automated GitOps Infrastructure Mapping
@@ -154,7 +145,10 @@ spec:
 
   output:
     links:
-      - title: Go to New Application Repository
+      - title: Open Fresh Repository on GitHub
         url: ${{ steps['publish-new-repo'].output.remoteUrl }}
-      - title: Review Infrastructure GitOps PR
+      - title: Open Central GitOps Infrastructure PR
         url: ${{ steps['push-to-infra-root'].output.remoteUrl }}
+      - title: Open Backstage Catalog Entity
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
