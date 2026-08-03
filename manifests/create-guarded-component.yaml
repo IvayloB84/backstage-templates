@@ -1,0 +1,67 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: create-guarded-component
+  title: Generate Component with Resource Limits
+  description: Automatically provisions a new codebase with strict, automated cluster CPU and RAM limits to prevent node exhaustion.
+spec:
+  owner: guest
+  type: service
+
+  parameters:
+    - title: Core Specifications
+      required:
+        - componentName
+        - sizeProfile
+      properties:
+        componentName:
+          title: Component or Repository Name
+          type: string
+          description: Example, vector-mesh-router
+        sizeProfile:
+          title: Cluster Resource Allocation Profile
+          type: string
+          enum:
+            - tiny
+            - standard
+            - large
+          enumNames:
+            - "Tiny Node"
+            - "Standard Node"
+            - "Large Node"
+          default: standard
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Deployment Infrastructure Blueprint
+      action: fetch:plain
+      input:
+        url: "https://github.com"
+
+    - id: merge-resource-limits
+      name: Merge Structural Resource Limits Into Manifest
+      action: roadiehq:utils:merge
+      input:
+        path: "base-deployment.yaml"
+        with:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: application
+                    resources:
+                      limits:
+                        cpu: ${{ '1000m' if parameters.sizeProfile == 'large' else ('500m' if parameters.sizeProfile == 'standard' else '250m') }}
+                        memory: ${{ '1Gi' if parameters.sizeProfile == 'large' else ('512Mi' if parameters.sizeProfile == 'standard' else '256Mi') }}
+                      requests:
+                        cpu: "100m"
+                        memory: "128Mi"
+
+    - id: push-to-infra
+      name: Submit Automated GitOps Infrastructure Manifest
+      action: publish:github:pull-request
+      input:
+        repoUrl: "://github.com"
+        branchName: "infra/add-${{ parameters.componentName }}"
+        title: "chore(gitops): provision application manifests with dynamic resource boundaries for ${{ parameters.componentName }}"
+        description: "Automated deployment manifest generated via Backstage using strict Roadie object merge guardrails."
