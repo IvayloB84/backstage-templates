@@ -36,7 +36,7 @@ spec:
       name: Fetch Base Deployment Infrastructure Blueprint
       action: fetch:plain
       input:
-        url: "https://github.com"
+        url: "https://github.com/IvayloB84/ArgoCD-RootApps"
 
     - id: merge-resource-limits
       name: Merge Structural Resource Limits Into Manifest
@@ -61,7 +61,7 @@ spec:
       name: Submit Automated GitOps Infrastructure Manifest
       action: publish:github:pull-request
       input:
-        repoUrl: "://github.com"
+        repoUrl: "github.com?repo=ArgoCD-RootApps&owner=IvayloB84"
         branchName: "infra/add-${{ parameters.componentName }}"
         title: "chore(gitops): provision application manifests with dynamic resource boundaries for ${{ parameters.componentName }}"
         description: "Automated deployment manifest generated via Backstage using strict Roadie object merge guardrails."
