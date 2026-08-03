@@ -39,7 +39,7 @@ spec:
       name: Submit Cluster Clean-up Request
       action: publish:github:pull-request
       input:
-        repoUrl: "https://github.com/IvayloB84/ArgoCD-RootApps"
+        repoUrl: "github.com?repo=ArgoCD-RootApps&owner=IvayloB84"
         branchName: "deactivate/${{ parameters.componentName }}"
         title: "chore(deactivate): pause cluster deployment for ${{ parameters.componentName }}"
         description: "Automated cluster resource cleanup initiated via Backstage. Codebase repository remains completely untouched and safe on GitHub."
