@@ -5,7 +5,7 @@ metadata:
   title: Generate Component with Resource Limits
   description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
 spec:
-  owner: user:default/IvayloB84
+  owner: user:default
   type: service
 
   parameters:
@@ -42,8 +42,10 @@ spec:
           
         serviceType:
           title: Select Base Service Stack
+          type: string
           enum: [nginx, postgres, java, redis]
           enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
+          default: nginx
         serviceImage:
           type: string
         servicePort:
@@ -118,10 +120,10 @@ spec:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
-        sourcePath: '.'
+        sourcePath: './app-repo' # 🌟 FIXED: Publishes the rendered app files cleanly into the root of the new GitHub repo
         description: "Application codebase repository for ${{ parameters.repoName }} created by Backstage."
 
-     # Step 2B: Instantly wire up your ngrok proxy link
+    # Step 2B: Instantly wire up your ngrok proxy link
     - id: create-webhook
       name: Link Developer Repo to ArgoCD Webhook
       action: github:webhook
@@ -142,8 +144,8 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
-        description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './k8s'
+        description: "Automated configuration generation from the software scaffold portal using strict Roadie object merge guardrails."        
+        sourcePath: './app-repo/k8s' # 🌟 FIXED: Targets the active manifest folder location in your scratchpad
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
     # Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
@@ -158,12 +160,12 @@ spec:
       name: Register in Backstage Catalog
       action: catalog:register
       input:
-        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml' # 🌟 FIXED: Now cleanly accessible at the root of the main branch
 
   output:
     links:
       - title: Open Fresh Repository on GitHub
-        url: ${{ steps['publish'].output.remoteUrl }}
+        url: ${{ steps['publish-new-repo'].output.remoteUrl }} # 🌟 FIXED: References the exact action id used in the pipeline
       - title: Open Central GitOps Infrastructure PR
         url: ${{ steps['append-to-roster'].output.remoteUrl }}
       - title: Open Backstage Catalog Entity
