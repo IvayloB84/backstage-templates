@@ -103,6 +103,11 @@ spec:
               spec:
                 containers:
                   - name: application
+                    image: ${{ parameters.serviceImage }}
+                    ports:
+                      - containerPort: ${{ parameters.servicePort }}
+                    env: >-
+                      ${{ [{ 'name': 'POSTGRES_HOST_AUTH_METHOD', 'value': 'trust' }] if parameters.serviceType == 'postgres' else [] }}
                     resources:
                       limits:
                         cpu: ${{ '1000m' if parameters.sizeProfile == 'large' else ('500m' if parameters.sizeProfile == 'standard' else '250m') }}
