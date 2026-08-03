@@ -24,6 +24,7 @@ spec:
           title: GitHub Owner/Organization
           type: string
           description: Your GitHub username or organization name.
+          default: IvayloB84
         description:
           title: Description
           type: string
