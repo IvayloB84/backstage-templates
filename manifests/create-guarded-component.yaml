@@ -5,7 +5,7 @@ metadata:
   title: Generate Component with Resource Limits
   description: Automatically provisions a new codebase with strict, automated cluster CPU and RAM limits to prevent node exhaustion.
 spec:
-  owner: guest
+  owner: user:guest
   type: service
 
   parameters:
@@ -42,7 +42,7 @@ spec:
       name: Merge Structural Resource Limits Into Manifest
       action: roadiehq:utils:merge
       input:
-        path: "base-deployment.yaml"
+        path: "skeletons/k8s/base-deployment.yaml"
         content:
           spec:
             template:
