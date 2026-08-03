@@ -39,141 +39,44 @@ spec:
             - "Standard Node (CPU: 500m, Mem: 512Mi)"
             - "Large Node (CPU: 1000m, Mem: 1Gi)"
           default: standard
+          
         serviceType:
-          title: Select Application type for default container image and port
+          title: Select Base Service Stack
+          enum: [nginx, postgres, java, redis]
+          enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
+        serviceImage:
           type: string
-          enum:
-            - nginx
-            - postgres
-            - java
-            - redis
-          enumNames:
-            - "NGINX Web Server"
-            - "PostgreSQL Database"
-            - "Java Runtime (OpenJDK 21)"
-            - "Redis Cache Cluster"
-          default: nginx
-      allOf:
-        - if:
-            properties:
-              serviceType:
-                const: nginx
-          then:
-            properties:
-              serviceImage:
-                title: Target Container Image
-                type: string
-                default: "nginx:alpine"
-              servicePort:
-                title: Target Container Port
-                type: integer
-                default: 80
-            required:
-              - serviceImage
-              - servicePort
-        - if:
-            properties:
-              serviceType:
-                const: postgres
-          then:
-            properties:
-              serviceImage:
-                title: Target Container Image
-                type: string
-                default: "postgres:16-alpine"
-              servicePort:
-                title: Target Container Port
-                type: integer
-                default: 5432
-            required:
-              - serviceImage
-              - servicePort
-        - if:
-            properties:
-              serviceType:
-                const: java
-          then:
-            properties:
-              serviceImage:
-                title: Target Container Image
-                type: string
-                default: "eclipse-temurin:21-jre"
-              servicePort:
-                title: Target Container Port
-                type: integer
-                default: 8080
-            required:
-              - serviceImage
-              - servicePort
-        - if:
-            properties:
-              serviceType:
-                const: redis
-          then:
-            properties:
-              serviceImage:
-                title: Target Container Image
-                type: string
-                default: "redis:alpine"
-              servicePort:
-                title: Target Container Port
-                type: integer
-                default: 6379
-            required:
-              - serviceImage
-              - servicePort
+        servicePort:
+          type: integer
+        ownerNamespace:
+          type: string
+          default: 'user:default'
+          ui:widget: hidden
 
       dependencies:
         serviceType:
           oneOf:
             - properties:
-                serviceType:
-                  enum:
-                    - nginx
-                serviceImage:
-                  title: Target Container Image
-                  type: string
-                  default: "nginx:alpine"
-                servicePort:
-                  title: Target Container Port
-                  type: integer
-                  default: 80
+                serviceType: { enum: [nginx] }
+                serviceImage: { type: string, default: "nginx:alpine" }
+                servicePort: { type: integer, default: 80 }
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum:
-                    - postgres
-                serviceImage:
-                  title: Target Container Image
-                  type: string
-                  default: "postgres:16-alpine"
-                servicePort:
-                  title: Target Container Port
-                  type: integer
-                  default: 5432
+                serviceType: { enum: [postgres] }
+                serviceImage: { type: string, default: "postgres:16-alpine" }
+                servicePort: { type: integer, default: 5432 }
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum:
-                    - java
-                serviceImage:
-                  title: Target Container Image
-                  type: string
-                  default: "eclipse-temurin:21-jre"
-                servicePort:
-                  title: Target Container Port
-                  type: integer
-                  default: 8080
+                serviceType: { enum: [java] }
+                serviceImage: { type: string, default: "eclipse-temurin:21-jre" }
+                servicePort: { type: integer, default: 8080 }
+              required: [serviceImage, servicePort]
             - properties:
-                serviceType:
-                  enum:
-                    - redis
-                serviceImage:
-                  title: Target Container Image
-                  type: string
-                  default: "redis:alpine"
-                servicePort:
-                  title: Target Container Port
-                  type: integer
-                  default: 6379
+                serviceType: { enum: [redis] }
+                serviceImage: { type: string, default: "redis:alpine" }
+                servicePort: { type: integer, default: 6379 }
+              required: [serviceImage, servicePort]
+
   steps:
     # --- PHASE 1: GENERATE & PUBLISH NEW APPLICATION REPOSITORY ---
     - id: fetch-app-skeleton
