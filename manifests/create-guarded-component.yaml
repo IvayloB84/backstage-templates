@@ -5,7 +5,7 @@ metadata:
   title: Generate Component with Resource Limits
   description: Provisions an app codebase repo with specialized container defaults and pushes distinct ArgoCD mapping configs to argocd-apps.
 spec:
-  owner: user:default
+  owner: user:default/IvayloB84
   type: service
 
   parameters:
@@ -52,15 +52,6 @@ spec:
             - "Java Runtime"
             - "Redis Cache Cluster"
           default: nginx
-        
-        # 🌟 CRITICAL FOR BACKSTAGE: We declare the fields here first as empty objects.
-        # This acts as a placeholder so the UI can swap their default values dynamically on click!
-        serviceImage:
-          title: Target Container Image
-          type: string
-        servicePort:
-          title: Target Container Port
-          type: integer
 
       # 🌟 YOUR EXACT PATTERN: Wrapped inside an allOf block to trigger reactive form state shifts
       allOf:
