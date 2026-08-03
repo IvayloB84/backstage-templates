@@ -31,7 +31,7 @@ spec:
       name: Remove ArgoCD Dashboard Tracking Manifest
       action: fs:delete
       input:
-        paths:
+        files:
           - "argocd-apps/${{ parameters.componentName }}"
 
     # 🚀 STEP 3: Push the clean state back to your main infrastructure repository
