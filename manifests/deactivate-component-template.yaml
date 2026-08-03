@@ -32,7 +32,7 @@ spec:
       action: fs:delete
       input:
         files:
-          - "argocd-apps/${{ parameters.componentName }}"
+          - "argocd-apps/${{ parameters.componentName }}/"
 
     # 🚀 STEP 3: Push the clean state back to your main infrastructure repository
     - id: push-infra-repo
