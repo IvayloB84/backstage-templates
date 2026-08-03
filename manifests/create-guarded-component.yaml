@@ -55,7 +55,7 @@ spec:
                         memory: ${{ '1Gi' if parameters.sizeProfile == 'large' else ('512Mi' if parameters.sizeProfile == 'standard' else '256Mi') }}
                       requests:
                         cpu: "100m"
-                        memory: "128Mi
+                        memory: "128Mi"
 
     - id: push-to-infra
       name: Submit Automated GitOps Infrastructure Manifest
