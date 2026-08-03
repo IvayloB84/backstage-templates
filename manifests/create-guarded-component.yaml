@@ -115,8 +115,6 @@ spec:
       name: Spin Up Brand-New GitHub Repository
       action: publish:github
       input:
-        allowedHosts:
-          - github.com
         repoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}"
         sourcePath: ./app-repo
         description: "Application codebase repository for ${{ parameters.repoName }} created by Backstage."
