@@ -26,12 +26,8 @@ spec:
         description:
           title: Description
           type: string
+          default: IvayloB84
           description: A brief summary explaining the purpose of this microservice.
-        ownerNamespace:
-          title: Owner Namespace
-          type: string
-          default: user:default/IvayloB84
-          description: The Backstage catalog owner reference entity.
 
     # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Fully Dynamic Context)
     - title: Advanced Service Configuration
