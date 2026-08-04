@@ -10,13 +10,17 @@ spec:
   
   parameters:
     - title: Identify Target Component to Deactivate
-      required: [repoName]
+      required: [repoName, repoOwner]
       properties:
         repoName:
           title: Component Repository Name
           type: string
           description: Enter the exact lowercase name of the application folder to remove.
-
+        repoOwner:
+          title: Repository Owner
+          type: string
+          default: IvayloB84
+          description: Your GitHub organization or personal profile username
   steps:
     - id: fetch-gitops-root
       name: Pull Centralized ArgoCD Tracking Hub
