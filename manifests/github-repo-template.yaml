@@ -18,6 +18,8 @@ spec:
         repoName:
           title: Repository Name
           type: string
+          maxLength: 50
+          pattern: '^([a-z][a-z0-9]*)(-[a-z0-9]+)*$'
           description: Choose a unique name for your new code repository.
         repoOwner:
           title: Repository Owner
