@@ -27,8 +27,9 @@ spec:
     - id: wipe-tracking-node
       name: Remove Registration Directory from Local Workspace
       action: fs:delete
-      files:
-        path: ./argocd-apps/${{ parameters.repoName }}
+      input:
+        files:
+          path: ./argocd-apps/${{ parameters.repoName }}
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
