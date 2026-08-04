@@ -46,16 +46,10 @@ spec:
         serviceType:
           oneOf:
             # --- POSTGRES LOGIC ---
-            # --- POSTGRES LOGIC ---
             - properties:
                 serviceType: { enum: [postgres] }
                 serviceImage: { type: string, default: "postgres:16-alpine" }
                 servicePort: { type: integer, default: 5432 }
-                # 🎯 Pre-saved resource values for Postgres
-                cpuRequest: { type: string, default: "50m", "ui:widget": "hidden" }
-                cpuLimit: { type: string, default: "300m", "ui:widget": "hidden" }
-                memRequest: { type: string, default: "64Mi", "ui:widget": "hidden" }
-                memLimit: { type: string, default: "128Mi", "ui:widget": "hidden" }
                 dbUser: { type: string, default: postgres }
                 dbPassword: { type: string, ui:field: Secret }
                 dbName: { type: string, default: app_db }
@@ -66,11 +60,6 @@ spec:
                 serviceType: { enum: [redis] }
                 serviceImage: { type: string, default: "redis:7-alpine" }
                 servicePort: { type: integer, default: 6379 }
-                # 🎯 Pre-saved resource values for Redis
-                cpuRequest: { type: string, default: "25m", "ui:widget": "hidden" }
-                cpuLimit: { type: string, default: "150m", "ui:widget": "hidden" }
-                memRequest: { type: string, default: "16Mi", "ui:widget": "hidden" }
-                memLimit: { type: string, default: "32Mi", "ui:widget": "hidden" }
                 redisPassword: { type: string, ui:field: Secret, default: "" }
               required: [serviceImage, servicePort]
 
@@ -79,11 +68,6 @@ spec:
                 serviceType: { enum: [java] }
                 serviceImage: { type: string, default: "eclipse-temurin:17-jre-alpine" }
                 servicePort: { type: integer, default: 8080 }
-                # 🎯 Pre-saved resource values for Java
-                cpuRequest: { type: string, default: "100m", "ui:widget": "hidden" }
-                cpuLimit: { type: string, default: "400m", "ui:widget": "hidden" }
-                memRequest: { type: string, default: "128Mi", "ui:widget": "hidden" }
-                memLimit: { type: string, default: "256Mi", "ui:widget": "hidden" }
                 javaOpts: { type: string, default: "-Xms512m -Xmx1024m" }
                 appEnv: { type: string, default: development, enum: [development, staging, production] }
               required: [serviceImage, servicePort, javaOpts, appEnv]
@@ -93,11 +77,6 @@ spec:
                 serviceType: { enum: [nginx] }
                 serviceImage: { type: string, default: "nginx:alpine" }
                 servicePort: { type: integer, default: 80 }
-                # 🎯 Pre-saved resource values for Nginx
-                cpuRequest: { type: string, default: "15m", "ui:widget": "hidden" }
-                cpuLimit: { type: string, default: "50m", "ui:widget": "hidden" }
-                memRequest: { type: string, default: "16Mi", "ui:widget": "hidden" }
-                memLimit: { type: string, default: "32Mi", "ui:widget": "hidden" }
                 nginxMode: { type: string, default: standard-spa, enum: [standard-spa, reverse-proxy, static-assets] }
               required: [serviceImage, servicePort, nginxMode]
 
@@ -126,7 +105,6 @@ spec:
           
           runCommand: ${{ (['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
           runArgs: ${{ (['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
-          # Environment variables
           dbUser: ${{ parameters.dbUser or 'postgres' }}
           dbPassword: ${{ parameters.dbPassword or '' }}
           dbName: ${{ parameters.dbName or 'postgres' }}
@@ -134,10 +112,10 @@ spec:
           javaOpts: ${{ parameters.javaOpts or '' }}
           appEnv: ${{ parameters.appEnv or '' }}
           nginxMode: ${{ parameters.nginxMode or '' }}
-          cpuRequest: ${{ parameters.cpuRequest }}
-          cpuLimit: ${{ parameters.cpuLimit }}
-          memRequest: ${{ parameters.memRequest }}
-          memLimit: ${{ parameters.memLimit }}
+          cpuRequest: ${{ parameters.cpuRequest or '25m' }}
+          cpuLimit: ${{ parameters.cpuLimit or '150m' }}
+          memRequest: ${{ parameters.memRequest or '16Mi' }}
+          memLimit: ${{ parameters.memLimit or '32Mi' }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
