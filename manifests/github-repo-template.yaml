@@ -158,8 +158,8 @@ spec:
           port: ${{ parameters.servicePort }}
           serviceType: ${{ parameters.serviceType }}
           
-          runCommand: ${{ ['sh', '-c'] | dump if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] }}
-          runArgs: ${{ ['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] | dump if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] }}
+          runCommand: ${{ (['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
+          runArgs: ${{ (['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
 
           # Environment variables
           dbUser: ${{ parameters.dbUser or 'postgres' }}
