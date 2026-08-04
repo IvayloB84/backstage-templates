@@ -10,7 +10,9 @@ spec:
   
   parameters:
     - title: Identify Target Component to Deactivate
-      required: [repoName, repoOwner]
+      required:
+      - repoName
+      - repoOwner
       properties:
         repoName:
           title: Component Repository Name
@@ -26,7 +28,7 @@ spec:
       name: Pull Centralized ArgoCD Tracking Hub
       action: fetch:plain
       input:
-        url: https://github.com/IvayloB84/ArgoCD-RootApps
+        url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
 
     - id: wipe-tracking-node
       name: Remove Registration Directory from Local Workspace
