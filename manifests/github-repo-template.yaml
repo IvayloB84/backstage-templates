@@ -126,7 +126,6 @@ spec:
           
           runCommand: ${{ (['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
           runArgs: ${{ (['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
-
           # Environment variables
           dbUser: ${{ parameters.dbUser or 'postgres' }}
           dbPassword: ${{ parameters.dbPassword or '' }}
@@ -135,7 +134,6 @@ spec:
           javaOpts: ${{ parameters.javaOpts or '' }}
           appEnv: ${{ parameters.appEnv or '' }}
           nginxMode: ${{ parameters.nginxMode or '' }}
-
           cpuRequest: ${{ parameters.cpuRequest }}
           cpuLimit: ${{ parameters.cpuLimit }}
           memRequest: ${{ parameters.memRequest }}
@@ -150,7 +148,11 @@ spec:
         repoVisibility: public
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
-        sourcePath: '.' 
+        sourcePath: '.'
+
+        gitCommitMessage: "initial platform commit"
+        gitAuthorName: "IvayloB84"
+        gitAuthorEmail: "scaffolder@localhost"
 
     # 🔗 Step 2B: Instantly wire up your ngrok proxy link
     - id: create-webhook
