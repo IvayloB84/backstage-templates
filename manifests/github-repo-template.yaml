@@ -30,10 +30,10 @@ spec:
         ownerNamespace:
           title: Owner Namespace
           type: string
-          default: user:default
+          default: user:default/IvayloB84
           description: The Backstage catalog owner reference entity.
 
-    # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Unified Context)
+    # PAGE 2: Service Selection & Dynamic Credentials (Unified Context)
     - title: Advanced Service Configuration
       required:
         - serviceType
@@ -54,7 +54,7 @@ spec:
           type: integer
           description: Specify the active networking network routing port target.
       
-      # 🚀 Conditional Fields evaluate perfectly here because they are on the same page!
+      # Conditional Fields evaluate perfectly here because they are on the same page!
       allOf:
         # --- POSTGRES CONDITION ---
         - if:
@@ -142,7 +142,7 @@ spec:
           description: ${{ parameters.description or 'Freshly generated application.' }}
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
-          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
+          ownerNamespace: ${{ parameters.ownerNamespace or 'user:default/IvayloB84' }}
           dbUser: ${{ parameters.dbUser or 'postgres' }}
           dbPassword: ${{ parameters.dbPassword or '' }}
           dbName: ${{ parameters.dbName or 'postgres' }}
