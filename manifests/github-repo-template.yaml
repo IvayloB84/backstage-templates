@@ -102,8 +102,8 @@ spec:
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
           serviceType: ${{ parameters.serviceType }}
-          appBaseUrl: ${{ config.getString('app.baseUrl') }}
-          
+          appBaseUrl: ${{ template.baseUrl }}   
+                 
           runCommand: ${{ (['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
           runArgs: ${{ (['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
           dbUser: ${{ parameters.dbUser or 'postgres' }}
