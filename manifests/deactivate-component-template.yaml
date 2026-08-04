@@ -27,14 +27,14 @@ spec:
     - id: wipe-tracking-node
       name: Remove Registration Directory from Local Workspace
       action: fs:delete
-      input:
+      files:
         path: ./argocd-apps/${{ parameters.repoName }}
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
       action: publish:github:pull-request
       input:
-        repoUrl: "https://github.com/IvayloB84/ArgoCD-RootApps"
+        repoUrl: "https://github.com"
         branchName: "cleanup/remove-${{ parameters.repoName }}"
         title: "SECURE DEACTIVATION REQUEST: Purge tracking manifolds for ${{ parameters.repoName }}"
         description: |
