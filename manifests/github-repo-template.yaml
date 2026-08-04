@@ -46,93 +46,59 @@ spec:
         serviceType:
           oneOf:
             # --- POSTGRES LOGIC ---
+            # --- POSTGRES LOGIC ---
             - properties:
-                serviceType:
-                  enum: [postgres]
-                serviceImage:
-                  title: Container Image Override
-                  type: string
-                  default: "postgres:16-alpine"
-                servicePort:
-                  title: Container Port
-                  type: integer
-                  default: 5432
-                dbUser:
-                  title: Database Admin User
-                  type: string
-                  default: postgres
-                dbPassword:
-                  title: Database Admin Password
-                  type: string
-                  ui:field: Secret
-                  description: Choose a secure master password for the superuser.
-                dbName:
-                  title: Initial Database Name
-                  type: string
-                  default: app_db
+                serviceType: { enum: [postgres] }
+                serviceImage: { type: string, default: "postgres:16-alpine" }
+                servicePort: { type: integer, default: 5432 }
+                # 🎯 Pre-saved resource values for Postgres
+                cpuRequest: { type: string, default: "50m", "ui:widget": "hidden" }
+                cpuLimit: { type: string, default: "300m", "ui:widget": "hidden" }
+                memRequest: { type: string, default: "64Mi", "ui:widget": "hidden" }
+                memLimit: { type: string, default: "128Mi", "ui:widget": "hidden" }
+                dbUser: { type: string, default: postgres }
+                dbPassword: { type: string, ui:field: Secret }
+                dbName: { type: string, default: app_db }
               required: [serviceImage, servicePort, dbUser, dbPassword, dbName]
 
             # --- REDIS LOGIC ---
             - properties:
-                serviceType:
-                  enum: [redis]
-                serviceImage:
-                  title: Container Image Override
-                  type: string
-                  default: "redis:7-alpine"
-                servicePort:
-                  title: Container Port
-                  type: integer
-                  default: 6379
-                redisPassword:
-                  title: Redis Access Password
-                  type: string
-                  ui:field: Secret
-                  description: Optional security credential. Leave blank to disable auth.
-                  default: ""
+                serviceType: { enum: [redis] }
+                serviceImage: { type: string, default: "redis:7-alpine" }
+                servicePort: { type: integer, default: 6379 }
+                # 🎯 Pre-saved resource values for Redis
+                cpuRequest: { type: string, default: "25m", "ui:widget": "hidden" }
+                cpuLimit: { type: string, default: "150m", "ui:widget": "hidden" }
+                memRequest: { type: string, default: "16Mi", "ui:widget": "hidden" }
+                memLimit: { type: string, default: "32Mi", "ui:widget": "hidden" }
+                redisPassword: { type: string, ui:field: Secret, default: "" }
               required: [serviceImage, servicePort]
 
             # --- JAVA LOGIC ---
             - properties:
-                serviceType:
-                  enum: [java]
-                serviceImage:
-                  title: Container Image Override
-                  type: string
-                  default: "eclipse-temurin:17-jre-alpine"
-                servicePort:
-                  title: Container Port
-                  type: integer
-                  default: 8080
-                javaOpts:
-                  title: Java Options (JAVA_OPTS)
-                  type: string
-                  default: "-Xms512m -Xmx1024m"
-                  description: Custom memory heap parameters and runtime options.
-                appEnv:
-                  title: Application Environment
-                  type: string
-                  default: development
-                  enum: [development, staging, production]
+                serviceType: { enum: [java] }
+                serviceImage: { type: string, default: "eclipse-temurin:17-jre-alpine" }
+                servicePort: { type: integer, default: 8080 }
+                # 🎯 Pre-saved resource values for Java
+                cpuRequest: { type: string, default: "100m", "ui:widget": "hidden" }
+                cpuLimit: { type: string, default: "400m", "ui:widget": "hidden" }
+                memRequest: { type: string, default: "128Mi", "ui:widget": "hidden" }
+                memLimit: { type: string, default: "256Mi", "ui:widget": "hidden" }
+                javaOpts: { type: string, default: "-Xms512m -Xmx1024m" }
+                appEnv: { type: string, default: development, enum: [development, staging, production] }
               required: [serviceImage, servicePort, javaOpts, appEnv]
 
             # --- NGINX LOGIC ---
             - properties:
-                serviceType:
-                  enum: [nginx]
-                serviceImage:
-                  title: Container Image Override
-                  type: string
-                  default: "nginx:alpine"
-                servicePort:
-                  title: Container Port
-                  type: integer
-                  default: 80
-                nginxMode:
-                  title: Proxy Server Routing Profile
-                  type: string
-                  default: standard-spa
-                  enum: [standard-spa, reverse-proxy, static-assets]
+                serviceType: { enum: [nginx] }
+                serviceImage: { type: string, default: "nginx:alpine" }
+                servicePort: { type: integer, default: 80 }
+                # 🎯 Pre-saved resource values for Nginx
+                cpuRequest: { type: string, default: "15m", "ui:widget": "hidden" }
+                cpuLimit: { type: string, default: "50m", "ui:widget": "hidden" }
+                memRequest: { type: string, default: "16Mi", "ui:widget": "hidden" }
+                memLimit: { type: string, default: "32Mi", "ui:widget": "hidden" }
+                nginxMode: { type: string, default: standard-spa, enum: [standard-spa, reverse-proxy, static-assets] }
               required: [serviceImage, servicePort, nginxMode]
 
   steps:
@@ -170,10 +136,10 @@ spec:
           appEnv: ${{ parameters.appEnv or '' }}
           nginxMode: ${{ parameters.nginxMode or '' }}
 
-          cpuRequest: ${{ '100m' if parameters.serviceType == 'java' else '50m' if parameters.serviceType == 'postgres' else '25m' if parameters.serviceType == 'redis' else '15m' }}
-          cpuLimit: ${{ '400m' if parameters.serviceType == 'java' else '300m' if parameters.serviceType == 'postgres' else '150m' if parameters.serviceType == 'redis' else '50m' }}
-          memRequest: ${{ '128Mi' if parameters.serviceType == 'java' else '64Mi' if parameters.serviceType == 'postgres' else '16Mi' if parameters.serviceType == 'redis' else '16Mi' }}
-          memLimit: ${{ '256Mi' if parameters.serviceType == 'java' else '128Mi' if parameters.serviceType == 'postgres' else '32Mi' if parameters.serviceType == 'redis' else '32Mi' }}
+          cpuRequest: ${{ parameters.cpuRequest }}
+          cpuLimit: ${{ parameters.cpuLimit }}
+          memRequest: ${{ parameters.memRequest }}
+          memLimit: ${{ parameters.memLimit }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
