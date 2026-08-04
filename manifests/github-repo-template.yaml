@@ -64,6 +64,57 @@ spec:
                 servicePort: { type: integer, default: 6379 }
               required: [serviceImage, servicePort]
 
+    # 🔐 DYNAMIC STEP 2: Renders advanced parameters conditionally per service
+    - title: Advanced Service Configuration
+      dependencies:
+        serviceType:
+          oneOf:
+            - properties:
+                serviceType: { enum: [postgres] }
+                dbUser:
+                  title: Database Admin User
+                  type: string
+                  default: postgres
+                dbPassword:
+                  title: Database Admin Password
+                  type: string
+                  ui:widget: password
+                  description: Choose a secure master password for the superuser.
+                dbName:
+                  title: Initial Database Name
+                  type: string
+                  default: app_db
+              required: [dbUser, dbPassword, dbName]
+            - properties:
+                serviceType: { enum: [redis] }
+                redisPassword:
+                  title: Redis Access Password
+                  type: string
+                  ui:widget: password
+                  description: Optional security credential. Leave blank to disable auth.
+                  default: ""
+            - properties:
+                serviceType: { enum: [java] }
+                javaOpts:
+                  title: Java Options (JAVA_OPTS)
+                  type: string
+                  default: "-Xms512m -Xmx1024m"
+                  description: Custom memory heap parameters and runtime options.
+                appEnv:
+                  title: Application Environment
+                  type: string
+                  default: development
+                  enum: [development, staging, production]
+              required: [javaOpts, appEnv]
+            - properties:
+                serviceType: { enum: [nginx] }
+                nginxMode:
+                  title: Proxy Server Routing Profile
+                  type: string
+                  default: standard-spa
+                  enum: [standard-spa, reverse-proxy, static-assets]
+              required: [nginxMode]
+
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
@@ -86,6 +137,13 @@ spec:
           image: ${{ parameters.serviceImage }}
           port: ${{ parameters.servicePort }}
           ownerNamespace: ${{ parameters.ownerNamespace or 'user:default' }}
+          dbUser: ${{ parameters.dbUser or 'postgres' }}
+          dbPassword: ${{ parameters.dbPassword or '' }}
+          dbName: ${{ parameters.dbName or 'postgres' }}
+          redisPassword: ${{ parameters.redisPassword or '' }}
+          javaOpts: ${{ parameters.javaOpts or '' }}
+          appEnv: ${{ parameters.appEnv or '' }}
+          nginxMode: ${{ parameters.nginxMode or '' }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish

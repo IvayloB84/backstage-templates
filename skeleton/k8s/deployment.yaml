@@ -19,6 +19,23 @@ spec:
           image: "${{ values.image }}"
           ports:
             - containerPort: ${{ values.port }}
+          env:
+            - name: SERVICE_TYPE
+              value: "${{ values.serviceType }}"
+            - name: POSTGRES_USER
+              value: "${{ values.dbUser }}"
+            - name: POSTGRES_PASSWORD
+              value: "${{ values.dbPassword }}"
+            - name: POSTGRES_DB
+              value: "${{ values.dbName }}"
+            - name: REDIS_PASSWORD
+              value: "${{ values.redisPassword }}"
+            - name: JAVA_OPTS
+              value: "${{ values.javaOpts }}"
+            - name: APP_ENV
+              value: "${{ values.appEnv }}"
+            - name: NGINX_ROUTING_PROFILE
+              value: "${{ values.nginxMode }}"
 ---
 apiVersion: v1
 kind: Service
