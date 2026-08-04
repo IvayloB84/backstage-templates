@@ -158,9 +158,9 @@ spec:
           port: ${{ parameters.servicePort }}
           serviceType: ${{ parameters.serviceType }}
           
-          runCommand: ${{ ['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] }}
-          runArgs: ${{ ['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] }}
-                    
+          runCommand: ${{ ['sh', '-c'] | dump if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] }}
+          runArgs: ${{ ['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] | dump if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] }}
+
           # Environment variables
           dbUser: ${{ parameters.dbUser or 'postgres' }}
           dbPassword: ${{ parameters.dbPassword or '' }}
@@ -169,7 +169,6 @@ spec:
           javaOpts: ${{ parameters.javaOpts or '' }}
           appEnv: ${{ parameters.appEnv or '' }}
           nginxMode: ${{ parameters.nginxMode or '' }}
-
 
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
