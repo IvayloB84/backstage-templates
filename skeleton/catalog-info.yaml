@@ -4,7 +4,7 @@ metadata:
   name: ${{ values.repoName | lower }}
   description: "${{ values.description }}"
   links:
-    - url: ${{ values.appBaseUrl }}/create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
+    - url: ./create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
       title: Request Component Deactivation
       icon: help
   annotations:
