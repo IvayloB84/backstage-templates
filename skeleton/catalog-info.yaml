@@ -4,14 +4,11 @@ metadata:
   name: ${{ values.repoName | lower }}
   description: "${{ values.description }}"
   links:
-    - url: /create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
+    # FIX: Corrected internal api routing target port to 7007
+    - url: https://localhost:7007/create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
       title: Request Component Deactivation
       icon: help
-  annotations:
-    github.com/project-slug: "${{ values.repoOwner }}/${{ values.repoName }}"
-    argocd/app-name: "${{ values.repoName }}"
-    backstage.io/kubernetes-label-selector: "app=${{ values.repoName }}"
 spec:
   type: service
   lifecycle: experimental
-  owner: "user:default/${{ values.repoOwner }}"
+  owner: ${{ values.repoOwner }}
