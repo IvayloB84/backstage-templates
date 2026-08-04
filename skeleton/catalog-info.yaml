@@ -4,8 +4,7 @@ metadata:
   name: ${{ values.repoName | lower }}
   description: "${{ values.description }}"
   links:
-    # FIX: Corrected internal api routing target port to 7007
-    - url: https://localhost:7007/create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
+    - url: ${{ config.getString('app.baseUrl') }}/create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
       title: Request Component Deactivation
       icon: help
   annotations:
