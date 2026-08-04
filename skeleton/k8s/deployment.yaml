@@ -21,6 +21,13 @@ spec:
             - containerPort: ${{ values.port }}
           command: ${{ values.runCommand }}
           args: ${{ values.runArgs }}
+          resources:
+            requests:
+              cpu: "${{ values.cpuRequest }}"
+              memory: "${{ values.memRequest }}"
+            limits:
+              cpu: "${{ values.cpuLimit }}"
+              memory: "${{ values.memLimit }}"
           env:
             - name: SERVICE_TYPE
               value: "${{ values.serviceType }}"

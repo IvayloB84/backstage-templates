@@ -171,25 +171,23 @@ spec:
           nginxMode: ${{ parameters.nginxMode or '' }}
 
           cpuRequest: >-
-            ${{ '50m' if parameters.serviceType == 'java' 
-            else '15m' if parameters.serviceType == 'postgres' 
-            else '10m' if parameters.serviceType == 'redis' 
-            else '5m' }}
-          cpuLimit: >-
-            ${{ '200m' if parameters.serviceType == 'java' 
-            else '100m' if parameters.serviceType == 'postgres' 
-            else '50m' if parameters.serviceType == 'redis' 
+            ${{ '100m' if parameters.serviceType == 'java' 
+            else '50m' if parameters.serviceType == 'postgres' 
             else '25m' }}
+          cpuLimit: >-
+            ${{ '400m' if parameters.serviceType == 'java' 
+            else '300m' if parameters.serviceType == 'postgres' 
+            else '150m' }}
           memRequest: >-
             ${{ '128Mi' if parameters.serviceType == 'java' 
             else '64Mi' if parameters.serviceType == 'postgres' 
             else '16Mi' if parameters.serviceType == 'redis' 
-            else '8Mi' }}
+            else '16Mi' }}
           memLimit: >-
             ${{ '256Mi' if parameters.serviceType == 'java' 
             else '128Mi' if parameters.serviceType == 'postgres' 
             else '32Mi' if parameters.serviceType == 'redis' 
-            else '16Mi' }}
+            else '32Mi' }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
