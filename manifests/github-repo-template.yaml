@@ -9,7 +9,7 @@ spec:
   type: service
 
   parameters:
-    # PAGE 1: Repository Ownership Details
+    # 📑 PAGE 1: Repository Ownership Details
     - title: Provide Repository Information
       required:
         - repoName
@@ -33,7 +33,7 @@ spec:
           default: user:default/IvayloB84
           description: The Backstage catalog owner reference entity.
 
-    # PAGE 2: Service Selection & Dynamic Credentials (Isolated State Mapping)
+    # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Clean State)
     - title: Advanced Service Configuration
       required:
         - serviceType
@@ -54,11 +54,10 @@ spec:
           type: integer
           description: Specify the active networking network routing port target.
 
-      # Stable conditional mapping engine (Native Backstage validation engine)
       dependencies:
         serviceType:
           oneOf:
-            # --- POSTGRES LOGIC ---
+            # --- POSTGRES EXTRA FIELDS ---
             - properties:
                 serviceType:
                   enum: [postgres]
@@ -77,7 +76,7 @@ spec:
                   default: app_db
               required: [dbUser, dbPassword, dbName]
 
-            # --- REDIS LOGIC ---
+            # --- REDIS EXTRA FIELDS ---
             - properties:
                 serviceType:
                   enum: [redis]
@@ -88,7 +87,7 @@ spec:
                   description: Optional security credential. Leave blank to disable auth.
                   default: ""
 
-            # --- JAVA LOGIC ---
+            # --- JAVA EXTRA FIELDS ---
             - properties:
                 serviceType:
                   enum: [java]
@@ -104,7 +103,7 @@ spec:
                   enum: [development, staging, production]
               required: [javaOpts, appEnv]
 
-            # --- NGINX LOGIC ---
+            # --- NGINX EXTRA FIELDS ---
             - properties:
                 serviceType:
                   enum: [nginx]
