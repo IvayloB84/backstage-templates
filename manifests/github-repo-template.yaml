@@ -149,6 +149,7 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         defaultBranch: 'main'
         sourcePath: '.'
+        repoWithThings: false
 
         gitCommitMessage: "initial platform commit"
         gitAuthorName: "IvayloB84"
