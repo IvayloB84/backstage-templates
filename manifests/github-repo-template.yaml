@@ -33,34 +33,32 @@ spec:
           default: user:default/IvayloB84
           description: The Backstage catalog owner reference entity.
 
-    # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Clean State)
+    # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Fully Dynamic Context)
     - title: Advanced Service Configuration
       required:
         - serviceType
-        - serviceImage
-        - servicePort
       properties:
         serviceType:
           title: Base Service Stack
           type: string
           enum: [nginx, postgres, java, redis]
           description: Select the container technology runtime for your environment.
-        serviceImage:
-          title: Container Image Override
-          type: string
-          description: Specify a custom registry target string or use standard defaults.
-        servicePort:
-          title: Container Port
-          type: integer
-          description: Specify the active networking network routing port target.
 
       dependencies:
         serviceType:
           oneOf:
-            # --- POSTGRES EXTRA FIELDS ---
+            # --- POSTGRES LOGIC ---
             - properties:
                 serviceType:
                   enum: [postgres]
+                serviceImage:
+                  title: Container Image Override
+                  type: string
+                  default: "postgres:16-alpine"
+                servicePort:
+                  title: Container Port
+                  type: integer
+                  default: 5432
                 dbUser:
                   title: Database Admin User
                   type: string
@@ -74,23 +72,40 @@ spec:
                   title: Initial Database Name
                   type: string
                   default: app_db
-              required: [dbUser, dbPassword, dbName]
+              required: [serviceImage, servicePort, dbUser, dbPassword, dbName]
 
-            # --- REDIS EXTRA FIELDS ---
+            # --- REDIS LOGIC ---
             - properties:
                 serviceType:
                   enum: [redis]
+                serviceImage:
+                  title: Container Image Override
+                  type: string
+                  default: "redis:7-alpine"
+                servicePort:
+                  title: Container Port
+                  type: integer
+                  default: 6379
                 redisPassword:
                   title: Redis Access Password
                   type: string
                   ui:field: Secret
                   description: Optional security credential. Leave blank to disable auth.
                   default: ""
+              required: [serviceImage, servicePort]
 
-            # --- JAVA EXTRA FIELDS ---
+            # --- JAVA LOGIC ---
             - properties:
                 serviceType:
                   enum: [java]
+                serviceImage:
+                  title: Container Image Override
+                  type: string
+                  default: "eclipse-temurin:17-jre-alpine"
+                servicePort:
+                  title: Container Port
+                  type: integer
+                  default: 8080
                 javaOpts:
                   title: Java Options (JAVA_OPTS)
                   type: string
@@ -101,18 +116,26 @@ spec:
                   type: string
                   default: development
                   enum: [development, staging, production]
-              required: [javaOpts, appEnv]
+              required: [serviceImage, servicePort, javaOpts, appEnv]
 
-            # --- NGINX EXTRA FIELDS ---
+            # --- NGINX LOGIC ---
             - properties:
                 serviceType:
                   enum: [nginx]
+                serviceImage:
+                  title: Container Image Override
+                  type: string
+                  default: "nginx:alpine"
+                servicePort:
+                  title: Container Port
+                  type: integer
+                  default: 80
                 nginxMode:
                   title: Proxy Server Routing Profile
                   type: string
                   default: standard-spa
                   enum: [standard-spa, reverse-proxy, static-assets]
-              required: [nginxMode]
+              required: [serviceImage, servicePort, nginxMode]
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
