@@ -8,7 +8,7 @@ spec:
   project: default
   source:
     repoURL: "https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
-    targetRevision: "infra/add-${{ values.repoName }}"
+    targetRevision: HEAD
     path: k8s
   destination:
     server: 'https://kubernetes.default.svc'
@@ -20,5 +20,3 @@ spec:
     automated:
       prune: true
       selfHeal: true
-        - CreateNamespace=true
-        - ApplyOutOfSyncOnly=true
