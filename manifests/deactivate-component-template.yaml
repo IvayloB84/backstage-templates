@@ -5,7 +5,7 @@ metadata:
   title: Request Component Lifecycle Deactivation
   description: Submits a secured Pull Request to remove tracking manifolds from the GitOps engine.
 spec:
-  owner: platform
+  owner: user:default/IvayloB84
   type: service
   
   parameters:
