@@ -170,24 +170,10 @@ spec:
           appEnv: ${{ parameters.appEnv or '' }}
           nginxMode: ${{ parameters.nginxMode or '' }}
 
-          cpuRequest: >-
-            ${{ '100m' if parameters.serviceType == 'java' 
-            else '50m' if parameters.serviceType == 'postgres' 
-            else '25m' }}
-          cpuLimit: >-
-            ${{ '400m' if parameters.serviceType == 'java' 
-            else '300m' if parameters.serviceType == 'postgres' 
-            else '150m' }}
-          memRequest: >-
-            ${{ '128Mi' if parameters.serviceType == 'java' 
-            else '64Mi' if parameters.serviceType == 'postgres' 
-            else '16Mi' if parameters.serviceType == 'redis' 
-            else '16Mi' }}
-          memLimit: >-
-            ${{ '256Mi' if parameters.serviceType == 'java' 
-            else '128Mi' if parameters.serviceType == 'postgres' 
-            else '32Mi' if parameters.serviceType == 'redis' 
-            else '32Mi' }}
+          cpuRequest: ${{ '100m' if parameters.serviceType == 'java' else '50m' if parameters.serviceType == 'postgres' else '25m' if parameters.serviceType == 'redis' else '15m' }}
+          cpuLimit: ${{ '400m' if parameters.serviceType == 'java' else '300m' if parameters.serviceType == 'postgres' else '150m' if parameters.serviceType == 'redis' else '50m' }}
+          memRequest: ${{ '128Mi' if parameters.serviceType == 'java' else '64Mi' if parameters.serviceType == 'postgres' else '16Mi' if parameters.serviceType == 'redis' else '16Mi' }}
+          memLimit: ${{ '256Mi' if parameters.serviceType == 'java' else '128Mi' if parameters.serviceType == 'postgres' else '32Mi' if parameters.serviceType == 'redis' else '32Mi' }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
