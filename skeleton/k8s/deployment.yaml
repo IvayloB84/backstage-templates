@@ -19,6 +19,8 @@ spec:
           image: "${{ values.image }}"
           ports:
             - containerPort: ${{ values.port }}
+          command: ${{ values.runCommand }}
+          args: ${{ values.runArgs }}
           env:
             - name: SERVICE_TYPE
               value: "${{ values.serviceType }}"
@@ -36,6 +38,7 @@ spec:
               value: "${{ values.appEnv }}"
             - name: NGINX_ROUTING_PROFILE
               value: "${{ values.nginxMode }}"
+
 ---
 apiVersion: v1
 kind: Service
