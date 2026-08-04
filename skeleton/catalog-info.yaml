@@ -3,6 +3,10 @@ kind: Component
 metadata:
   name: "${{ values.repoName }}"
   description: "${{ values.description }}"
+  links:
+    - url: /create/templates/default/deactivate-service-pipeline?template_args[repoName]=${{ values.repoName | lower }}
+      title: Request Component Deactivation
+      icon: help
   annotations:
     github.com/project-slug: "${{ values.repoOwner }}/${{ values.repoName }}"
     argocd/app-name: "${{ values.repoName }}"
