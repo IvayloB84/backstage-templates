@@ -78,7 +78,7 @@ spec:
                 dbPassword:
                   title: Database Admin Password
                   type: string
-                  ui:widget: password
+                  ui:field: Secret
                   description: Choose a secure master password for the superuser.
                 dbName:
                   title: Initial Database Name
@@ -90,7 +90,7 @@ spec:
                 redisPassword:
                   title: Redis Access Password
                   type: string
-                  ui:widget: password
+                  ui:field: Secret
                   description: Optional security credential. Leave blank to disable auth.
                   default: ""
             - properties:
