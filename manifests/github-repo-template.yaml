@@ -9,39 +9,52 @@ spec:
   type: service
 
   parameters:
+    # 📑 PAGE 1: Repository Ownership Details
     - title: Provide Repository Information
       required:
         - repoName
         - repoOwner
-        - serviceType
       properties:
         repoName:
           title: Repository Name
           type: string
-          maxLength: 50
-          pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
+          description: Choose a unique name for your new code repository.
         repoOwner:
           title: Repository Owner
           type: string
-          default: IvayloB84
+          description: Your GitHub organization or personal profile username.
         description:
           title: Description
           type: string
-        serviceType:
-          title: Select Base Service Stack
-          enum: [nginx, postgres, java, redis]
-          enumNames: ['Nginx', 'PostgreSQL', 'Java', 'Redis']
-        serviceImage:
-          type: string
-        servicePort:
-          type: integer
+          description: A brief summary explaining the purpose of this microservice.
         ownerNamespace:
+          title: Owner Namespace
           type: string
-          default: 'user:default'
-          ui:widget: hidden
+          default: user:default
+          description: The Backstage catalog owner reference entity.
 
-    # 🔐 DYNAMIC STEP 2: Advanced parameters rendered dynamically per service stack without UI freezes
+    # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Unified Context)
     - title: Advanced Service Configuration
+      required:
+        - serviceType
+        - serviceImage
+        - servicePort
+      properties:
+        serviceType:
+          title: Base Service Stack
+          type: string
+          enum: [nginx, postgres, java, redis]
+          description: Select the container technology runtime for your environment.
+        serviceImage:
+          title: Container Image Override
+          type: string
+          description: Specify a custom registry target string or use standard defaults.
+        servicePort:
+          title: Container Port
+          type: integer
+          description: Specify the active networking network routing port target.
+      
+      # 🚀 Conditional Fields evaluate perfectly here because they are on the same page!
       allOf:
         # --- POSTGRES CONDITION ---
         - if:
