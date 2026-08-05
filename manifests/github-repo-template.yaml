@@ -154,7 +154,7 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './k8s'
+        sourcePath: '.'
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
