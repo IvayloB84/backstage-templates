@@ -4,7 +4,6 @@ metadata:
   name: remote-centralized-templates
   description: Index of all pipeline scaffolding template cards
 spec:
-  type: url
   targets:
     - ./github-repo-template.yaml
     - ./create-guarded-component.yaml
