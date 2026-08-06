@@ -57,7 +57,7 @@ spec:
 
     - id: publish-cleanup-branch
       name: Push Deletion Tree to Feature Branch
-      action: publish:github:push
+      action: github:push
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         branchName: "cleanup-remove-${{ parameters.repoName }}"
