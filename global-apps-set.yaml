@@ -10,6 +10,8 @@ spec:
         revision: HEAD
         directories:
           - path: argocd-apps/*
+  syncPolicy:
+    preserveResourcesOnDeletion: false
   template:
     metadata:
       name: "{{path.basename}}"
