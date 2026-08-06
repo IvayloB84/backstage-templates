@@ -60,7 +60,7 @@ spec:
       action: publish:github
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
-        branchName: "cleanup-remove-${{ parameters.repoName }}"
+        branch: "cleanup-remove-${{ parameters.repoName }}"
         sourcePath: '.'
 
     - id: publish-cleanup-pr
