@@ -8,6 +8,7 @@ spec:
     - git:
         repoURL: "https://github.com/IvayloB84/ArgoCD-RootApps"
         revision: HEAD
+        requeueAfterSeconds: 10
         directories:
           - path: argocd-apps/*
   syncPolicy:
