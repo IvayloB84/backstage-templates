@@ -23,14 +23,22 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
-    - title: Corporate Safety Gate      
+    - title: Corporate Safety Gate
       required:
         - confirmDestruction
       properties:
         confirmDestruction:
-          title: "<html><span style='color: #d32f2f; font-weight: bold;'> I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines</span></html>"
+          # Keep the title plain here so Backstage maps the internal variable safely
+          title: "Infrastructure Destruction Authorization"
           type: boolean
           default: false
+      uiSchema:
+        confirmDestruction:
+          ui:widget: "checkbox"
+          ui:description: |
+            <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
+               WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
+            </span>
   steps:
     - id: fetch-gitops-root
       name: Pull Centralized ArgoCD Tracking Hub
