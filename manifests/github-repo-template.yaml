@@ -4,9 +4,6 @@ metadata:
   name: github-repo-template
   title: Create a New GitHub Repository
   description: Scaffolds a baseline source code workspace with GitOps webhooks
-  annotations:
-    backstage.io/managed-by-location: url:https://github.com
-    backstage.io/managed-by-origin: url:https://github.com
 spec:
   owner: user:default/IvayloB84
   type: service

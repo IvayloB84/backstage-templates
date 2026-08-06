@@ -4,9 +4,6 @@ metadata:
   name: deactivate-component-template
   title: Deactivate Cluster Component
   description: Safely tears down active pipeline structures and cleans GitOps anchors
-  annotations:
-    backstage.io/managed-by-location: url:https://github.com
-    backstage.io/managed-by-origin: url:https://github.com
 spec:
   owner: user:default/IvayloB84
   type: service
