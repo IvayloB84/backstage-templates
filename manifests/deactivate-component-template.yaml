@@ -35,7 +35,7 @@ spec:
       action: fs:delete
       input:
         files:
-          - ./argocd-apps/${{ parameters.repoName }}/**
+          - ./argocd-apps/${{ parameters.repoName }}
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
