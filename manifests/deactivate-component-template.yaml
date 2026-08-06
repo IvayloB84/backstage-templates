@@ -23,6 +23,14 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
+    - title: Corporate Safety Gate      
+      required:
+        - confirmDestruction
+      properties:
+        confirmDestruction:
+          title: "<html><span style='color: #d32f2f; font-weight: bold;'> I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines</span></html>"
+          type: boolean
+          default: false
   steps:
     - id: fetch-gitops-root
       name: Pull Centralized ArgoCD Tracking Hub
@@ -30,12 +38,29 @@ spec:
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
 
-    - id: wipe-tracking-node
-      name: Remove Registration Directory from Local Workspace
-      action: fs:delete
+    - id: inject-lifecycle-hold
+      name: Inject Secure Infrastructure Deactivation Review Tag
+      action: fs:createFile
       input:
-        files:
-          - ./argocd-apps/${{ parameters.repoName }}
+        filePath: ./argocd-apps/${{ parameters.repoName }}/application.yaml
+        content: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: ${{ parameters.repoName }}
+            namespace: argocd
+            annotations:
+              # RECOVERY LOCK: Tells ArgoCD to intercept and request a foreground teardown ONLY upon admin merge
+              argocd.argoproj.io/lifecycle-delete-policy: Foreground
+          spec:
+            project: default
+            source:
+              repoURL: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps.git"
+              targetRevision: main
+              path: "argocd-apps/${{ parameters.repoName }}"
+            destination:
+              server: "https://kubernetes.default.svc"
+              namespace: default
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
