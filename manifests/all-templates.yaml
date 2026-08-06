@@ -5,6 +5,8 @@ metadata:
   description: Index of all pipeline scaffolding template cards
 spec:
   type: url
+  rules: 
+    - allow: [Template, Location] 
   targets:
     - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/github-repo-template.yaml
     - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/create-guarded-component.yaml
