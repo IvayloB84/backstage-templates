@@ -4,5 +4,8 @@ metadata:
   name: remote-centralized-templates
   description: Index of all pipeline scaffolding template cards
 spec:
+  type: url
   targets:
-    - ./*.yaml
+    - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/github-repo-template.yaml
+    - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/create-guarded-component.yaml
+    - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/deactivate-component-template.yaml
