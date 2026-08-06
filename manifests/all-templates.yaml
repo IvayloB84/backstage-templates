@@ -5,6 +5,6 @@ metadata:
   description: Index of all pipeline scaffolding template cards
 spec:
   targets:
-    - ./github-repo-template.yaml
-    - ./create-guarded-component.yaml
-    - ./deactivate-guarded-component.yaml
+    - ./manifest/github-repo-template.yaml
+    - ./manifest/create-guarded-component.yaml
+    - ./manifest/deactivate-guarded-component.yaml
