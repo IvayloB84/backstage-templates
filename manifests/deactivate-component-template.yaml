@@ -42,7 +42,7 @@ spec:
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
-        branchName: "cleanup/remove-${{ parameters.repoName }}"
+        branchName: "cleanup-remove-${{ parameters.repoName }}"
         title: "SECURE DEACTIVATION REQUEST: Purge tracking manifolds for ${{ parameters.repoName }}"
         sourcePath: '.'
         description: |
