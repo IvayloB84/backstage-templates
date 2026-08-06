@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: remote-centralized-templates
+  description: Index of all pipeline scaffolding template cards
+spec:
+  type: url
+  targets:
+    - ./github-repo-template.yaml
+    - ./create-guarded-component.yaml
+    - ./deactivate-guarded-component.yaml
