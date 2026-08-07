@@ -46,23 +46,9 @@ spec:
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
         targetPath: '.'
-
-    # Overwrites manifest files with empty content to guarantee a visual red diff in the PR
-    - id: clear-application-manifest
-      name: Empty ArgoCD Application Manifest Configuration
-      action: fs:createFile
-      input:
-        filePath: './argocd-apps/${{ parameters.repoName }}/application.yaml'
-        content: ''
-        overwrite: true
-
-    - id: clear-deployment-manifest
-      name: Empty ArgoCD Deployment Manifest Configuration
-      action: fs:createFile
-      input:
-        filePath: './argocd-apps/${{ parameters.repoName }}/deployment.yaml'
-        content: ''
-        overwrite: true
+        templateFileProperties:
+          argocd-apps/${{ parameters.repoName }}/application.yaml: ""
+          argocd-apps/${{ parameters.repoName }}/deployment.yaml: ""
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
