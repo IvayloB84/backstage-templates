@@ -3,6 +3,10 @@ kind: Application
 metadata:
   name: "${{ values.repoName }}"
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: "argocd-apps/${{ values.repoName }}"
 spec:
   project: default
   source:
