@@ -48,15 +48,7 @@ spec:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
         targetPath: '.'
 
-    # STEP 2: Delete the specific folder locally in the Backstage workspace
-    - id: wipe-tracking-node
-      name: Remove Registration Directory from Workspace
-      action: fs:delete
-      input:
-        files:
-          - ./argocd-apps/${{ parameters.repoName }}
-
-    # STEP 3: Submit the PR containing the deletion
+    # STEP 2: Submit the PR containing the deletion
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
       action: publish:github:pull-request
@@ -70,6 +62,8 @@ spec:
           This Pull Request removes the ArgoCD tracking folder: `argocd-apps/${{ parameters.repoName }}`.
         sourcePath: '.'
         update: true
+        filesToDelete:
+          - 'argocd-apps/${{ parameters.repoName }}'
 
   output:
     links:
