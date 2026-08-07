@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: "https://github.com/${{ values.repoOwner }}/ArgoCD-RootApps.git"
     targetRevision: HEAD
-    path: "argocd-apps/${{ values.repoName | lower }}"
+    path: "argocd-apps/${{ values.repoName }}/k8s"
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default
