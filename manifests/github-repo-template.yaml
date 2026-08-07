@@ -144,19 +144,6 @@ spec:
           - push
         token: ${{ secrets.GITHUB_TOKEN }}
 
-
-    # ⚙️ Step 2C: Generate the GitOps tracking configuration file
-    - id: create-argocd-config
-      name: Generate ArgoCD GitOps Tracking Configuration
-      action: fs:createFile
-      input:
-        filePath: './config.yaml'
-        content: |
-          appName: "${{ parameters.repoName }}"
-          repoURL: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}.git"
-          targetRevision: "main"
-          path: "k8s"
-
     # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
     - id: append-to-roster
       name: Submit Automated Deployment Manifest to Central GitOps Hub
@@ -167,7 +154,7 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './k8s'
+        sourcePath: '.'
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
