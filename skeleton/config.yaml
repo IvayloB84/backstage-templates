@@ -1,0 +1,6 @@
+appName: "${{ values.name }}"
+repoURL: "https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
+targetRevision: "main"
+path: "k8s"
+# Append your custom Backstage parameters here later:
+language: "${{ values.language }}" # e.g., nodeJS, python, go
