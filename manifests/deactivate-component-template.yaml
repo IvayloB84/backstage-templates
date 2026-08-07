@@ -46,6 +46,13 @@ spec:
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
 
+    - id: rename-tracking-node
+      name: Stage Folder Deletion for Review
+      action: fs:rename
+      input:
+        from: ./argocd-apps/${{ parameters.repoName }}
+        to: ./argocd-apps/${{ parameters.repoName }}.deleted
+
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
       action: publish:github:pull-request
@@ -53,11 +60,12 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         targetBranchName: 'main'
         branchName: "cleanup-remove-${{ parameters.repoName }}"
-        title: "PR-PURGE: Deactivate ${{ parameters.repoName }} Infrastructure"
+        title: "PR-PURGE: Remove ${{ parameters.repoName }} from Infrastructure"
         description: |
           ### Automated Infrastructure Lifecycle Request
-          This Pull Request initializes the deactivation sequence for `argocd-apps/${{ parameters.repoName }}`.
+          This Pull Request prepares the deactivation of `argocd-apps/${{ parameters.repoName }}`.
         sourcePath: '.'
+        update: true
 
   output:
     links:
