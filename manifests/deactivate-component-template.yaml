@@ -42,14 +42,9 @@ spec:
   steps:
     - id: fetch-gitops-root
       name: Pull Centralized ArgoCD Tracking Hub
-      action: fetch:template
+      action: fetch:plain
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
-        targetPath: '.'
-        templateFileProperties:
-        values:
-          repoName: ${{ parameters.repoName }}
-          purgeManifests: true
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
@@ -58,12 +53,11 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         targetBranchName: 'main'
         branchName: "cleanup-remove-${{ parameters.repoName }}"
-        title: "PR-PURGE: Clear ${{ parameters.repoName }} from Infrastructure"
+        title: "PR-PURGE: Deactivate ${{ parameters.repoName }} Infrastructure"
         description: |
           ### Automated Infrastructure Lifecycle Request
-          This Pull Request blanks out the manifests under `argocd-apps/${{ parameters.repoName }}`.
+          This Pull Request initializes the deactivation sequence for `argocd-apps/${{ parameters.repoName }}`.
         sourcePath: '.'
-        update: true
 
   output:
     links:
