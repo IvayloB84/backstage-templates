@@ -46,14 +46,6 @@ spec:
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
 
-    - id: rename-tracking-node
-      name: Stage Folder Deletion for Review
-      action: fs:rename
-      input:
-        files:
-          - from: ./argocd-apps/${{ parameters.repoName }}
-            to: ./argocd-apps/${{ parameters.repoName }}.deleted
-
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
       action: publish:github:pull-request
@@ -61,12 +53,21 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         targetBranchName: 'main'
         branchName: "cleanup-remove-${{ parameters.repoName }}"
-        title: "PR-PURGE: Remove ${{ parameters.repoName }} from Infrastructure"
+        title: "PR-PURGE: Deactivate ${{ parameters.repoName }} Infrastructure"
         description: |
-          ### Automated Infrastructure Lifecycle Request
-          This Pull Request prepares the deactivation of `argocd-apps/${{ parameters.repoName }}`.
+          # CRITICAL INFRASTRUCTURE DECOMMISSION REQUEST
+          
+          ## Target Component: `${{ parameters.repoName }}`
+          
+          ### ADMINISTRATIVE VERIFICATION GATE
+          An automated request has been submitted to dismantle this component. Merging this Pull Request will trigger immediate background cleanup scripts.
+          
+          - [ ] **CONFIRMED**: The directory `argocd-apps/${{ parameters.repoName }}` will be deleted from the main branch.
+          - [ ] **CONFIRMED**: The external standalone repository `${{ parameters.repoName }}` will be permanently destroyed.
+          
+          ---
+          *To reject this destruction request, simply click **Close Pull Request**.*
         sourcePath: '.'
-        update: true
 
   output:
     links:
