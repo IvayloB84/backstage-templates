@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.repoName | lower }}
-  description: ${{ values.description ~ ' [Request Component Deactivation](/create/templates/default/deactivate-service-pipeline?template_args[repoName]=' ~ (values.repoName | lower) ~ ')' }}
+  name: "Freshly generated application."
+  description: "${{ values.description }}"
   annotations:
     github.com/project-slug: "${{ values.repoOwner }}/${{ values.repoName }}"
     argocd/app-name: "${{ values.repoName }}"
