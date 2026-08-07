@@ -40,15 +40,30 @@ spec:
                WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
             </span>
   steps:
-    # STEP 1: Fetch the Centralized GitOps Hub
     - id: fetch-gitops-root
       name: Pull Centralized ArgoCD Tracking Hub
-      action: fetch:plain
+      action: fetch:template
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
         targetPath: '.'
 
-    # STEP 2: Submit the PR containing the deletion
+    # Overwrites manifest files with empty content to guarantee a visual red diff in the PR
+    - id: clear-application-manifest
+      name: Empty ArgoCD Application Manifest Configuration
+      action: fs:createFile
+      input:
+        filePath: './argocd-apps/${{ parameters.repoName }}/application.yaml'
+        content: ''
+        overwrite: true
+
+    - id: clear-deployment-manifest
+      name: Empty ArgoCD Deployment Manifest Configuration
+      action: fs:createFile
+      input:
+        filePath: './argocd-apps/${{ parameters.repoName }}/deployment.yaml'
+        content: ''
+        overwrite: true
+
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
       action: publish:github:pull-request
@@ -56,14 +71,12 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         targetBranchName: 'main'
         branchName: "cleanup-remove-${{ parameters.repoName }}"
-        title: "PR-PURGE: Remove ${{ parameters.repoName }} from Infrastructure"
+        title: "PR-PURGE: Clear ${{ parameters.repoName }} from Infrastructure"
         description: |
           ### Automated Infrastructure Lifecycle Request
-          This Pull Request removes the ArgoCD tracking folder: `argocd-apps/${{ parameters.repoName }}`.
+          This Pull Request blanks out the manifests under `argocd-apps/${{ parameters.repoName }}`.
         sourcePath: '.'
         update: true
-        filesToDelete:
-          - 'argocd-apps/${{ parameters.repoName }}'
 
   output:
     links:
