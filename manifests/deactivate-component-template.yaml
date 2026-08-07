@@ -57,7 +57,7 @@ spec:
 
     - id: publish-cleanup-branch
       name: Push Deletion Tree to Feature Branch
-      action: publish:push
+      action: publish:github
       input:
         repoUrl: 'github.com?owner=IvayloB84&branch=cleanup-remove-${{ parameters.repoName }}&repo=ArgoCD-RootApps'
         gitCommitMessage: "infrastructure(lifecycle): decommission tracking manifold for ${{ parameters.repoName }}"
