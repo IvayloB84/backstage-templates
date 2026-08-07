@@ -47,8 +47,9 @@ spec:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
         targetPath: '.'
         templateFileProperties:
-          argocd-apps/${{ parameters.repoName }}/application.yaml: ""
-          argocd-apps/${{ parameters.repoName }}/deployment.yaml: ""
+        values:
+          repoName: ${{ parameters.repoName }}
+          purgeManifests: true
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
