@@ -61,6 +61,7 @@ spec:
       input:
         repoUrl: 'github.com?owner=IvayloB84&branch=cleanup-remove-${{ parameters.repoName }}&repo=ArgoCD-RootApps'  
         title: "SECURE DEACTIVATION REQUEST: Purge tracking manifolds for ${{ parameters.repoName }}"
+        branchName: "cleanup-remove-${{ parameters.repoName }}"
         sourcePath: '.'
         description: |
           ### System Infrastructure Lifecycle Request
