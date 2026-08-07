@@ -50,8 +50,9 @@ spec:
       name: Stage Folder Deletion for Review
       action: fs:rename
       input:
-        from: ./argocd-apps/${{ parameters.repoName }}
-        to: ./argocd-apps/${{ parameters.repoName }}.deleted
+        files:
+          - from: ./argocd-apps/${{ parameters.repoName }}
+            to: ./argocd-apps/${{ parameters.repoName }}.deleted
 
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
