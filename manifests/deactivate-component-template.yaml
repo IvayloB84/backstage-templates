@@ -46,6 +46,7 @@ spec:
       action: fetch:plain
       input:
         url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
+        targetPATH: '.'
 
     # STEP 2: Delete the specific folder locally in the Backstage workspace
     - id: wipe-tracking-node
