@@ -55,14 +55,6 @@ spec:
         files:
           - ./argocd-apps/${{ parameters.repoName }}
 
-    - id: publish-cleanup-branch
-      name: Push Deletion Tree to Feature Branch
-      action: publish:github
-      input:
-        repoUrl: 'github.com?owner=IvayloB84&branch=cleanup-remove-${{ parameters.repoName }}&repo=ArgoCD-RootApps'
-        gitCommitMessage: "infrastructure(lifecycle): decommission tracking manifold for ${{ parameters.repoName }}"
-        sourcePath: '.'
-
     - id: publish-cleanup-pr
       name: Submit Deactivation Pull Request for Admin Approval
       action: publish:github:pull-request
@@ -81,3 +73,4 @@ spec:
           1. Verify this component should be decommissioned.
           2. Merge this PR into main to permanently delete the folder.
           3. ArgoCD will instantly catch the merge and prune the cluster pods automatically.
+        createWhenEmpty: true
