@@ -103,9 +103,9 @@ spec:
           port: ${{ parameters.servicePort }}
           serviceType: ${{ parameters.serviceType }}
                  
-          runCommand: >
+          runCommand: >-
             ${{ ['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] | dump }}
-          runArgs: >
+          runArgs: >-
             ${{ ['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else [] | dump }}
 
           dbUser: ${{ parameters.dbUser or 'postgres' }}
