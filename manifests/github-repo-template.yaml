@@ -77,7 +77,7 @@ spec:
                 serviceType: { enum: [nginx] }
                 serviceImage: { type: string, default: "nginx:alpine" }
                 servicePort: { type: integer, default: 80 }
-                nginxMode: { type: string, default: standard-spa, enum: [standard-spa, reverse-proxy, static-assets] }
+                nginxMode: { type: string, default: "standard-spa", enum: ["standard-spa", "reverse-proxy", "static-assets"] }
               required: [serviceImage, servicePort, nginxMode]
 
   steps:
