@@ -9,10 +9,11 @@ spec:
   type: service
   
   parameters:
+    # 📑 PAGE 1: Identify Target Component to Deactivate
     - title: Identify Target Component to Deactivate
       required:
-      - repoName
-      - repoOwner
+        - repoName
+        - repoOwner
       properties:
         repoName:
           title: Component Repository Name
@@ -23,12 +24,13 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
+          
+    # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
       properties:
         confirmDestruction:
-          # Keep the title plain here so Backstage maps the internal variable safely
           title: "Infrastructure Destruction Authorization"
           type: boolean
           default: false
@@ -39,57 +41,62 @@ spec:
             <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
                WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
             </span>
+
   steps:
+    # 🎲 Step 0: CACHE BUSTER - Initialize task session token
+    - id: generate-uuid
+      name: Generating Unique Session Token
+      action: debug:log
+      input:
+        message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
+
+    # 📝 Step 1: Clone the centralized ArgoCD Root Apps repo
     - id: fetch-gitops-root
-      name: Pull Centralized ArgoCD Tracking Hub
+      name: Fetch Central ArgoCD Root Apps Repository
       action: fetch:plain
       input:
-        url: https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps
+        url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
 
-    - id: publish-cleanup-pr
-      name: Submit Deactivation Pull Request for Admin Approval
+    # 📁 Step 2: Wipe the targeted application folder generated during creation
+    - id: remove-manifests
+      name: Remove Component Manifest Directory
+      action: fs:delete
+      input:
+        files:
+          - ./argocd-apps/${{ parameters.repoName }}/
+
+    # 🚀 Step 3: Open a PR against the central repo using your token credentials
+    - id: create-pr
+      name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
-        targetBranchName: 'main'
-        branchName: "cleanup-remove-${{ parameters.repoName }}"
-        title: "PR-PURGE: Deactivate ${{ parameters.repoName }} Infrastructure"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branchName: purge/${{ parameters.repoName }}
+        title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
         description: |
-          # CRITICAL INFRASTRUCTURE DECOMMISSION REQUEST
+          ### ⚠️ Automated Component Deletion Request
+          This PR removes the tracking pointer configuration directory `./argocd-apps/${{ parameters.repoName }}/`.
           
-          ## Target Component: `${{ parameters.repoName }}`
-          
-          ### ADMINISTRATIVE VERIFICATION GATE
-          An automated request has been submitted to dismantle this component. Merging this Pull Request will trigger immediate background cleanup scripts.
-          
-          - [ ] **CONFIRMED**: The directory `argocd-apps/${{ parameters.repoName }}` will be deleted from the main branch.
-          - [ ] **CONFIRMED**: The external standalone repository `${{ parameters.repoName }}` will be permanently destroyed.
-          
-          ---
-          *To reject this destruction request, simply click **Close Pull Request**.*
-        sourcePath: '.'
+          **Expected Outcomes upon merging:**
+          * Argo CD auto-pruning triggers immediately.
+          * The parent Application resource inside the cluster is dropped.
+          * Cascading labels trigger a clean wipe of live pods, workloads, and services.
+        targetBranchName: main
+
+    # 💥 Step 4: Fully delete the target application repository from GitHub via native API proxy
+    - id: delete-source-repo
+      name: Delete Application Repository From GitHub
+      action: http:request
+      input:
+        method: DELETE
+        url: 'https://api.github.com/repos/${{ parameters.repoOwner }}/${{ parameters.repoName }}'
+        headers:
+          Accept: "application/vnd.github+json"
+          X-GitHub-Api-Version: "2022-11-28"
+          Authorization: "Bearer ${{ secrets.GITHUB_TOKEN }}"
 
   output:
     links:
-      - title: Review and Merge Deletion PR
-        url: ${{ steps['publish-cleanup-pr'].output.remoteUrl }}
-
-    # - id: publish-cleanup-pr
-    #   name: Submit Deactivation Pull Request for Admin Approval
-    #   action: publish:github:pull-request
-    #   input:
-    #     repoUrl: 'github.com?owner=IvayloB84&branch=cleanup-remove-${{ parameters.repoName }}&repo=ArgoCD-RootApps'  
-    #     title: "SECURE DEACTIVATION REQUEST: Purge tracking manifolds for ${{ parameters.repoName }}"
-    #     branchName: "cleanup-remove-${{ parameters.repoName }}"
-    #     sourcePath: '.'
-    #     description: |
-    #       ### System Infrastructure Lifecycle Request
-    #       This Pull Request was automatically generated by Backstage to request the formal deactivation of ${{ parameters.repoName }}.
-          
-    #       The live infrastructure remains 100% active and running on the cluster right now. 
-    #       To reject this destruction request, simply close this Pull Request.
-          
-    #       Reviewer Actions Required:
-    #       1. Verify this component should be decommissioned.
-    #       2. Merge this PR into main to permanently delete the folder.
-    #       3. ArgoCD will instantly catch the merge and prune the cluster pods automatically.
+      - title: Review Deletion Pull Request
+        url: ${{ steps['create-pr'].output.remoteUrl }}
