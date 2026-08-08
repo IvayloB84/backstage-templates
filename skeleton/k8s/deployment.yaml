@@ -45,17 +45,3 @@ spec:
               value: "${{ values.appEnv }}"
             - name: NGINX_ROUTING_PROFILE
               value: "${{ values.nginxMode }}"
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "${{ values.repoName }}"
-  labels:
-    app: "${{ values.repoName }}"
-spec:
-  ports:
-    - port: ${{ values.port }}
-      targetPort: ${{ values.port }}
-  selector:
-    app: "${{ values.repoName }}"
