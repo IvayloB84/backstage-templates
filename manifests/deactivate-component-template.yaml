@@ -59,15 +59,14 @@ spec:
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
         filesToDelete:
           - 'argocd-apps/${{ parameters.repoName }}/k8s/application.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
         description: |
           ### Automated Component Deletion Request
-          This PR cleanly removes the application and deployment manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
+          This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
           
           Expected Outcomes upon merging:
           * Argo CD auto-pruning triggers immediately.
           * Target pods, configurations, and folders are removed from the cluster.
-          * AUTOMATION TRIGGER: Merging this PR will automatically initiate developer repository deletion.
         targetBranchName: main
 
 
