@@ -60,6 +60,8 @@ spec:
         filesToDelete:
           - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
           - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
         description: |
           ### Automated Component Deletion Request
           This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
