@@ -43,57 +43,33 @@ spec:
             </span>
 
   steps:
-    # Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
       name: Generating Unique Session Token
       action: debug:log
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # Step 1: Securely clone the application's source repository codebase
-    - id: fetch-app-source
-      name: Fetch Application Codebase Repository
-      action: fetch:plain
-      input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}'
-
-    # Step 2: Overwrite the active catalog-info.yaml file with a decommissioned footprint.
-    - id: mark-deactivation
-      name: Write Application Decommissioning Definition
-      action: catalog:write
-      input:
-        filePath: './catalog-info.yaml'
-        entity:
-          apiVersion: backstage.io/v1alpha1
-          kind: Component
-          metadata:
-            name: ${{ parameters.repoName }}
-            description: "Freshly deactivated application."
-            annotations:
-              github.com/project-slug: "${{ parameters.repoOwner }}/${{ parameters.repoName }}"
-              status: "deactivated-via-backstage-runbook"
-          spec:
-            type: service
-            lifecycle: decommissioned
-            owner: "user:default/${{ parameters.repoOwner }}"
-
-    # Step 3: Open an Infrastructure Pull Request against the application repo to request teardown approval
     - id: create-pr
-      name: Generate Application Deactivation Pull Request
+      name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        title: "fix(lifecycle): decommission component anchors for ${{ parameters.repoName }}"
+        title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
+        filesToDelete:
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/application.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
         description: |
-          ### Automated Component Deactivation Request
-          This PR modifies the `catalog-info.yaml` descriptor file to flag this repository as decommissioned.
+          ### Automated Component Deletion Request
+          This PR cleanly removes the application and deployment manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
           
           Expected Outcomes upon merging:
-          * The 'argocd/app-name' label tag tracking link is stripped out.
-          * The parent Application controller breaks synchronization, initiating a full live pod purge from the cluster.
+          * Argo CD auto-pruning triggers immediately.
+          * Target pods, configurations, and folders are removed from the cluster.
+          * AUTOMATION TRIGGER: Merging this PR will automatically initiate developer repository deletion.
         targetBranchName: main
+
 
   output:
     links:
