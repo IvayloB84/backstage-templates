@@ -58,7 +58,7 @@ spec:
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
         filesToDelete:
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/application.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
           - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
         description: |
           ### Automated Component Deletion Request
