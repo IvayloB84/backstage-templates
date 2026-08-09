@@ -59,6 +59,7 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
+        empty: true
         sourcePath: './empty-directory-placeholder'
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
         description: |
