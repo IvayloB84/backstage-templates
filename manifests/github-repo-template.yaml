@@ -133,17 +133,17 @@ spec:
         gitAuthorName: "IvayloB84"
         gitAuthorEmail: "scaffolder@localhost"
 
-    # 🔗 Step 2B: Instantly wire up your ngrok proxy link
-    - id: create-webhook
-      name: Link Developer Repo to ArgoCD Webhook
-      action: github:webhook
-      input:
-        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
-        webhookUrl: 'https://reason-ricotta-clicker.ngrok-free.dev/api/webhook'
-        contentType: 'json'
-        events:
-          - push
-        token: ${{ secrets.GITHUB_TOKEN }}
+    # # 🔗 Step 2B: Instantly wire up your ngrok proxy link
+    # - id: create-webhook
+    #   name: Link Developer Repo to ArgoCD Webhook
+    #   action: github:webhook
+    #   input:
+    #     repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+    #     webhookUrl: 'https://reason-ricotta-clicker.ngrok-free.dev/api/webhook'
+    #     contentType: 'json'
+    #     events:
+    #       - push
+    #     token: ${{ secrets.GITHUB_TOKEN }}
 
     # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
     - id: append-to-roster
