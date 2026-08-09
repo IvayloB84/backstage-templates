@@ -57,20 +57,21 @@ spec:
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
 
-    # 🪦 Step 2: Write a lifecycle tombstone marker to bypass the empty workspace PR bug
-    # This generates a file changes footprint so publish:github:pull-request won't register 0 files
-    - id: mark-deactivation
-      name: Generate GitOps Infrastructure Tombstone Marker
+    # 🪦 Step 2: Overwrite the layout to trigger a real Git deletion/modification diff
+    - id: write-deactivation-manifest
+      name: Generate Structural Deactivation Instruction
       action: catalog:write
       input:
-        filePath: './argocd-apps/${{ parameters.repoName }}/.tombstone'
+        filePath: './deactivation-requests/${{ parameters.repoName }}.yaml'
         entity:
-          apiVersion: scaffolder.backstage.io/v1beta3
-          kind: ComponentLifecycle
+          apiVersion: gitops.lifecycle.io/v1alpha1
+          kind: DeactivationRequest
           metadata:
             name: ${{ parameters.repoName }}
-            status: deactivated
-            timestamp: '${{ steps["generate-uuid"].output.timestamp }}'
+            owner: ${{ parameters.repoOwner }}
+          spec:
+            targetDirectory: 'argocd-apps/${{ parameters.repoName }}'
+            action: PERMANENT_OBLITERATION
 
     # 🚀 Step 3: Open a PR against the central repo using your token credentials
     - id: create-pr
@@ -80,15 +81,15 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
+        title: "DANGER: Formal Deactivation Request for ${{ parameters.repoName }}"
         description: |
-          ### ⚠️ Automated Component Deletion Request
-          This PR removes the tracking pointer configuration directory `./argocd-apps/${{ parameters.repoName }}/`.
+          ### ⚠️ Automated Component Deletion Gate
+          Merging this Pull Request will trigger a cascading architectural cleanup.
           
-          **Expected Outcomes upon merging:**
-          * Argo CD auto-pruning triggers immediately.
-          * The parent Application resource inside the cluster is dropped.
-          * Cascading labels trigger a clean wipe of live pods, workloads, and services.
+          **Automated Operations on Merge:**
+          1. The folder `argocd-apps/${{ parameters.repoName }}/` will be permanently deleted from Git history.
+          2. Argo CD will instantly catch the deletion, drop the cluster configuration object, and terminate all active live pods.
+          3. The standalone application repository `IvayloB84/${{ parameters.repoName }}` will be deleted from GitHub via REST API.
         targetBranchName: main
 
   output:
