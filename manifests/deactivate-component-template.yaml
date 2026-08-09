@@ -57,26 +57,18 @@ spec:
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
 
-    # 🪦 Step 2: Overwrite the layout to trigger a real Git deletion/modification diff
-    - id: write-deactivation-manifest
-      name: Generate Structural Deactivation Instruction
-      action: catalog:write
+    # 📁 Step 2: Delete the local application directory out of the scratch workspace
+    - id: remove-manifests
+      name: Remove Component Manifest Directory
+      action: fs:delete
       input:
-        filePath: './deactivation-requests/${{ parameters.repoName }}.yaml'
-        entity:
-          apiVersion: gitops.lifecycle.io/v1alpha1
-          kind: DeactivationRequest
-          metadata:
-            name: ${{ parameters.repoName }}
-            owner: ${{ parameters.repoOwner }}
-          spec:
-            targetDirectory: 'argocd-apps/${{ parameters.repoName }}'
-            action: PERMANENT_OBLITERATION
+        files:
+          - ./argocd-apps/${{ parameters.repoName }}/
 
     # 🚀 Step 3: Open a PR against the central repo using your token credentials
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
-      action: publish:github:pull-request
+      action: publish:github:pull-request:git
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
