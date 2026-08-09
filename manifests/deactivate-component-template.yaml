@@ -53,7 +53,7 @@ spec:
       name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
       input:
-        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
