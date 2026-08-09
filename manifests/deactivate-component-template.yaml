@@ -56,7 +56,6 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        # Changed commit title formatting slightly to match what your GitHub Action expects to parse
         title: "purge/${{ parameters.repoName }} remove tracking infrastructure anchor"
         filesToDelete:
           - 'argocd-apps/${{ parameters.repoName }}.yaml'  
