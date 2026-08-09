@@ -57,23 +57,33 @@ spec:
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
 
-    # 📁 Step 2: Delete the local application directory out of the scratch workspace
-    - id: remove-manifests
-      name: Remove Component Manifest Directory
-      action: fs:delete
+    # 🪦 Step 2: Overwrite the active manifest with a plain, disabled marker configuration.
+    # This modifies the file directly, generating a clear, auditable Git modification diff.
+    - id: mark-deactivation
+      name: Write Application Decommissioning Definition
+      action: catalog:write
       input:
-        files:
-          - ./argocd-apps/${{ parameters.repoName }}/
+        filePath: './argocd-apps/${{ parameters.repoName }}/k8s/app.yaml'
+        entity:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: ${{ parameters.repoName }}-deactivated
+            namespace: default
+            annotations:
+              status: "deactivated-via-backstage-runbook"
+          data:
+            message: "This infrastructure module has been officially decommissioned."
 
     # 🚀 Step 3: Open a PR against the central repo using your token credentials
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
-      action: publish:github:pull-request:git
+      action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        title: "DANGER: Formal Deactivation Request for ${{ parameters.repoName }}"
+        title: "fix(gitops): decommission infrastructure folder for ${{ parameters.repoName }}"
         description: |
           ### ⚠️ Automated Component Deletion Gate
           Merging this Pull Request will trigger a cascading architectural cleanup.
