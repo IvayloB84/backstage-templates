@@ -50,46 +50,25 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Clone the centralized ArgoCD Root Apps repo
-    - id: fetch-gitops-root
-      name: Fetch Central ArgoCD Root Apps Repository
-      action: fetch:plain
-      input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
-
-
-    # 📁 Step 2: Delete the local application directory out of the scratch workspace
-    - id: remove-manifests
-      name: Remove Component Manifest Directory
-      action: fs:delete
-      input:
-        files:
-          - ./argocd-apps/${{ parameters.repoName }}/
-
-    # 🚀 Step 3: Push the empty workspace state to a brand new remote branch
-    - id: push-deletion-branch
-      name: Push Deletion Branch to GitHub
-      action: publish:github
-      input:
-        repoUrl: 'github.com?owner=${{ parameters.repoOwner }}&repo=ArgoCD-RootApps&branch=purge/${{ parameters.repoName }}'
-        token: ${{ secrets.GITHUB_TOKEN }}
-        defaultBranch: main
-        sourcePath: '.'
-        gitCommitMessage: "cleanup(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
-        gitAuthorName: "IvayloB84"
-        gitAuthorEmail: "scaffolder@localhost"
-
-    # 🚀 Step 3: Open a PR against the central repo using your token credentials
+    # 🚀 Open a PR against the central repo using your token credentials
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
-      action: github:pull-request:create
+      action: publish:github:pull-request
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
-        targetBranchName: main
-        sourceBranchName: purge/${{ parameters.repoName }}
+        branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
-        description: "Automated configuration cleanup."
+        sourcePath: './empty-directory-placeholder'
+        targetPath: 'argocd-apps/${{ parameters.repoName }}'
+        description: |
+          ### Automated Component Deletion Request
+          This PR completely removes the configuration directory `./argocd-apps/${{ parameters.repoName }}/`.
+          
+          Expected Outcomes upon merging:
+          * Argo CD auto-pruning triggers immediately.
+          * Target pods, configurations, and folders are removed from the cluster.
+        targetBranchName: main
 
   output:
     links:
