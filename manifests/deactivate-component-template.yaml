@@ -50,53 +50,49 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # Step 1: Clone your central cluster configuration repository
-    - id: fetch-gitops-root
-      name: Fetch Central ArgoCD Root Apps Repository
+    # Step 1: Securely clone the application's source repository codebase
+    - id: fetch-app-source
+      name: Fetch Application Codebase Repository
       action: fetch:plain
       input:
-        url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
+        url: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}'
 
-    # Step 2: Use the standard shell runner to execute native Git tree-destruction utilities
-    - id: git-purge-execution
-      name: Execute Pure Structural Git Directory Erasure
-      action: backstage:shell:execute
+    # Step 2: Overwrite the active catalog-info.yaml file with a decommissioned footprint.
+    - id: mark-deactivation
+      name: Write Application Decommissioning Definition
+      action: catalog:write
       input:
-        command: |
-          git config --global user.name "Backstage Platform Automation"
-          git config --global user.email "platform-engineering@localhost"
-          
-          git checkout -b purge/${{ parameters.repoName }}
-          
-          if [ -d "./argocd-apps/${{ parameters.repoName }}" ]; then
-            git rm -rf ./argocd-apps/${{ parameters.repoName }}
-            
-            git commit -m "cleanup(gitops): permanently purge infrastructure folder for ${{ parameters.repoName }}"
-            
-            # FIXED: Syntax error removed. Replaced '@://github.com{{' with '@github.com/${{'
-            git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps.git purge/${{ parameters.repoName }} --force
-          else
-            echo "Target tracking layout directory was not discovered in this workspace scope."
-            exit 1
-          fi
+        filePath: './catalog-info.yaml'
+        entity:
+          apiVersion: backstage.io/v1alpha1
+          kind: Component
+          metadata:
+            name: ${{ parameters.repoName }}
+            description: "Freshly deactivated application."
+            annotations:
+              github.com/project-slug: "${{ parameters.repoOwner }}/${{ parameters.repoName }}"
+              status: "deactivated-via-backstage-runbook"
+          spec:
+            type: service
+            lifecycle: decommissioned
+            owner: "user:default/${{ parameters.repoOwner }}"
 
-    # Step 3: Wrap that newly pushed feature branch into a clean administrative Pull Request
+    # Step 3: Open an Infrastructure Pull Request against the application repo to request teardown approval
     - id: create-pr
-      name: Generate GitOps Deletion Pull Request
+      name: Generate Application Deactivation Pull Request
       action: publish:github:pull-request
       input:
-        # FIXED: Changed from standard web URL to the mandatory Backstage query-string schema
-        repoUrl: 'github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
+        title: "fix(lifecycle): decommission component anchors for ${{ parameters.repoName }}"
         description: |
-          ### Automated Component Deletion Request
-          This PR completely removes the configuration directory `./argocd-apps/${{ parameters.repoName }}/`.
+          ### Automated Component Deactivation Request
+          This PR modifies the `catalog-info.yaml` descriptor file to flag this repository as decommissioned.
           
           Expected Outcomes upon merging:
-          * Argo CD auto-pruning triggers immediately.
-          * Target pods, configurations, and folders are removed from the cluster.
+          * The 'argocd/app-name' label tag tracking link is stripped out.
+          * The parent Application controller breaks synchronization, initiating a full live pod purge from the cluster.
         targetBranchName: main
 
   output:
