@@ -88,7 +88,7 @@ spec:
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Render skeleton files into an isolated directory for the application codebase repository
+    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
@@ -118,7 +118,7 @@ spec:
           memRequest: ${{ parameters.memRequest or '16Mi' }}
           memLimit: ${{ parameters.memLimit or '32Mi' }}
 
-    # 🚀 Step 2: Publishes the isolated app folder safely to GitHub as a fresh repo
+    # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
       name: Provision Production Repository on GitHub and Stamp GitOps Topics
       action: publish:github
@@ -133,6 +133,18 @@ spec:
         gitAuthorName: "IvayloB84"
         gitAuthorEmail: "scaffolder@localhost"
 
+    # 🔗 Step 2B: Instantly wire up your Cloudflare Quick Tunnel link
+    - id: create-webhook
+      name: Link Developer Repo to ArgoCD Webhook
+      action: github:webhook
+      input:
+        repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
+        webhookUrl: 'https://receive-correction-property-diagram.trycloudflare.com'
+        contentType: 'json'
+        events:
+          - push
+        token: ${{ secrets.GITHUB_TOKEN }}
+
     # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
     - id: append-to-roster
       name: Submit Automated Deployment Manifest to Central GitOps Hub
@@ -143,8 +155,8 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: './k8s'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}/k8s'
+        sourcePath: './argocd-app.yaml'
+        targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
     - id: wait-for-github
