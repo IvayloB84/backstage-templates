@@ -1,4 +1,4 @@
-apiVersion: scaffolder.backstage.io/v1beta3
+apiVersion: scarcaffold.backstage.io/v1beta3
 kind: Template
 metadata:
   name: deactivate-component-template
@@ -56,22 +56,18 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
+        # Changed commit title formatting slightly to match what your GitHub Action expects to parse
+        title: "purge/${{ parameters.repoName }} remove tracking infrastructure anchor"
         filesToDelete:
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/application.yaml'  
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'       
-          - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}.yaml'  
         description: |
           ### Automated Component Deletion Request
-          This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
+          This PR cleanly removes the application mapping tracking anchor at `argocd-apps/${{ parameters.repoName }}.yaml`.
           
           Expected Outcomes upon merging:
-          * Argo CD auto-pruning triggers immediately.
-          * Target pods, configurations, and folders are removed from the cluster.
+          * Argo CD single root tracking webhook proxy fires instantly.
+          * Target pods, configurations, and isolated components cascade delete from k8s natively.
         targetBranchName: main
-
 
   output:
     links:
