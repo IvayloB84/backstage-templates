@@ -84,14 +84,15 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): decommission infrastructure folder for ${{ parameters.repoName }}"
+        # 🌟 THE MANDATORY ADDITION: Force GitHub to calculate the true folder deletion diff
+        updateMethod: 'REPLACE'
         description: |
-          ### ⚠️ Automated Component Deletion Gate
-          Merging this Pull Request will trigger a cascading architectural cleanup.
+          ### ⚠️ Automated Component Deactivation Request
+          This PR replaces the active infrastructure pointer files with a deactivation tracking asset.
           
-          **Automated Operations on Merge:**
-          1. The folder `argocd-apps/${{ parameters.repoName }}/` will be permanently deleted from Git history.
-          2. Argo CD will instantly catch the deletion, drop the cluster configuration object, and terminate all active live pods.
-          3. The standalone application repository `IvayloB84/${{ parameters.repoName }}` will be deleted from GitHub via REST API.
+          **Expected Outcomes upon merging:**
+          * Argo CD auto-pruning triggers immediately.
+          * The active application definition is removed, automatically terminating live cluster workloads.
         targetBranchName: main
 
   output:
