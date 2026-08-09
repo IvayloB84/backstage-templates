@@ -57,43 +57,39 @@ spec:
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
 
-    # 🪦 Step 2: Overwrite the active manifest with a plain, disabled marker configuration.
-    # This modifies the file directly, generating a clear, auditable Git modification diff.
-    - id: mark-deactivation
-      name: Write Application Decommissioning Definition
-      action: catalog:write
+
+    # 📁 Step 2: Delete the local application directory out of the scratch workspace
+    - id: remove-manifests
+      name: Remove Component Manifest Directory
+      action: fs:delete
       input:
-        filePath: './argocd-apps/${{ parameters.repoName }}/k8s/app.yaml'
-        entity:
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            name: ${{ parameters.repoName }}-deactivated
-            namespace: default
-            annotations:
-              status: "deactivated-via-backstage-runbook"
-          data:
-            message: "This infrastructure module has been officially decommissioned."
+        files:
+          - ./argocd-apps/${{ parameters.repoName }}/
+
+    # 🚀 Step 3: Push the empty workspace state to a brand new remote branch
+    - id: push-deletion-branch
+      name: Push Deletion Branch to GitHub
+      action: publish:github
+      input:
+        repoUrl: 'github.com?owner=${{ parameters.repoOwner }}&repo=ArgoCD-RootApps&branch=purge/${{ parameters.repoName }}'
+        token: ${{ secrets.GITHUB_TOKEN }}
+        defaultBranch: main
+        sourcePath: '.'
+        gitCommitMessage: "cleanup(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
+        gitAuthorName: "IvayloB84"
+        gitAuthorEmail: "scaffolder@localhost"
 
     # 🚀 Step 3: Open a PR against the central repo using your token credentials
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
-      action: publish:github:pull-request
+      action: github:pull-request:create
       input:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
-        branchName: purge/${{ parameters.repoName }}
-        title: "fix(gitops): decommission infrastructure folder for ${{ parameters.repoName }}"
-        # 🌟 THE MANDATORY ADDITION: Force GitHub to calculate the true folder deletion diff
-        updateMethod: 'REPLACE'
-        description: |
-          ### ⚠️ Automated Component Deactivation Request
-          This PR replaces the active infrastructure pointer files with a deactivation tracking asset.
-          
-          **Expected Outcomes upon merging:**
-          * Argo CD auto-pruning triggers immediately.
-          * The active application definition is removed, automatically terminating live cluster workloads.
         targetBranchName: main
+        sourceBranchName: purge/${{ parameters.repoName }}
+        title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
+        description: "Automated configuration cleanup."
 
   output:
     links:
