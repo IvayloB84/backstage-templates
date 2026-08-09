@@ -57,13 +57,20 @@ spec:
       input:
         url: 'https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps'
 
-    # 📁 Step 2: Wipe the targeted application folder generated during creation
-    - id: remove-manifests
-      name: Remove Component Manifest Directory
-      action: fs:delete
+    # 🪦 Step 2: Write a lifecycle tombstone marker to bypass the empty workspace PR bug
+    # This generates a file changes footprint so publish:github:pull-request won't register 0 files
+    - id: mark-deactivation
+      name: Generate GitOps Infrastructure Tombstone Marker
+      action: catalog:write
       input:
-        files:
-          - ./argocd-apps/${{ parameters.repoName }}/
+        filePath: './argocd-apps/${{ parameters.repoName }}/.tombstone'
+        entity:
+          apiVersion: scaffolder.backstage.io/v1beta3
+          kind: ComponentLifecycle
+          metadata:
+            name: ${{ parameters.repoName }}
+            status: deactivated
+            timestamp: '${{ steps["generate-uuid"].output.timestamp }}'
 
     # 🚀 Step 3: Open a PR against the central repo using your token credentials
     - id: create-pr
@@ -83,18 +90,6 @@ spec:
           * The parent Application resource inside the cluster is dropped.
           * Cascading labels trigger a clean wipe of live pods, workloads, and services.
         targetBranchName: main
-
-    # 💥 Step 4: Fully delete the target application repository from GitHub via native API proxy
-    - id: delete-source-repo
-      name: Delete Application Repository From GitHub
-      action: http:request
-      input:
-        method: DELETE
-        url: 'https://api.github.com/repos/${{ parameters.repoOwner }}/${{ parameters.repoName }}'
-        headers:
-          Accept: "application/vnd.github+json"
-          X-GitHub-Api-Version: "2022-11-28"
-          Authorization: "Bearer ${{ secrets.GITHUB_TOKEN }}"
 
   output:
     links:
