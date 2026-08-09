@@ -34,6 +34,7 @@ spec:
           title: "Infrastructure Destruction Authorization"
           type: boolean
           default: false
+          const: true
       uiSchema:
         confirmDestruction:
           ui:widget: "checkbox"
