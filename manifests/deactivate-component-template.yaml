@@ -50,7 +50,7 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 🚀 Open a PR against the central repo using your token credentials
+    # Open a PR against the central repo using your token credentials
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
@@ -59,9 +59,8 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure folder for ${{ parameters.repoName }}"
-        empty: true
-        sourcePath: './empty-directory-placeholder'
-        targetPath: 'argocd-apps/${{ parameters.repoName }}'
+        filesToDelete:
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/app.yaml'
         description: |
           ### Automated Component Deletion Request
           This PR completely removes the configuration directory `./argocd-apps/${{ parameters.repoName }}/`.
