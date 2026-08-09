@@ -139,7 +139,7 @@ spec:
       action: github:webhook
       input:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
-        webhookUrl: 'https://reason-ricotta-clicker.ngrok-free.dev/api/webhook/'
+        webhookUrl: 'https://reason-ricotta-clicker.ngrok-free.dev/api/webhook'
         contentType: 'json'
         events:
           - push
