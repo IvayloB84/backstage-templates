@@ -155,8 +155,12 @@ spec:
         branchName: 'infra/add-${{ parameters.repoName }}'      
         title: "infra: register new service ${{ parameters.repoName }}"
         description: "Automated configuration generation from the software scaffold portal."        
-        sourcePath: 'argocd-app.yaml'
+        sourcePath: '.'
         targetPath: 'argocd-apps/${{ parameters.repoName }}.yaml'
+
+        files:
+          - source: 'argocd-app.yaml'
+            target: '${{ parameters.repoName }}.yaml'
 
     # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
     - id: wait-for-github
