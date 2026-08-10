@@ -9,8 +9,35 @@ spec:
   type: service
   
   parameters:
-    # PAGE 1: Identify Target Component to Deactivate
+    # 📑 TWO-WAY ROUTING SYSTEM:
+    # The engine evaluates pages in sequence. 
+    # If the URL button click provides repoName, Page 1A activates and greys out.
+    # If opened manually, repoName is empty, so Page 1A is skipped and Page 1B loads blank!
+
+    # 🔒 PAGE 1A: Activated via URL link click (Automated Mode)
     - title: Identify Target Component to Deactivate
+      # This page only triggers if repoName has a preset string injected via formData
+      if: ${{ parameters.repoName }}
+      required:
+        - repoName
+        - repoOwner
+      properties:
+        repoName:
+          title: Component Repository Name
+          type: string
+        repoOwner:
+          title: Repository Owner
+          type: string
+          default: IvayloB84
+          description: Your GitHub organization or personal profile username
+      uiSchema:
+        repoName:
+          ui:disabled: true
+
+    # 🔓 PAGE 1B: Activated via direct template navigation (Manual Mode)
+    - title: Identify Target Component to Deactivate
+      # This page triggers only if the user arrives manually and repoName is completely empty
+      if: ${{ not parameters.repoName }}
       required:
         - repoName
         - repoOwner
@@ -25,16 +52,7 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      uiSchema:
-        repoName:
-          # The exact form engine syntax: checks if a string exists on page load.
-          # If a value comes via URL (Test 1), it greys out and locks the text box.
-          # If opened manually (Test 2), it stays false, leaving it open for typing.
-          ui:options:
-            readonly:
-              "==": [{"var": "formData.repoName"}, ""]
-              negate: true
-
+    # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
