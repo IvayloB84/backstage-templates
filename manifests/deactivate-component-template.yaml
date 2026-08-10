@@ -9,15 +9,14 @@ spec:
   type: service
   
   parameters:
-    # 📑 PAGE 1: Identify Target Component to Deactivate
     - title: Identify Target Component to Deactivate
       required:
         - repoName
         - repoOwner
       properties:
         isPreset:
-          type: boolean
-          default: false
+          type: tring
+          default: "false"
         repoName:
           title: Component Repository Name
           type: string
@@ -31,10 +30,18 @@ spec:
         isPreset:
           oneOf:
             - properties:
+                isPreset:
+                  enum: ["true"]
+                repoName:
+                  type: string
+                  readOnly: true
+            - properties:
+                isPreset:
+                  enum: ["false"]
       uiSchema:
         isPreset:
-          ui:options:
-            widget: hidden
+          ui:widget: hidden
+          ui:title: ""
           
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
