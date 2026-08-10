@@ -26,9 +26,7 @@ spec:
           description: Your GitHub organization or personal profile username
       uiSchema:
         repoName:
-          ui:backstage:disabled:
-            if:
-              exists: true
+          ui:disabled: ${{ true if parameters.repoName else false }}
           
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
