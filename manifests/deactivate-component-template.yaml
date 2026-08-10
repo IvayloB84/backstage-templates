@@ -8,9 +8,8 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
-
   parameters:
-    # PAGE 1: Target Identification
+    # PAGE 1: Identify Target Component
     - title: Identify Target Component to Deactivate
       required:
         - repoName
@@ -20,20 +19,19 @@ spec:
           title: Component Repository Name
           type: string
           description: Select or verify the application component item to remove.
+          # Natively extracts the value from your original button's template_args payload
+          default: ${{ template_args.repoName }}
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Enforces the native greyed-out visual layout immediately on load
       uiSchema:
         repoName:
-          ui:field: EntityNamePicker
-          ui:options:
-            allowedKinds:
-              - Component
-          ui:disabled: true
+          ui:autofocus: true
+          # This forces Backstage to display the field as locked and greyed-out instantly
+          ui:readonly: true
 
     # PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
@@ -49,10 +47,9 @@ spec:
       uiSchema:
         confirmDestruction:
           ui:widget: "checkbox"
-          # Fixed: Replaced dangerous HTML span text with secure standard Markdown alerts to bypass CSP blocks
           ui:description: |
             ### ⚠️ WARNING
-            I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
+            I explicitly authorize the total destruction of this component 
 
   steps:
     - id: generate-uuid
