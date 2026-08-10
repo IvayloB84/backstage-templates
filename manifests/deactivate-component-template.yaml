@@ -26,10 +26,8 @@ spec:
           description: Your GitHub organization or personal profile username
       uiSchema:
         repoName:
-          ui:options:
-            readonly:
-              and:
-                - "!!{{ values.repoName }}"
+            "not":
+              "==": ["", {"var": "formData.repoName"}]
           
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
