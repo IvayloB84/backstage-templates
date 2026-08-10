@@ -8,32 +8,30 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
-
-
-
   parameters:
-    # PAGE 1: Target Identification
     - title: Identify Target Component to Deactivate
       required:
-        - targetRepoName
+        - repoName
         - repoOwner
       properties:
-        targetRepoName:
+        repoName:
           title: Component Repository Name
           type: string
-          description: Select or verify the application component item to remove.
-          # Explicitly maps data from the updated template_args layout key
-          default: ${{ template_args.targetRepoName }}
+          description: Verify the active application component item to remove.
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Forces the form engine to visually lock the input field in grey
+      # Syntax Fix: Swapped EntityPicker for EntityNamePicker to pass clean strings to steps
       uiSchema:
-        targetRepoName:
-          ui:autofocus: true
+        repoName:
+          ui:field: EntityNamePicker
+          ui:options:
+            allowedKinds:
+              - Component
+            defaultKind: Component
           ui:disabled: true
 
     # PAGE 2: Corporate Safety Gate
@@ -50,7 +48,6 @@ spec:
       uiSchema:
         confirmDestruction:
           ui:widget: "checkbox"
-          # Fixed: Replaced dangerous HTML span text with secure standard Markdown alerts to bypass CSP blocks
           ui:description: |
             ### ⚠️ WARNING
             I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
