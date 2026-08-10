@@ -26,11 +26,14 @@ spec:
           description: Your GitHub organization or personal profile username
 
       uiSchema:
-        # THE FIX: If repoName is injected by the URL, lock it. If empty, let me type.
         repoName:
-          ui:disabled:
-            "==": [{ "var": "formData.repoName" }, ""]
-            negate: true
+          # This instructs the form wrapper to dynamically evaluate if data was loaded.
+          # If formData has an active value (Test 1), it locks it down immediately.
+          # If empty (Test 2), it evaluates to false, leaving it open for manual typing!
+          ui:options:
+            readonly:
+              not:
+                empty: "formData.repoName"
 
     - title: Corporate Safety Gate
       required:
