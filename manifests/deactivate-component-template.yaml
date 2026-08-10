@@ -10,28 +10,29 @@ spec:
 
 
 
+
   parameters:
     # PAGE 1: Target Identification
     - title: Identify Target Component to Deactivate
       required:
-        - repoName
+        - targetRepoName
         - repoOwner
       properties:
-        repoName:
+        targetRepoName:
           title: Component Repository Name
           type: string
           description: Select or verify the application component item to remove.
-          # Explicitly extracts data from your original App.tsx template_args structure
-          default: ${{ template_args.repoName }}
+          # Explicitly maps data from the updated template_args layout key
+          default: ${{ template_args.targetRepoName }}
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Static uiSchema property configuration forces the visual freeze state instantly on load
+      # Forces the form engine to visually lock the input field in grey
       uiSchema:
-        repoName:
+        targetRepoName:
           ui:autofocus: true
           ui:disabled: true
 
