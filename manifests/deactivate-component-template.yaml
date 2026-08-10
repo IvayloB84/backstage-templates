@@ -8,7 +8,6 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
-
   parameters:
     - title: Identify Target Component to Deactivate
       required:
@@ -19,33 +18,20 @@ spec:
           title: Component Repository Name
           type: string
           description: Enter the exact lowercase name of the application folder to remove.
-          # Native Backstage token injection extracts the active workspace component context on page load
-          default: ${{ entity.metadata.name }} 
+          # Explicitly inherits the data from template_args, or defaults to an empty string if manual
+          default: ${{ template_args.repoName or "" }}
         repoOwner:
           title: Repository Owner
           type: string
-          default: IvayloB84
+          default: ${{ template_args.repoOwner or "IvayloB84" }}
           description: Your GitHub organization or personal profile username
 
-      # Locks the field dynamically by checking if the input value has text characters
-      dependencies:
-        repoName:
-          oneOf:
-            - properties:
-                repoName:
-                  type: string
-                  minLength: 1 # Condition matches when entity context is injected successfully
-              uiSchema:
-                repoName:
-                  ui:disabled: true # Greys out the text block immediately on your screen
-            - properties:
-                repoName:
-                  type: string
-                  maxLength: 0 # Fallback default matches direct user navigation
-
+      # Controls the visual representation natively without glitchy dependency blocks
       uiSchema:
         repoName:
           ui:autofocus: true
+          # This forces Backstage to display the field as greyed-out/locked instantly if pre-filled
+          ui:readonly: true 
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
