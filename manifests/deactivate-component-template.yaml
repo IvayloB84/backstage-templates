@@ -8,7 +8,9 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
+
   parameters:
+    # PAGE 1: Target Identification (Populates component name and greys out)
     - title: Identify Target Component to Deactivate
       required:
         - repoName
@@ -18,17 +20,19 @@ spec:
           title: Component Repository Name
           type: string
           description: Select or verify the application component item to remove.
+          # Resolves values delivered from your original button's template_args string payload
+          default: ${{ template_args.repoName }}
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Unified schema handling. No dynamic token substitution text or dependencies.
       uiSchema:
         repoName:
           ui:autofocus: true
-          ui:disabled: true
+          # This forces Backstage 1.52 to natively render the field as locked and greyed-out
+          ui:disabled: true 
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
