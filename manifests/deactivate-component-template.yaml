@@ -25,15 +25,9 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      allOf:
-        - if:
-            properties:
-              repoName:
-                pattern: '^.+$'
-          then:
-            properties:
-              repoName:
-                readOnly: true
+      uiSchema:
+        repoName:
+          ui:disabled: ${{ true if parameters.repoName else false }}
 
     - title: Corporate Safety Gate
       required:
