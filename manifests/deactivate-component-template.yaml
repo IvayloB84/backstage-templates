@@ -15,6 +15,9 @@ spec:
         - repoName
         - repoOwner
       properties:
+        isPreset:
+          type: boolean
+          default: false
         repoName:
           title: Component Repository Name
           type: string
@@ -24,11 +27,18 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
-      uiSchema:
-        repoName:
-          ui:disabled:
-            "==": [{"var": "formData.repoName"}, ""]
-            "negate": true
+      dependencies:
+        isPreset:
+          oneOf:
+            - properties:
+                isPreset:
+                  enum: [true]
+                repoName:
+                  type: string
+                  readOnly: true
+            - properties:
+                isPreset:
+                  enum: [false]
           
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
