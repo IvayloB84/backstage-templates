@@ -26,15 +26,10 @@ spec:
           description: Your GitHub organization or personal profile username
       uiSchema:
         repoName:
-          # 🔮 THE DYNAMIC FIX: 
-          # This checks if formData.repoName has a value. 
-          # If it does (from the button click), it locks it. If it's empty (manual navigation), it stays open!
           ui:options:
             readonly:
-              ===:
-                - "#/formData/repoName"
-                - ""
-              negate: true
+              and:
+                - "!!{{ values.repoName }}"
           
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
