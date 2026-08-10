@@ -25,10 +25,7 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      uiSchema:
-        repoName:
-          ui:disabled: ${{ true if parameters.repoName else false }}
-
+    # PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
@@ -39,13 +36,17 @@ spec:
           default: false
           enum:
             - true
-      uiSchema:
-        confirmDestruction:
-          ui:widget: "checkbox"
-          ui:description: |
-            <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
-               WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
-            </span>
+
+  # This root-level uiSchema correctly locks your parameters without breaking page schemas!
+  uiSchema:
+    repoName:
+      ui:disabled: ${{ true if parameters.repoName else false }}
+    confirmDestruction:
+      ui:widget: "checkbox"
+      ui:description: |
+        <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
+           WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
+        </span>
 
   steps:
     - id: generate-uuid
