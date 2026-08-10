@@ -7,37 +7,10 @@ metadata:
 spec:
   owner: user:default/IvayloB84
   type: service
-  
+
+
   parameters:
-    # 📑 TWO-WAY ROUTING SYSTEM:
-    # The engine evaluates pages in sequence. 
-    # If the URL button click provides repoName, Page 1A activates and greys out.
-    # If opened manually, repoName is empty, so Page 1A is skipped and Page 1B loads blank!
-
-    # 🔒 PAGE 1A: Activated via URL link click (Automated Mode)
     - title: Identify Target Component to Deactivate
-      # This page only triggers if repoName has a preset string injected via formData
-      if: ${{ parameters.repoName }}
-      required:
-        - repoName
-        - repoOwner
-      properties:
-        repoName:
-          title: Component Repository Name
-          type: string
-        repoOwner:
-          title: Repository Owner
-          type: string
-          default: IvayloB84
-          description: Your GitHub organization or personal profile username
-      uiSchema:
-        repoName:
-          ui:disabled: true
-
-    # 🔓 PAGE 1B: Activated via direct template navigation (Manual Mode)
-    - title: Identify Target Component to Deactivate
-      # This page triggers only if the user arrives manually and repoName is completely empty
-      if: ${{ not parameters.repoName }}
       required:
         - repoName
         - repoOwner
@@ -51,6 +24,36 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
+        isAutomated:
+          type: boolean
+          default: false
+          title: Automated Trigger
+          description: Internal flag used to toggle read-only states
+
+      # UI Schema conditions control visibility and interactivity
+      uiSchema:
+        # Hide the system boolean flag so users don't see it on the form
+        isAutomated:
+          ui:widget: hidden
+
+        # Apply conditional rules dynamically to repoName based on the state of isAutomated
+        repoName:
+          ui:options:
+            dependencies:
+              isAutomated:
+                oneOf:
+                  - properties:
+                      isAutomated:
+                        enum: [true]
+                    uiSchema:
+                      # If isAutomated is true (clicked via button), disable typing
+                      ui:disabled: true
+                  - properties:
+                      isAutomated:
+                        enum: [false]
+                    uiSchema:
+                      # If false (direct navigation), keep it fully active
+                      ui:disabled: false
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
@@ -87,15 +90,15 @@ spec:
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
         filesToDelete:
-          - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'    
+          - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'
           - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
           - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'       
+          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
           - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
         description: |
           ### Automated Component Deletion Request
           This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
-          
+
           Expected Outcomes upon merging:
           * Argo CD auto-pruning triggers immediately.
           * Target pods, configurations, and folders are removed from the cluster.
