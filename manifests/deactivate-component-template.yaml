@@ -9,16 +9,6 @@ spec:
   type: service
 
 
-apiVersion: scaffolder.backstage.io/v1beta3
-kind: Template
-metadata:
-  name: deactivate-component-template
-  title: Request Deactivate Component
-  description: Handles component deactivation manually or automatically.
-spec:
-  owner: platform-engineering
-  type: service
-
   parameters:
     # PAGE 1: Target Identification
     - title: Identify Target Component to Deactivate
@@ -30,17 +20,19 @@ spec:
           title: Component Repository Name
           type: string
           description: Select or verify the application component item to remove.
-          # Maps data from the original template_args payload correctly
-          default: ${{ template_args.repoName }}
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
+      # Enforces the native greyed-out visual layout immediately on load
       uiSchema:
         repoName:
-          ui:autofocus: true
+          ui:field: EntityNamePicker
+          ui:options:
+            allowedKinds:
+              - Component
           ui:disabled: true
 
     # PAGE 2: Corporate Safety Gate
@@ -57,7 +49,7 @@ spec:
       uiSchema:
         confirmDestruction:
           ui:widget: "checkbox"
-          # FIX: Replaced dangerous HTML span text with secure standard Markdown alerts to bypass CSP blocks
+          # Fixed: Replaced dangerous HTML span text with secure standard Markdown alerts to bypass CSP blocks
           ui:description: |
             ### ⚠️ WARNING
             I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
