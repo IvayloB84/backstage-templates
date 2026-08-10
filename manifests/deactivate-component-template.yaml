@@ -25,11 +25,11 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Enforces the native greyed-out visual layout immediately on load
+      # Controls the visual representation natively
       uiSchema:
         repoName:
           ui:autofocus: true
-          ui:readonly: true
+          ui:disabled: true  # This greys out the prefilled value
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
