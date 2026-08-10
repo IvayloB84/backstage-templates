@@ -24,14 +24,10 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Uses native Backstage 1.52 UI components to extract active item identity
+      # Unified schema handling. No dynamic token substitution text or dependencies.
       uiSchema:
         repoName:
-          ui:field: EntityPicker
-          ui:options:
-            allowedKinds:
-              - Component
-            defaultKind: Component
+          ui:autofocus: true
           ui:disabled: true
 
     # ⚙️ PAGE 2: Corporate Safety Gate
