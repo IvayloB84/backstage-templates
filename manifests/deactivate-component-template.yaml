@@ -10,43 +10,11 @@ spec:
 
 
   parameters:
-    # 🔒 PAGE 1A: Triggers only when clicked from the Entity Card Button
     - title: Identify Target Component to Deactivate
-      if:
-        properties:
-          isAutomated: { const: true }
       required:
         - repoName
         - repoOwner
       properties:
-        isAutomated:
-          type: boolean
-          default: true
-        repoName:
-          title: Component Repository Name
-          type: string
-        repoOwner:
-          title: Repository Owner
-          type: string
-          default: IvayloB84
-      uiSchema:
-        isAutomated:
-          ui:widget: hidden
-        repoName:
-          ui:disabled: true # This completely greys out the text input field
-
-    # 🔓 PAGE 1B: Triggers only when opened directly from the Template Menu
-    - title: Identify Target Component to Deactivate
-      if:
-        properties:
-          isAutomated: { not: { const: true } }
-      required:
-        - repoName
-        - repoOwner
-      properties:
-        isAutomated:
-          type: boolean
-          default: false
         repoName:
           title: Component Repository Name
           type: string
@@ -55,9 +23,13 @@ spec:
           title: Repository Owner
           type: string
           default: IvayloB84
+          description: Your GitHub organization or personal profile username
+
+      # Enforces the native greyed-out visual layout immediately on load
       uiSchema:
-        isAutomated:
-          ui:widget: hidden
+        repoName:
+          ui:autofocus: true
+          ui:readonly: true
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
