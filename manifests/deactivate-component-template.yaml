@@ -9,7 +9,6 @@ spec:
   type: service
   
   parameters:
-    # PAGE 1: Identify Target Component to Deactivate
     - title: Identify Target Component to Deactivate
       required:
         - repoName
@@ -42,9 +41,12 @@ spec:
                   enum: ["false"]
 
       uiSchema:
+        # THE EXACT LAYOUT FIX:
+        # This completely stops the HTML engine from rendering the title or the label block container.
         isPreset:
-          ui:widget: hidden
-          ui:title: ""
+          "ui:widget": "hidden"
+          "ui:options":
+            label: false
           
     - title: Corporate Safety Gate
       required:
