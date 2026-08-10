@@ -8,7 +8,6 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
-
   parameters:
     - title: Identify Target Component to Deactivate
       required:
@@ -24,36 +23,14 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
-        isAutomated:
-          type: boolean
-          default: false
-          title: Automated Trigger
-          description: Internal flag used to toggle read-only states
 
-      # UI Schema conditions control visibility and interactivity
+      # Clean UI Schema handling. No broken dependency blocks.
       uiSchema:
-        # Hide the system boolean flag so users don't see it on the form
-        isAutomated:
-          ui:widget: hidden
-
-        # Apply conditional rules dynamically to repoName based on the state of isAutomated
         repoName:
+          ui:autofocus: true
+          # Instructs the form engine to respect query parameter locks if injected
           ui:options:
-            dependencies:
-              isAutomated:
-                oneOf:
-                  - properties:
-                      isAutomated:
-                        enum: [true]
-                    uiSchema:
-                      # If isAutomated is true (clicked via button), disable typing
-                      ui:disabled: true
-                  - properties:
-                      isAutomated:
-                        enum: [false]
-                    uiSchema:
-                      # If false (direct navigation), keep it fully active
-                      ui:disabled: false
+            rows: 1
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
