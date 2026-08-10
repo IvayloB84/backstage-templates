@@ -8,7 +8,6 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
-
   parameters:
     - title: Identify Target Component to Deactivate
       required:
@@ -25,11 +24,24 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
+      # Valid syntax to evaluate values dynamically without duplicate keys
+      allOf:
+        - if:
+            properties:
+              repoName:
+                type: string
+                minLength: 1 # Condition met when pre-filled from button
+          then:
+            properties:
+              repoName:
+                type: string
+            uiSchema:
+              repoName:
+                ui:disabled: true # Grey out the component name block instantly
+
       uiSchema:
         repoName:
           ui:autofocus: true
-          # This forces Backstage to display the field as locked/greyed out 
-          ui:readonly: true 
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
