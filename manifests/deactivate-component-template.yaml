@@ -18,20 +18,18 @@ spec:
           title: Component Repository Name
           type: string
           description: Verify the active application component item to remove.
+          # Fix: Natively extracts plain text from your button's template_args payload
+          default: ${{ template_args.repoName }}
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Syntax Fix: Swapped EntityPicker for EntityNamePicker to pass clean strings to steps
+      # Controls the visual representation natively to grey it out on load
       uiSchema:
         repoName:
-          ui:field: EntityNamePicker
-          ui:options:
-            allowedKinds:
-              - Component
-            defaultKind: Component
+          ui:autofocus: true
           ui:disabled: true
 
     # PAGE 2: Corporate Safety Gate
