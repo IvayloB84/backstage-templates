@@ -25,12 +25,13 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Official Backstage UI configuration pattern
+      # Keeps field properties plain so query injection takes over layout execution
       uiSchema:
         repoName:
           ui:autofocus: true
-          # This controls the greyed-out visual behavior on step 1 loading
-          ui:disabled: true 
+        repoOwner:
+          ui:options:
+            rows: 1
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
