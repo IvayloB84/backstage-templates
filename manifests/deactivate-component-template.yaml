@@ -31,14 +31,10 @@ spec:
         isPreset:
           oneOf:
             - properties:
-                isPreset:
-                  enum: [true]
-                repoName:
-                  type: string
-                  readOnly: true
-            - properties:
-                isPreset:
-                  enum: [false]
+      uiSchema:
+        isPreset:
+          ui:options:
+            widget: hidden
           
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
