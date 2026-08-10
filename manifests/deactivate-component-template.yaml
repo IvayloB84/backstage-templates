@@ -9,13 +9,14 @@ spec:
   type: service
   
   parameters:
+    # PAGE 1: Identify Target Component to Deactivate
     - title: Identify Target Component to Deactivate
       required:
         - repoName
         - repoOwner
       properties:
         isPreset:
-          type: tring
+          type: string
           default: "false"
         repoName:
           title: Component Repository Name
@@ -26,6 +27,7 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
+
       dependencies:
         isPreset:
           oneOf:
@@ -38,12 +40,12 @@ spec:
             - properties:
                 isPreset:
                   enum: ["false"]
+
       uiSchema:
         isPreset:
           ui:widget: hidden
           ui:title: ""
           
-    # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
