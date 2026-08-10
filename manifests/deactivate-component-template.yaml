@@ -10,7 +10,32 @@ spec:
 
 
   parameters:
+    # 🔒 SCENARIO A: Triggered from the entity button click (Auto-fills and Greys Out)
     - title: Identify Target Component to Deactivate
+      if:
+        properties:
+          repoName: { not: { type: string, maxLength: 0 } }
+      required:
+        - repoName
+        - repoOwner
+      properties:
+        repoName:
+          title: Component Repository Name
+          type: string
+        repoOwner:
+          title: Repository Owner
+          type: string
+          default: IvayloB84
+          description: Your GitHub organization or personal profile username
+      uiSchema:
+        repoName:
+          ui:disabled: true # This makes the field greyed-out and unchangeable
+
+    # 🔓 SCENARIO B: Triggered via direct navigation (Empty & Fully Editable)
+    - title: Identify Target Component to Deactivate
+      if:
+        properties:
+          repoName: { type: string, maxLength: 0 }
       required:
         - repoName
         - repoOwner
@@ -24,14 +49,6 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
-
-      # Keeps field properties plain so query injection takes over layout execution
-      uiSchema:
-        repoName:
-          ui:autofocus: true
-        repoOwner:
-          ui:options:
-            rows: 1
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
