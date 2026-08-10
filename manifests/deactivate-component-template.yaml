@@ -25,7 +25,16 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-    # PAGE 2: Corporate Safety Gate
+      uiSchema:
+        repoName:
+          # The exact form engine syntax: checks if a string exists on page load.
+          # If a value comes via URL (Test 1), it greys out and locks the text box.
+          # If opened manually (Test 2), it stays false, leaving it open for typing.
+          ui:options:
+            readonly:
+              "==": [{"var": "formData.repoName"}, ""]
+              negate: true
+
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
@@ -36,17 +45,13 @@ spec:
           default: false
           enum:
             - true
-
-  # This root-level uiSchema correctly locks your parameters without breaking page schemas!
-  uiSchema:
-    repoName:
-      ui:disabled: ${{ true if parameters.repoName else false }}
-    confirmDestruction:
-      ui:widget: "checkbox"
-      ui:description: |
-        <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
-           WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
-        </span>
+      uiSchema:
+        confirmDestruction:
+          ui:widget: "checkbox"
+          ui:description: |
+            <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
+               WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
+            </span>
 
   steps:
     - id: generate-uuid
