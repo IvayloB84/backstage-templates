@@ -8,6 +8,7 @@ spec:
   owner: user:default/IvayloB84
   type: service
 
+
   parameters:
     - title: Identify Target Component to Deactivate
       required:
@@ -24,13 +25,12 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Clean UI Schema handling. No broken dependency blocks.
+      # Official Backstage UI configuration pattern
       uiSchema:
         repoName:
           ui:autofocus: true
-          # Instructs the form engine to respect query parameter locks if injected
-          ui:options:
-            rows: 1
+          # This controls the greyed-out visual behavior on step 1 loading
+          ui:disabled: true 
 
     # ⚙️ PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
