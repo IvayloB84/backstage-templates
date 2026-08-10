@@ -14,29 +14,44 @@ spec:
       required:
         - repoOwner
       properties:
-        # PATH A: This property catches your URL click payload and freezes the box cleanly
-        repoNameReadOnly:
-          title: Component Repository Name
+        # A hidden tracking switch that intercepts whether data came from the URL click
+        isPreset:
           type: string
-          readOnly: true # 🔒 Greys out and completely locks the field against typing or deleting
-        
-        # PATH B: This property handles your clean manual entries when navigated to directly
-        repoName:
-          title: Component Repository Name
-          type: string
-          description: Enter the exact lowercase name of the application folder to remove.
-          
+          default: "false"
         repoOwner:
           title: Repository Owner
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      uiSchema:
-        # THE CLEAN UP: We use the native omit directive so that whichever field is empty vanishes from the page completely!
-        "ui:options":
-          omitExtraData: true
+      dependencies:
+        isPreset:
+          oneOf:
+            - properties:
+                isPreset:
+                  enum: ["true"]
+                repoNameReadOnly:
+                  title: Component Repository Name
+                  type: string
+                  readOnly: true
+              required:
+                - repoNameReadOnly
 
+            - properties:
+                isPreset:
+                  enum: ["false"]
+                repoName:
+                  title: Component Repository Name
+                  type: string
+                  description: Enter the exact lowercase name of the application folder to remove.
+              required:
+                - repoName
+
+      uiSchema:
+        # Erases the isPreset string parameter and its text header from the screen completely
+        isPreset:
+          ui:widget: hidden
+          ui:title: ""
 
     - title: Corporate Safety Gate
       required:
