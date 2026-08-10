@@ -9,6 +9,7 @@ spec:
   type: service
   
   parameters:
+    # PAGE 1: Identify Target Component to Deactivate
     - title: Identify Target Component to Deactivate
       required:
         - repoName
@@ -25,10 +26,12 @@ spec:
           description: Your GitHub organization or personal profile username
 
       uiSchema:
+        # THE FIX: If repoName is injected by the URL, lock it. If empty, let me type.
         repoName:
-          ui:disabled: ${{ true if form.repoName or parameters.repoName else false }}
-          
-          
+          ui:disabled:
+            "==": [{ "var": "formData.repoName" }, ""]
+            negate: true
+
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
