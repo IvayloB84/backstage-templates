@@ -14,9 +14,6 @@ spec:
         - repoName
         - repoOwner
       properties:
-        isPreset:
-          type: string
-          default: "false"
         repoName:
           title: Component Repository Name
           type: string
@@ -26,12 +23,11 @@ spec:
           type: string
           default: IvayloB84
           description: Your GitHub organization or personal profile username
-      uiSchema:
-        isPreset:
-          ui:widget: hidden
-        repoName:
-          ui:disabled: ${{ true if user.isPreset == 'true' or parameters.isPreset == 'true' else false }}
 
+      uiSchema:
+        repoName:
+          ui:disabled: ${{ true if form.repoName or parameters.repoName else false }}
+          
           
     - title: Corporate Safety Gate
       required:
