@@ -9,8 +9,18 @@ spec:
   type: service
 
 
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: deactivate-component-template
+  title: Request Deactivate Component
+  description: Handles component deactivation manually or automatically.
+spec:
+  owner: platform-engineering
+  type: service
+
   parameters:
-    # PAGE 1: Target Identification (Populates component name and greys out)
+    # PAGE 1: Target Identification
     - title: Identify Target Component to Deactivate
       required:
         - repoName
@@ -20,7 +30,7 @@ spec:
           title: Component Repository Name
           type: string
           description: Select or verify the application component item to remove.
-          # Resolves values delivered from your original button's template_args string payload
+          # Maps data from the original template_args payload correctly
           default: ${{ template_args.repoName }}
         repoOwner:
           title: Repository Owner
@@ -31,10 +41,9 @@ spec:
       uiSchema:
         repoName:
           ui:autofocus: true
-          # This forces Backstage 1.52 to natively render the field as locked and greyed-out
-          ui:disabled: true 
+          ui:disabled: true
 
-    # ⚙️ PAGE 2: Corporate Safety Gate
+    # PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
         - confirmDestruction
@@ -48,10 +57,10 @@ spec:
       uiSchema:
         confirmDestruction:
           ui:widget: "checkbox"
+          # FIX: Replaced dangerous HTML span text with secure standard Markdown alerts to bypass CSP blocks
           ui:description: |
-            <span style="color: #d32f2f; font-weight: bold; font-size: 1.1em;">
-               WARNING: I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
-            </span>
+            ### ⚠️ WARNING
+            I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
 
   steps:
     - id: generate-uuid
