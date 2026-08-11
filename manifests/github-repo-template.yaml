@@ -14,6 +14,7 @@ spec:
       required:
         - repoName
         - repoOwner
+        - cloudFlare
       properties:
         repoName:
           title: Repository Name
@@ -30,6 +31,10 @@ spec:
           title: Description
           type: string
           description: A brief summary explaining the purpose of this microservice.
+        cloudflareUrl:
+          title: Active Cloudflare Tunnel URL
+          type: string
+          description: Run 'kubectl logs deployment/webhook-proxy -n argocd' and paste the trycloudflare string here.
 
     # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Fully Dynamic Context)
     - title: Advanced Service Configuration
@@ -133,18 +138,18 @@ spec:
         gitAuthorName: "IvayloB84"
         gitAuthorEmail: "scaffolder@localhost"
 
-    # 🔗 Step 2B: Instantly wire up your permanent Localtunnel link
+    # 🔗 Step 2B: Instantly wire up your permanent Smee.io link
     - id: create-webhook
       name: Link Developer Repo to ArgoCD Webhook
       action: github:webhook
       input:
         repoUrl: 'github.com?repo=${{ parameters.repoName }}&owner=${{ parameters.repoOwner }}'
-        # Swap out the expired trycloudflare string with your permanent address:
-        webhookUrl: 'https://fluffy-warthog-18.loca.lt'
+        webhookUrl: 'https://smee.io/vVvKlKpQsKv5zv0W'
         contentType: 'json'
         events:
           - push
         token: ${{ secrets.GITHUB_TOKEN }}
+
 
     # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
     - id: append-to-roster
