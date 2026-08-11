@@ -46,7 +46,6 @@ spec:
             - "--branch=main"
             - "--depth=1"
             - "--wait=10"
-            - "--link=index.html"
             - "--root=/tmp/git"
           volumeMounts:
             - name: code-stream-volume
