@@ -22,9 +22,9 @@ spec:
           image: "${{ values.image }}"
           ports:
             - containerPort: ${{ values.port }}
-          securityContext:
-            runAsUser: 65534
-            runAsGroup: 65534
+          env:
+            - name: "${{ values.serviceType | upper }}_PORT"
+              value: "${{ values.port }}"
           volumeMounts:
             - name: code-stream-volume
               mountPath: "${{ values.webRootPath }}"
