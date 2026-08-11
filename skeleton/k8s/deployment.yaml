@@ -1,52 +1,54 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "${{ values.repoName }}"
+  name: "${{ values.component_id }}"
   labels:
-    app: "${{ values.repoName }}"
+    app: "${{ values.component_id }}"
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: "${{ values.repoName }}"
+      app: "${{ values.component_id }}"
   template:
     metadata:
       labels:
-        app: "${{ values.repoName }}"
+        app: "${{ values.component_id }}"
     spec:
+      securityContext:
+        fsGroup: 65534
       containers:
-        # 1. Core Service Application Runtime (Generic Context)
+        # 1. Nginx Unprivileged Production Core Web Server Engine
         - name: app-container
-          image: "${{ values.image }}"
+          image: "nginxinc/nginx-unprivileged:alpine"
           ports:
-            - containerPort: ${{ values.port }}
-          command: ${{ values.runCommand }}
-          args: ${{ values.runArgs }}
+            - containerPort: 8085
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
           volumeMounts:
             - name: code-stream-volume
-              mountPath: "${{ values.webRootPath | default('/usr/share/nginx/html') }}"
+              mountPath: "/usr/share/nginx/html"
+            - name: config-volume
+              mountPath: "/etc/nginx/conf.d/default.conf"
+              subPath: "default.conf"
           resources:
             requests:
-              cpu: "${{ values.cpuRequest }}"
-              memory: "${{ values.memRequest }}"
+              cpu: "25m"
+              memory: "16Mi"
             limits:
-              cpu: "${{ values.cpuLimit }}"
-              memory: "${{ values.memLimit }}"
-          env:
-            - name: SERVICE_TYPE
-              value: "${{ values.serviceType }}"
-            - name: WEB_SERVER_ROUTING_PROFILE
-              value: "${{ values.webServerMode }}"
+              cpu: "150m"
+              memory: "32Mi"
 
-        # 2. Automated Git-Sync Core Engine (Upgraded to v4.7.1)
+        # 2. Automated Git-Sync Synchronization Engine
         - name: git-sync-sidecar
           image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
           args:
-            - "--repo=https://github.com/${{ values.repoOwner | default('IvayloB84') }}/${{ values.repoName }}.git"
+            - "--repo=https://github.com/${{ values.destination.owner }}/${{ values.destination.repo }}.git"
             - "--branch=main"
             - "--depth=1"
             - "--wait=10"
             - "--root=/tmp/git"
+            - "--dest=${{ values.destination.repo }}"
           volumeMounts:
             - name: code-stream-volume
               mountPath: /tmp/git
@@ -54,7 +56,32 @@ spec:
             runAsUser: 65534
             runAsGroup: 65534
 
-      # Shared internal workspace volume declaration connecting the containers
       volumes:
         - name: code-stream-volume
           emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: "${{ values.component_id }}-nginx-config"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "${{ values.component_id }}-nginx-config"
+data:
+  default.conf: |
+    server {
+        listen       8085;
+        listen  [::]:8085;
+        server_name  localhost;
+
+        location / {
+            root /usr/share/nginx/html/${{ values.destination.repo }};
+            autoindex on;
+            try_files \$uri \$uri/ @spa;
+        }
+
+        location @spa {
+            root /usr/share/nginx/html/${{ values.destination.repo }};
+            try_files /index.html =404;
+        }
+    }
