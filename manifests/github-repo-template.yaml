@@ -9,7 +9,7 @@ spec:
   type: service
 
   parameters:
-    # 📑 PAGE 1: Repository Ownership Details
+    # PAGE 1: Repository Ownership Details (Kept exactly as you wrote it)
     - title: Provide Repository Information
       required:
         - repoName
@@ -31,54 +31,74 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # ⚙️ PAGE 2: Service Selection & Dynamic Credentials (Fully Dynamic Context)
-    - title: Advanced Service Configuration
+    # PAGE 2: Fully Decoupled Web Server Configuration Profile
+    - title: Web Server Runtime Configuration
       required:
+        - serviceCategory
         - serviceType
+        - image
+        - port
+        - webServerMode
+        - webRootPath
       properties:
-        serviceType:
-          title: Base Service Stack
+        serviceCategory:
+          title: Architecture Classification
           type: string
-          enum: [nginx, postgres, java, redis]
-          description: Select the container technology runtime for your environment.
+          default: "webserver"
+          enum: ["webserver"]
+          description: Fixed architectural scope ensuring native shared workspace volume mounts.
+        serviceType:
+          title: Web Server Engine
+          type: string
+          description: Select the technology stack container profile.
+          enum:
+            - nginx
+            - httpd
+            - caddy
+        image:
+          title: Base Container Image
+          type: string
+          default: "nginx:alpine"
+          description: The remote registry image tracking tag.
+        port:
+          title: Container Port Allocation
+          type: integer
+          default: 80
+          description: Internal port listener mapping configuration.
+        webServerMode:
+          title: Web Server Routing Profile
+          type: string
+          default: "standard-spa"
+          description: Select the execution layer pattern for asset delivery.
+          enum:
+            - "standard-spa"
+            - "reverse-proxy"
+            - "static-assets"
+        webRootPath:
+          title: Container Document Root Path
+          type: string
+          default: "/usr/share/nginx/html"
+          description: Absolute destination path where the engine reads code files.
 
+      # Automated validation rendering constraints switching properties dynamically based on the dropdown
       dependencies:
         serviceType:
           oneOf:
-            # --- POSTGRES LOGIC ---
             - properties:
-                serviceType: { enum: [postgres] }
-                serviceImage: { type: string, default: "postgres:16-alpine" }
-                servicePort: { type: integer, default: 5432 }
-                dbUser: { type: string, default: postgres }
-                dbPassword: { type: string, ui:field: Secret }
-                dbName: { type: string, default: app_db }
-              required: [serviceImage, servicePort, dbUser, dbPassword, dbName]
-
-            # --- REDIS LOGIC ---
+                serviceType: { const: "nginx" }
+                image: { type: string, default: "nginx:alpine" }
+                port: { type: integer, default: 80 }
+                webRootPath: { type: string, default: "/usr/share/nginx/html" }
             - properties:
-                serviceType: { enum: [redis] }
-                serviceImage: { type: string, default: "redis:7-alpine" }
-                servicePort: { type: integer, default: 6379 }
-                redisPassword: { type: string, ui:field: Secret, default: "" }
-              required: [serviceImage, servicePort]
-
-            # --- JAVA LOGIC ---
+                serviceType: { const: "httpd" }
+                image: { type: string, default: "httpd:alpine" }
+                port: { type: integer, default: 80 }
+                webRootPath: { type: string, default: "/usr/local/apache2/htdocs" }
             - properties:
-                serviceType: { enum: [java] }
-                serviceImage: { type: string, default: "eclipse-temurin:17-jre-alpine" }
-                servicePort: { type: integer, default: 8080 }
-                javaOpts: { type: string, default: "-Xms512m -Xmx1024m" }
-                appEnv: { type: string, default: development, enum: [development, staging, production] }
-              required: [serviceImage, servicePort, javaOpts, appEnv]
-
-            # --- NGINX LOGIC ---
-            - properties:
-                serviceType: { enum: [nginx] }
-                serviceImage: { type: string, default: "nginx:alpine" }
-                servicePort: { type: integer, default: 80 }
-                nginxMode: { type: string, default: "standard-spa", enum: ["standard-spa", "reverse-proxy", "static-assets"] }
-              required: [serviceImage, servicePort, nginxMode]
+                serviceType: { const: "caddy" }
+                image: { type: string, default: "caddy:alpine" }
+                port: { type: integer, default: 80 }
+                webRootPath: { type: string, default: "/usr/share/caddy" }
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
@@ -98,21 +118,21 @@ spec:
         values:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
-          description: ${{ parameters.description or 'Freshly generated application.' }}
-          image: ${{ parameters.serviceImage }}
-          port: ${{ parameters.servicePort }}
+          description: ${{ parameters.description or 'Freshly generated web application.' }}
+          
+          # Dynamic server runtime parameters
+          serviceCategory: ${{ parameters.serviceCategory }}
           serviceType: ${{ parameters.serviceType }}
+          image: ${{ parameters.image }}
+          port: ${{ parameters.port }}
+          webServerMode: ${{ parameters.webServerMode }}
+          webRootPath: ${{ parameters.webRootPath }}
                  
-          runCommand: ${{ (['sh', '-c'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
-          runArgs: ${{ (['echo Runtime container initialized. Waiting for code deployment... && sleep infinity'] if (parameters.serviceType == 'java' or parameters.serviceType == 'nginx') else []) | dump }}
+          # Dynamic execution layer commands (Completely decoupled from technology name)
+          runCommand: ${{ ([] if parameters.webServerMode == 'standard-spa' else ['sh', '-c']) | dump }}
+          runArgs: ${{ ([] if parameters.webServerMode == 'standard-spa' else ['echo Initializing custom web routing profile...']) | dump }}
 
-          dbUser: ${{ parameters.dbUser or 'postgres' }}
-          dbPassword: ${{ parameters.dbPassword or '' }}
-          dbName: ${{ parameters.dbName or 'postgres' }}
-          redisPassword: ${{ parameters.redisPassword or '' }}
-          javaOpts: ${{ parameters.javaOpts or '' }}
-          appEnv: ${{ parameters.appEnv or '' }}
-          nginxMode: ${{ parameters.nginxMode or '' }}
+          # Resource allocation parameters
           cpuRequest: ${{ parameters.cpuRequest or '25m' }}
           cpuLimit: ${{ parameters.cpuLimit or '150m' }}
           memRequest: ${{ parameters.memRequest or '16Mi' }}

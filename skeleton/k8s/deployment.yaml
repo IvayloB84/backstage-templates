@@ -15,12 +15,16 @@ spec:
         app: "${{ values.repoName }}"
     spec:
       containers:
+        # 1. Core Service Application Runtime (Generic Context)
         - name: app-container
           image: "${{ values.image }}"
           ports:
             - containerPort: ${{ values.port }}
           command: ${{ values.runCommand }}
           args: ${{ values.runArgs }}
+          volumeMounts:
+            - name: code-stream-volume
+              mountPath: "${{ values.webRootPath | default('/usr/share/nginx/html') }}"
           resources:
             requests:
               cpu: "${{ values.cpuRequest }}"
@@ -31,17 +35,27 @@ spec:
           env:
             - name: SERVICE_TYPE
               value: "${{ values.serviceType }}"
-            - name: POSTGRES_USER
-              value: "${{ values.dbUser }}"
-            - name: POSTGRES_PASSWORD
-              value: "${{ values.dbPassword }}"
-            - name: POSTGRES_DB
-              value: "${{ values.dbName }}"
-            - name: REDIS_PASSWORD
-              value: "${{ values.redisPassword }}"
-            - name: JAVA_OPTS
-              value: "${{ values.javaOpts }}"
-            - name: APP_ENV
-              value: "${{ values.appEnv }}"
-            - name: NGINX_ROUTING_PROFILE
-              value: "${{ values.nginxMode }}"
+            - name: WEB_SERVER_ROUTING_PROFILE
+              value: "${{ values.webServerMode }}"
+
+        # 2. Automated Git-Sync Core Engine (Upgraded to v4.7.1)
+        - name: git-sync-sidecar
+          image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
+          args:
+            - "--repo=https://github.com/${{ values.repoOwner | default('IvayloB84') }}/${{ values.repoName }}.git"
+            - "--branch=main"
+            - "--depth=1"
+            - "--wait=10"
+            - "--link=index.html"
+            - "--root=/tmp/git"
+          volumeMounts:
+            - name: code-stream-volume
+              mountPath: /tmp/git
+          securityContext:
+            runAsUser: 65534
+            runAsGroup: 65534
+
+      # Shared internal workspace volume declaration connecting the containers
+      volumes:
+        - name: code-stream-volume
+          emptyDir: {}
