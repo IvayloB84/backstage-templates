@@ -1,68 +1,3 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: "${{ values.repoName }}-proxy"
-  labels:
-    app: "${{ values.repoName }}-proxy"
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: "${{ values.repoName }}-proxy"
-  template:
-    metadata:
-      labels:
-        app: "${{ values.repoName }}-proxy"
-    spec:
-      securityContext:
-        fsGroup: 65534
-      containers:
-        # 1. Reverse Proxy Routing Engine (Nginx Unprivileged)
-        - name: proxy-container
-          image: "nginx:1.25-alpine"
-          ports:
-            - containerPort: ${{ values.port }}
-          env:
-            - name: "${{ values.serviceType | upper }}_PORT"
-              value: "${{ values.port }}"
-          volumeMounts:
-            - name: config-volume
-              mountPath: "/etc/nginx/nginx.conf"
-              subPath: "nginx.conf"
-            - name: tmp-fs
-              mountPath: /tmp
-            # [FIX 1/3] Mount writable directories for stock Nginx script initialization
-            - name: var-cache
-              mountPath: /var/cache/nginx
-            - name: var-run
-              mountPath: /var/run
-          resources:
-            requests:
-              cpu: "${{ values.cpuRequest }}"
-              memory: "${{ values.memRequest }}"
-            limits:
-              cpu: "${{ values.cpuLimit }}"
-              memory: "${{ values.memLimit }}"
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: true
-            runAsUser: 101
-            runAsGroup: 101
-
-      volumes:
-        - name: tmp-fs
-          emptyDir: {} 
-        # [FIX 2/3] Define the physical storage scratchpads in host memory
-        - name: var-cache
-          emptyDir: {}
-        - name: var-run
-          emptyDir: {}
-        - name: config-volume
-          configMap:
-            name: "${{ values.repoName }}-proxy-config"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -85,7 +20,6 @@ data:
         uwsgi_temp_path       /tmp/uwsgi_temp;
         scgi_temp_path        /tmp/scgi_temp;
 
-        # [FIX] Explicitly append the namespace domain to ensure CoreDNS resolves it instantly
         upstream spa_upstream {
             server ${{ values.frontendServiceName | default("spa-delivery-engine") }}.${{ values.namespace | default("default") }}.svc.cluster.local:80;
         }
@@ -95,12 +29,10 @@ data:
             listen  [::]:${{ values.port }};
             server_name  localhost;
 
-            # Health probe endpoint for the proxy
             location /healthz {
                 return 200 "healthy\n";
             }
 
-            # Forward everything else to your existing, working SPA engine
             location / {
                 proxy_pass http://spa_upstream;
                 proxy_set_header Host $host;
