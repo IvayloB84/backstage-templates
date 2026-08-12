@@ -1,3 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "${{ values.repoName }}-proxy"
+  labels:
+    app: "${{ values.repoName }}-proxy"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "${{ values.repoName }}-proxy"
+  template:
+    metadata:
+      labels:
+        app: "${{ values.repoName }}-proxy"
+    spec:
+      securityContext:
+        fsGroup: 65534
+      containers:
+        # 1. Reverse Proxy Routing Engine (Nginx Unprivileged)
+        - name: proxy-container
+          image: "nginx:1.25-alpine"
+          ports:
+            - containerPort: ${{ values.port }}
+          env:
+            - name: "${{ values.serviceType | upper }}_PORT"
+              value: "${{ values.port }}"
+          volumeMounts:
+            - name: config-volume
+              mountPath: "/etc/nginx/nginx.conf"
+              subPath: "nginx.conf"
+            - name: tmp-fs
+              mountPath: /tmp
+            # Mount writable directories for stock Nginx script initialization
+            - name: var-cache
+              mountPath: /var/cache/nginx
+            - name: var-run
+              mountPath: /var/run
+          resources:
+            requests:
+              cpu: "${{ values.cpuRequest }}"
+              memory: "${{ values.memRequest }}"
+            limits:
+              cpu: "${{ values.cpuLimit }}"
+              memory: "${{ values.memLimit }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 101
+            runAsGroup: 101
+
+      volumes:
+        - name: tmp-fs
+          emptyDir: {} 
+        # Define the physical storage scratchpads in host memory
+        - name: var-cache
+          emptyDir: {}
+        - name: var-run
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: "${{ values.repoName }}-proxy-config"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -20,21 +85,25 @@ data:
         uwsgi_temp_path       /tmp/uwsgi_temp;
         scgi_temp_path        /tmp/scgi_temp;
 
-        upstream spa_upstream {
-            server ${{ values.frontendServiceName | default("spa-delivery-engine") }}.${{ values.namespace | default("default") }}.svc.cluster.local:80;
-        }
-
         server {
             listen       ${{ values.port }};
             listen  [::]:${{ values.port }};
             server_name  localhost;
 
+            # Health probe endpoint for the proxy
             location /healthz {
                 return 200 "healthy\n";
             }
 
+            # Forward everything else to your working Nginx SPA engine container
             location / {
-                proxy_pass http://spa_upstream;
+                # Native internal K8s CoreDNS lookup endpoint
+                resolver kube-dns.kube-system.svc.cluster.local valid=10s;
+                
+                # Dynamic runtime variable evaluation prevents boot-time validation crashes
+                set $spa_target_endpoint "http://${{ values.frontendServiceName | default('project-web-service') }}.${{ values.namespace | default('default') }}.svc.cluster.local:80";
+                
+                proxy_pass $spa_target_endpoint;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
