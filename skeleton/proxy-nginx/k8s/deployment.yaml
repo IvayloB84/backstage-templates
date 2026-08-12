@@ -85,9 +85,9 @@ data:
         uwsgi_temp_path       /tmp/uwsgi_temp;
         scgi_temp_path        /tmp/scgi_temp;
 
-        # [FIX 3/3] Dynamic routing fallback default targeting your working SPA engine
+        # [FIX] Explicitly append the namespace domain to ensure CoreDNS resolves it instantly
         upstream spa_upstream {
-            server ${{ values.frontendServiceName | default("spa-delivery-engine") }}:80;
+            server ${{ values.frontendServiceName | default("spa-delivery-engine") }}.${{ values.namespace | default("default") }}.svc.cluster.local:80;
         }
 
         server {
