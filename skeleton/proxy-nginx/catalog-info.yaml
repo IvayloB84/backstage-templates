@@ -5,6 +5,9 @@ metadata:
   description: "${{ values.description }}"
   annotations:
     backstage.io/techdocs-ref: dir:.
+    github.com/project-slug: "${{ values.repoOwner }}/${{ values.repoName }}"
+    argocd/app-name: "${{ values.repoName }}"
+    backstage.io/kubernetes-label-selector: "app=${{ values.repoName }}"
 spec:
   type: service
   lifecycle: production
