@@ -31,7 +31,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Kept exactly as you wrote it)
+    # PAGE 2: Fully Decoupled Web Server Configuration Profile
     - title: Web Server Runtime Configuration
       required:
         - serviceCategory
@@ -80,6 +80,7 @@ spec:
           default: "/usr/share/nginx/html"
           description: Absolute destination path where the engine reads code files.
 
+      # Automated validation rendering constraints switching properties dynamically based on the dropdown
       dependencies:
         serviceType:
           oneOf:
@@ -107,14 +108,12 @@ spec:
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Dynamic Folder Fetch Switch
+    # 📝 Step 1A: Render skeleton files into an isolated directory for the application codebase repository
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
       input:
-        # DYNAMIC PATH: If user chooses 'reverse-proxy', fetches proxy-nginx folder. Otherwise, pulls webservers-spa.
-        url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa' }}
+        url: 'https://github.com/${{ parameters.repoOwner }}/backstage-templates/tree/main/skeleton'
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
@@ -129,7 +128,7 @@ spec:
           webServerMode: ${{ parameters.webServerMode }}
           webRootPath: ${{ parameters.webRootPath }}
                  
-          # Dynamic execution layer commands
+          # Dynamic execution layer commands (Completely decoupled from technology name)
           runCommand: ${{ ([] if parameters.webServerMode == 'standard-spa' else ['sh', '-c']) | dump }}
           runArgs: ${{ ([] if parameters.webServerMode == 'standard-spa' else ['echo Initializing custom web routing profile...']) | dump }}
 
