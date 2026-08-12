@@ -31,6 +31,11 @@ spec:
               subPath: "nginx.conf"
             - name: tmp-fs
               mountPath: /tmp
+            # [FIX 1/3] Mount writable directories for stock Nginx script initialization
+            - name: var-cache
+              mountPath: /var/cache/nginx
+            - name: var-run
+              mountPath: /var/run
           resources:
             requests:
               cpu: "${{ values.cpuRequest }}"
@@ -39,12 +44,22 @@ spec:
               cpu: "${{ values.cpuLimit }}"
               memory: "${{ values.memLimit }}"
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
             runAsUser: 101
             runAsGroup: 101
 
       volumes:
         - name: tmp-fs
-          emptyDir: {} # Required for unprivileged nginx pid and cache files
+          emptyDir: {} 
+        # [FIX 2/3] Define the physical storage scratchpads in host memory
+        - name: var-cache
+          emptyDir: {}
+        - name: var-run
+          emptyDir: {}
         - name: config-volume
           configMap:
             name: "${{ values.repoName }}-proxy-config"
@@ -66,10 +81,13 @@ data:
         include /etc/nginx/mime.types;
         client_body_temp_path /tmp/client_temp;
         proxy_temp_path       /tmp/proxy_temp;
+        fastcgi_temp_path     /tmp/fastcgi_temp;
+        uwsgi_temp_path       /tmp/uwsgi_temp;
+        scgi_temp_path        /tmp/scgi_temp;
 
-        # Target pointing back to your working SPA service name
+        # [FIX 3/3] Dynamic routing fallback default targeting your working SPA engine
         upstream spa_upstream {
-            server ${{ values.frontendServiceName | default("my-spa-service") }}:8080;
+            server ${{ values.frontendServiceName | default("spa-delivery-engine") }}:80;
         }
 
         server {
