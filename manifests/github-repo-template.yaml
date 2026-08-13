@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Fixed v1.52 Conditional Form States)
+    # PAGE 2: Web Server Configuration Profile (Fixed Dynamic Text Replacements)
     - title: Web Server Runtime Configuration
       required:
         - serviceCategory
@@ -57,7 +57,6 @@ spec:
             - httpd
             - caddy
 
-        # Declare the base inputs normally without fixed top-level strings so conditions can write to them
         image:
           title: Base Container Image
           type: string
@@ -71,9 +70,9 @@ spec:
           type: string
           description: Absolute destination path where the engine reads code files.
 
-      # [THE CANONICAL V1.52 STANDARD] Using allOf blocks triggers the form to recalculate values on switch
+      # [THE PRECISION OVERWRITE ENGINE] This forces RJSF to dump old states and write fresh text
       allOf:
-        # 1️⃣ Subschema Rule for Nginx
+        # 1️⃣ Dynamic Overwrites for Nginx
         - if:
             properties:
               serviceType:
@@ -86,7 +85,6 @@ spec:
                 default: 80
               webRootPath:
                 default: "/usr/share/nginx/html"
-              # Inject the Nginx routing profile dynamically into the form context
               webServerMode:
                 title: Web Server Routing Profile
                 type: string
@@ -99,7 +97,7 @@ spec:
             required:
               - webServerMode
 
-        # 2️⃣ Subschema Rule for Apache HTTPD
+        # 2️⃣ Dynamic Overwrites for Apache HTTPD
         - if:
             properties:
               serviceType:
@@ -113,7 +111,7 @@ spec:
               webRootPath:
                 default: "/usr/local/apache2/htdocs"
 
-        # 3️⃣ Subschema Rule for Caddy
+        # 3️⃣ Dynamic Overwrites for Caddy
         - if:
             properties:
               serviceType:
@@ -126,6 +124,15 @@ spec:
                 default: 80
               webRootPath:
                 default: "/usr/share/caddy"
+
+      # This section tells the UI layout layer to listen for changes and wipe the stale values instantly
+      uiSchema:
+        image:
+          ui:options:
+            updateOnChange: true
+        webRootPath:
+          ui:options:
+            updateOnChange: true
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
