@@ -32,13 +32,10 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Runtime Configuration (Fixed Auto-Populating Defaults)
+    # PAGE 2: Web Server Runtime Configuration (Fixed Dynamic Field Isolation)
     - title: Web Server Runtime Configuration
       required:
         - serviceType
-        - image
-        - port
-        - webRootPath
       properties:
         serviceCategory:
           type: string
@@ -52,33 +49,23 @@ spec:
             - nginx
             - httpd
             - caddy
-        image:
-          title: Base Container Image
-          type: string
-          description: The remote registry image tracking tag.
-        port:
-          title: Container Port Allocation
-          type: integer
-          description: Internal port listener mapping configuration.
-        webRootPath:
-          title: Container Document Root Path
-          type: string
-          description: Absolute destination path where the engine reads code files.
 
-      # [TRUE AUTO-POPULATE FIX] Pure const definitions force immediate value placement without manual selection
+      # [THE UNMOUNT PATTERN] Uses unique keys to force the browser to clear and update the text boxes
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ Presets for Nginx
+            # 1️⃣ Selection rules for Nginx
             - properties:
                 serviceType:
                   const: "nginx"
-                image:
-                  const: "nginx:alpine"
+                nginxImage:
+                  title: Base Container Image
+                  type: string
+                  default: "nginx:alpine"
                 port:
-                  const: 80
-                webRootPath:
-                  const: "/usr/share/nginx/html"
+                  title: Container Port Allocation
+                  type: integer
+                  default: 80
                 webServerMode:
                   title: Web Server Routing Profile
                   type: string
@@ -88,39 +75,61 @@ spec:
                     - "standard-spa"
                     - "reverse-proxy"
                     - "static-assets"
+                webRootPath:
+                  title: Container Document Root Path
+                  type: string
+                  default: "/usr/share/nginx/html"
               required:
+                - nginxImage
+                - port
                 - webServerMode
+                - webRootPath
 
-            # 2️⃣ Presets for Apache HTTPD
+            # 2️⃣ Selection rules for Apache HTTPD
             - properties:
                 serviceType:
                   const: "httpd"
-                image:
-                  const: "httpd:alpine"
-                port:
-                  const: 80
-                webRootPath:
-                  const: "/usr/local/apache2/htdocs"
+                httpdImage:
+                  title: Base Container Image
+                  type: string
+                  default: "httpd:alpine"
+                httpdPort:
+                  title: Container Port Allocation
+                  type: integer
+                  default: 80
+                httpdWebRootPath:
+                  title: Container Document Root Path
+                  type: string
+                  default: "/usr/local/apache2/htdocs"
+              required:
+                - httpdImage
+                - httpdPort
+                - httpdWebRootPath
 
-            # 3️⃣ Presets for Caddy
+            # 3️⃣ Selection rules for Caddy
             - properties:
                 serviceType:
                   const: "caddy"
-                image:
-                  const: "caddy:alpine"
-                port:
-                  const: 80
-                webRootPath:
-                  const: "/usr/share/caddy"
+                caddyImage:
+                  title: Base Container Image
+                  type: string
+                  default: "caddy:alpine"
+                caddyPort:
+                  title: Container Port Allocation
+                  type: integer
+                  default: 80
+                caddyWebRootPath:
+                  title: Container Document Root Path
+                  type: string
+                  default: "/usr/share/caddy"
+              required:
+                - caddyImage
+                - caddyPort
+                - caddyWebRootPath
 
-      # Keeps architecture hidden and forces the selection layout engine to run
       uiSchema:
         serviceCategory:
           ui:widget: hidden
-        image:
-          ui:widget: select
-        webRootPath:
-          ui:widget: select
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
@@ -143,14 +152,14 @@ spec:
           repoName: ${{ parameters.repoName }}
           repoOwner: ${{ parameters.repoOwner }}
           description: ${{ parameters.description or 'Freshly generated web application.' }}
-          
-          # Dynamic server runtime parameters
           serviceCategory: ${{ parameters.serviceCategory }}
           serviceType: ${{ parameters.serviceType }}
-          image: ${{ parameters.image }}
-          port: ${{ parameters.port }}
-          webServerMode: ${{ parameters.webServerMode }}
-          webRootPath: ${{ parameters.webRootPath }}
+          
+          # Dynamic server runtime parameters
+          image: ${{ parameters.nginxImage or parameters.httpdImage or parameters.caddyImage }}
+          port: ${{ parameters.port or parameters.httpdPort or parameters.caddyPort }}
+          webRootPath: ${{ parameters.webRootPath or parameters.httpdWebRootPath or parameters.caddyWebRootPath }}
+          webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
           # Dynamic execution layer commands
           runCommand: ${{ ([] if parameters.webServerMode == 'standard-spa' else ['sh', '-c']) | dump }}
