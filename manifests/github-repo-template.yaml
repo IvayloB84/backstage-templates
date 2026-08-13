@@ -25,19 +25,18 @@ spec:
         repoOwner:
           title: Repository Owner
           type: string
-          description: Automatically locked and assigned to your active authenticated GitHub identity profile.
+          default: IvayloB84
+          description: Your GitHub organization or personal profile username.
         description:
           title: Description
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-      # [THE COMPLIANT FIX] Uses RepoOwnerPicker with a single host, forcing it to be greyed out natively
+      # [THE PRECISE FIX] This forces a standard text input to grey out cleanly on screen
       uiSchema:
         repoOwner:
-          ui:field: RepoOwnerPicker
           ui:disabled: true
-          ui:options:
-            host: github.com
+          ui:readonly: true
 
     # PAGE 2: Web Server Configuration Profile (Kept exactly as you wrote it)
     - title: Web Server Runtime Configuration
