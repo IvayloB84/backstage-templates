@@ -80,11 +80,12 @@ spec:
             runAsUser: 65534
             runAsGroup: 65534
           resources:
-            cpu: "${{ values.cpuRequest }}"
-            memory: "${{ values.memRequest }}"
-          limits:
-            cpu: "${{ values.cpuLimit }}"
-            memory: "${{ values.memLimit }}"
+            requests:
+              cpu: "${{ values.cpuRequest }}"
+              memory: "${{ values.memRequest }}"
+            limits:
+              cpu: "${{ values.cpuLimit }}"
+              memory: "${{ values.memLimit }}"
 
       volumes:
         - name: code-stream-volume
