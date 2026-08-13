@@ -32,21 +32,19 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Fixed Dynamic Schema Mapping)
+    # PAGE 2: Web Server Configuration Profile (Fixed Field Contamination & Removed UI Clutter)
     - title: Web Server Runtime Configuration
       required:
-        - serviceCategory
         - serviceType
         - image
         - port
         - webRootPath
       properties:
+        # [HIDDEN BACKEND TOKENS] Keeps corporate architectural constraints active without wasting UI space
         serviceCategory:
-          title: Architecture Classification
           type: string
           default: "webserver"
-          enum: ["webserver"]
-          description: Fixed architectural scope ensuring native shared workspace volume mounts.
+        
         serviceType:
           title: Web Server Engine
           type: string
@@ -56,31 +54,37 @@ spec:
             - nginx
             - httpd
             - caddy
+
         image:
           title: Base Container Image
           type: string
-          default: "nginx:alpine"
           description: The remote registry image tracking tag.
         port:
           title: Container Port Allocation
           type: integer
-          default: 80
           description: Internal port listener mapping configuration.
         webRootPath:
           title: Container Document Root Path
           type: string
-          default: "/usr/share/nginx/html"
           description: Absolute destination path where the engine reads code files.
 
-      # [THE PRECISION OVERWRITE ENGINE] Overrides text fields cleanly on choice swap
+      # [DYNAMIC SWAP ENGINE] Evaluates exact enum values to force text boxes to update instantly
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ Selection rules for Nginx
+            # 1️⃣ Presets loaded if Nginx is chosen
             - properties:
                 serviceType:
-                  enum:
-                    - nginx
+                  enum: [nginx]
+                image:
+                  enum: ["nginx:alpine"]
+                  default: "nginx:alpine"
+                port:
+                  enum: [80]
+                  default: 80
+                webRootPath:
+                  enum: ["/usr/share/nginx/html"]
+                  default: "/usr/share/nginx/html"
                 webServerMode:
                   title: Web Server Routing Profile
                   type: string
@@ -93,29 +97,42 @@ spec:
               required:
                 - webServerMode
 
-            # 2️⃣ Selection rules for Apache HTTPD
+            # 2️⃣ Presets loaded if Apache HTTPD is chosen
             - properties:
                 serviceType:
-                  enum:
-                    - httpd
+                  enum: [httpd]
                 image:
-                  type: string
+                  enum: ["httpd:alpine"]
                   default: "httpd:alpine"
+                port:
+                  enum: [80]
+                  default: 80
                 webRootPath:
-                  type: string
+                  enum: ["/usr/local/apache2/htdocs"]
                   default: "/usr/local/apache2/htdocs"
 
-            # 3️⃣ Selection rules for Caddy
+            # 3️⃣ Presets loaded if Caddy is chosen
             - properties:
                 serviceType:
-                  enum:
-                    - caddy
+                  enum: [caddy]
                 image:
-                  type: string
+                  enum: ["caddy:alpine"]
                   default: "caddy:alpine"
+                port:
+                  enum: [80]
+                  default: 80
                 webRootPath:
-                  type: string
+                  enum: ["/usr/share/caddy"]
                   default: "/usr/share/caddy"
+
+      # [THE VISUAL FIX] Completely hides the architecture token from the UI layer
+      uiSchema:
+        serviceCategory:
+          ui:widget: hidden
+        image:
+          ui:widget: select
+        webRootPath:
+          ui:widget: select
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
