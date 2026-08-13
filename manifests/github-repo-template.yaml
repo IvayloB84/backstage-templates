@@ -32,11 +32,14 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Select Server Engine Node
-    - title: Select Web Server Engine
+    # PAGE 2: Web Server Configuration Profile (Fixed Dynamic Schema Mapping)
+    - title: Web Server Runtime Configuration
       required:
         - serviceCategory
         - serviceType
+        - image
+        - port
+        - webRootPath
       properties:
         serviceCategory:
           title: Architecture Classification
@@ -53,41 +56,31 @@ spec:
             - nginx
             - httpd
             - caddy
-
-    # PAGE 3: Web Server Details (Evaluated on Step Transition to Prevent Text Freezing)
-    - title: Web Server Runtime Configuration
-      required:
-        - image
-        - port
-        - webRootPath
-      properties:
         image:
           title: Base Container Image
           type: string
+          default: "nginx:alpine"
           description: The remote registry image tracking tag.
         port:
           title: Container Port Allocation
           type: integer
+          default: 80
           description: Internal port listener mapping configuration.
         webRootPath:
           title: Container Document Root Path
           type: string
+          default: "/usr/share/nginx/html"
           description: Absolute destination path where the engine reads code files.
 
-      # [THE ARCHITECTURAL FIX] Evaluates dependencies cleanly because Page 2 state is already locked
+      # [THE PRECISION OVERWRITE ENGINE] Overrides text fields cleanly on choice swap
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ Rules applied if Nginx was chosen on Page 2
+            # 1️⃣ Selection rules for Nginx
             - properties:
                 serviceType:
-                  const: "nginx"
-                image:
-                  type: string
-                  default: "nginx:alpine"
-                port:
-                  type: integer
-                  default: 80
+                  enum:
+                    - nginx
                 webServerMode:
                   title: Web Server Routing Profile
                   type: string
@@ -97,36 +90,29 @@ spec:
                     - "standard-spa"
                     - "reverse-proxy"
                     - "static-assets"
-                webRootPath:
-                  type: string
-                  default: "/usr/share/nginx/html"
               required:
                 - webServerMode
 
-            # 2️⃣ Rules applied if Apache HTTPD was chosen on Page 2
+            # 2️⃣ Selection rules for Apache HTTPD
             - properties:
                 serviceType:
-                  const: "httpd"
+                  enum:
+                    - httpd
                 image:
                   type: string
                   default: "httpd:alpine"
-                port:
-                  type: integer
-                  default: 80
                 webRootPath:
                   type: string
                   default: "/usr/local/apache2/htdocs"
 
-            # 3️⃣ Rules applied if Caddy was chosen on Page 2
+            # 3️⃣ Selection rules for Caddy
             - properties:
                 serviceType:
-                  const: "caddy"
+                  enum:
+                    - caddy
                 image:
                   type: string
                   default: "caddy:alpine"
-                port:
-                  type: integer
-                  default: 80
                 webRootPath:
                   type: string
                   default: "/usr/share/caddy"
