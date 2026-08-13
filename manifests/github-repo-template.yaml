@@ -108,16 +108,13 @@ spec:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
     # 📝 Step 1: Dynamic Folder Fetch Switch
-    # 📝 Step 1: Dynamic Folder Fetch Switch
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
       input:
-        # FIXED: Added explicit forward slashes to ensure standard GitHub repo paths compile perfectly
+        # [FIXED STANDARD] Flat execution structure eliminates multi-line parsing errors entirely
         url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else 
-              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.webServerMode == 'static-assets' else 
-               'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa') }}
+          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.webServerMode == 'static-assets' else 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa') }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
@@ -141,6 +138,7 @@ spec:
           cpuLimit: ${{ parameters.cpuLimit or '150m' }}
           memRequest: ${{ parameters.memRequest or '16Mi' }}
           memLimit: ${{ parameters.memLimit or '32Mi' }}
+
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
