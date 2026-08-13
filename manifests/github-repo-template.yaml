@@ -31,7 +31,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-      # [OFFICIAL SYNTAX STANDARD] Controls the form UI layer cleanly by binding session hooks inside uiSchema options
+      # [OFFICIAL ROADMAP STANDARD] Bypasses native HTML string limitations by embedding the user data payload context inside uiSchema options
       uiSchema:
         repoOwner:
           ui:disabled: true
