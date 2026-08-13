@@ -108,13 +108,16 @@ spec:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
     # 📝 Step 1: Dynamic Folder Fetch Switch
+    # 📝 Step 1: Dynamic Folder Fetch Switch
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
       input:
-        # DYNAMIC PATH: If user chooses 'reverse-proxy', fetches proxy-nginx folder. Otherwise, pulls webservers-spa.
+        # FIXED: Added explicit forward slashes to ensure standard GitHub repo paths compile perfectly
         url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa' }}
+          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else 
+              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.webServerMode == 'static-assets' else 
+               'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa') }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
