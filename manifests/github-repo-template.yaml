@@ -25,21 +25,19 @@ spec:
         repoOwner:
           title: Repository Owner
           type: string
-          # Native user identity context token injector
-          default: ${{ user.entity.metadata.name }}
           description: Automatically locked and assigned to your active authenticated GitHub identity profile.
         description:
           title: Description
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-      # Modern Backstage UI schema tracking: This pre-populates and locks the string without clearing the field text
+      # [MODERN BOUNDARY SOLUTION] Pre-fills the field with the session identity and forces a clean UI grey-out
       uiSchema:
         repoOwner:
           ui:disabled: true
           ui:readonly: true
           ui:options:
-            rows: 1
+            default: ${{ user.entity.metadata.name }} # Injected directly inside uiSchema to ensure rjsf greys it out cleanly
 
     # PAGE 2: Web Server Configuration Profile (Kept exactly as you wrote it)
     - title: Web Server Runtime Configuration
