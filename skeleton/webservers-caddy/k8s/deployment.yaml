@@ -25,12 +25,17 @@ spec:
           env:
             - name: "${{ values.serviceType | upper }}_PORT"
               value: "${{ values.port }}"
+            # Caddy uses these environmental variable structures for its operational caching
+            - name: XDG_DATA_HOME
+              value: /tmp/caddy_data
+            - name: XDG_CONFIG_HOME
+              value: /tmp/caddy_config
           volumeMounts:
             - name: code-stream-volume
               mountPath: "${{ values.webRootPath }}"
             - name: config-volume
-              mountPath: "/usr/local/apache2/conf/httpd.conf"
-              subPath: "httpd.conf"
+              mountPath: "/etc/caddy/Caddyfile"
+              subPath: "Caddyfile"
           resources:
             requests:
               cpu: "${{ values.cpuRequest }}"
@@ -68,48 +73,23 @@ spec:
           emptyDir: {}
         - name: config-volume
           configMap:
-            name: "${{ values.repoName }}-httpd-config"
+            name: "${{ values.repoName }}-caddy-config"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "${{ values.repoName }}-httpd-config"
+  name: "${{ values.repoName }}-caddy-config"
 data:
-  httpd.conf: |
-    ServerRoot "/usr/local/apache2"
-    Listen ${{ values.port }}
-
-    LoadModule mpm_event_module modules/mod_mpm_event.so
-    LoadModule authn_core_module modules/mod_authn_core.so
-    LoadModule authz_core_module modules/mod_authz_core.so
-    LoadModule dir_module modules/mod_dir.so
-    LoadModule mime_module modules/mod_mime.so
-    LoadModule log_config_module modules/mod_log_config.so
-    LoadModule env_module modules/mod_env.so
-    LoadModule headers_module modules/mod_headers.so
-    LoadModule rewrite_module modules/mod_rewrite.so
-    LoadModule unixd_module modules/mod_unixd.so
-
-    TypesConfig conf/mime.types
-    CustomLog /proc/self/fd/1 combined
-    ErrorLog /proc/self/fd/2
-    LogLevel warn
-
-    ServerTokens Prod
-    ServerSignature Off
-
-    DocumentRoot "${{ values.webRootPath }}/${{ values.repoName }}"
-
-    <Directory "${{ values.webRootPath }}/${{ values.repoName }}">
-        Options -Indexes +FollowSymLinks
-        AllowOverride None
-        Require all granted
-
-        # SPA Engine Forwarding Logic
-        RewriteEngine On
-        RewriteBase /
-        RewriteRule ^index\.html$ - [L]
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteRule . /index.html [L]
-    </Directory>
+  Caddyfile: |
+    :${{ values.port }} {
+        root * ${{ values.webRootPath }}/${{ values.repoName }}
+        file_server
+        
+        # Native SPA Fallback Engine Integration
+        try_files {path} {path}/ /index.html
+        
+        log {
+            output stdout
+            format console
+        }
+    }
