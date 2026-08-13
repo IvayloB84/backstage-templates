@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "${{ values.repoName }}-static"
+  labels:
+    app: "${{ values.repoName }}-static"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "${{ values.repoName }}-static"
+  template:
+    metadata:
+      labels:
+        app: "${{ values.repoName }}-static"
+    spec:
+      securityContext:
+        fsGroup: 65534
+      containers:
+        # 1. Secure Unprivileged Apache HTTPD Server Layer
+        - name: app-container
+          image: "${{ values.image }}"
+          ports:
+            - containerPort: ${{ values.port }}
+          volumeMounts:
+            - name: code-stream-volume
+              mountPath: "${{ values.webRootPath }}"
+            - name: httpd-logs
+              mountPath: /usr/local/apache2/logs
+          resources:
+            requests:
+              cpu: "${{ values.cpuRequest }}"
+              memory: "${{ values.memRequest }}"
+            limits:
+              cpu: "${{ values.cpuLimit }}"
+              memory: "${{ values.memLimit }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false
+            runAsUser: 101
+            runAsGroup: 101
+
+        # 2. Automated Git-Sync Sidecar Layer
+        - name: git-sync-sidecar
+          image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
+          args:
+            - "--repo=https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
+            - "--branch=main"
+            - "--depth=1"
+            - "--wait=10"
+            - "--root=/tmp/git"
+            - "--dest=${{ values.repoName }}"
+          env:
+            - name: HOME
+              value: /tmp
+          volumeMounts:
+            - name: code-stream-volume
+              mountPath: /tmp/git
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsUser: 65534
+            runAsGroup: 65534
+          resources:
+            requests:
+              cpu: "${{ values.cpuRequest }}"
+              memory: "${{ values.memRequest }}"
+            limits:
+              cpu: "${{ values.cpuLimit }}"
+              memory: "${{ values.memLimit }}"
+
+      volumes:
+        - name: code-stream-volume
+          emptyDir: {}
+        - name: httpd-logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "${{ values.repoName }}"
+spec:
+  type: ClusterIP
+  selector:
+    app: "${{ values.repoName }}-static"
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: ${{ values.port }}

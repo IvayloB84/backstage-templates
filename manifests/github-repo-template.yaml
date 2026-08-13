@@ -144,9 +144,11 @@ spec:
       name: Render Codebase Repository Skeleton
       action: fetch:template
       input:
-        # [FIXED STANDARD] Flat execution structure eliminates multi-line parsing errors entirely
         url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.webServerMode == 'static-assets' else 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa') }}
+          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else 
+              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
+               ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.webServerMode == 'static-assets' else 
+                'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
