@@ -6,7 +6,7 @@ metadata:
   description: Scaffolds a baseline source code workspace with GitOps webhooks
 
 spec:
-  owner: "user:default/IvayloB84"
+  owner: user:default/IvayloB84
   type: service
 
   parameters:
