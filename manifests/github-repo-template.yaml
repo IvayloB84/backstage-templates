@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Fixed Field Contamination & Removed UI Clutter)
+    # PAGE 2: Web Server Configuration Profile (Fixed Auto-Selection Defaults)
     - title: Web Server Runtime Configuration
       required:
         - serviceType
@@ -40,11 +40,9 @@ spec:
         - port
         - webRootPath
       properties:
-        # [HIDDEN BACKEND TOKENS] Keeps corporate architectural constraints active without wasting UI space
         serviceCategory:
           type: string
           default: "webserver"
-        
         serviceType:
           title: Web Server Engine
           type: string
@@ -54,7 +52,6 @@ spec:
             - nginx
             - httpd
             - caddy
-
         image:
           title: Base Container Image
           type: string
@@ -68,23 +65,23 @@ spec:
           type: string
           description: Absolute destination path where the engine reads code files.
 
-      # [DYNAMIC SWAP ENGINE] Evaluates exact enum values to force text boxes to update instantly
+      # [AUTO-SELECT MATRIX] Combining single-item enums with const forces instant default activation
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ Presets loaded if Nginx is chosen
+            # 1️⃣ Automated Defaults for Nginx
             - properties:
                 serviceType:
-                  enum: [nginx]
+                  const: "nginx"
                 image:
+                  const: "nginx:alpine"
                   enum: ["nginx:alpine"]
-                  default: "nginx:alpine"
                 port:
+                  const: 80
                   enum: [80]
-                  default: 80
                 webRootPath:
+                  const: "/usr/share/nginx/html"
                   enum: ["/usr/share/nginx/html"]
-                  default: "/usr/share/nginx/html"
                 webServerMode:
                   title: Web Server Routing Profile
                   type: string
@@ -97,35 +94,35 @@ spec:
               required:
                 - webServerMode
 
-            # 2️⃣ Presets loaded if Apache HTTPD is chosen
+            # 2️⃣ Automated Defaults for Apache HTTPD
             - properties:
                 serviceType:
-                  enum: [httpd]
+                  const: "httpd"
                 image:
+                  const: "httpd:alpine"
                   enum: ["httpd:alpine"]
-                  default: "httpd:alpine"
                 port:
+                  const: 80
                   enum: [80]
-                  default: 80
                 webRootPath:
+                  const: "/usr/local/apache2/htdocs"
                   enum: ["/usr/local/apache2/htdocs"]
-                  default: "/usr/local/apache2/htdocs"
 
-            # 3️⃣ Presets loaded if Caddy is chosen
+            # 3️⃣ Automated Defaults for Caddy
             - properties:
                 serviceType:
-                  enum: [caddy]
+                  const: "caddy"
                 image:
+                  const: "caddy:alpine"
                   enum: ["caddy:alpine"]
-                  default: "caddy:alpine"
                 port:
+                  const: 80
                   enum: [80]
-                  default: 80
                 webRootPath:
+                  const: "/usr/share/caddy"
                   enum: ["/usr/share/caddy"]
-                  default: "/usr/share/caddy"
 
-      # [THE VISUAL FIX] Completely hides the architecture token from the UI layer
+      # Keeps architecture hidden and forces the selection layout engine to run
       uiSchema:
         serviceCategory:
           ui:widget: hidden
