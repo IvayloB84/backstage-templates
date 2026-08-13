@@ -63,9 +63,14 @@ spec:
             - "--wait=10"
             - "--root=/tmp/git"
             - "--dest=${{ values.repoName }}"
+          env:
+            - name: HOME
+              value: /tmp
           volumeMounts:
             - name: code-stream-volume
               mountPath: /tmp/git
+            - name: tmp-fs
+              mountPath: /tmp
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -75,12 +80,11 @@ spec:
             runAsUser: 65534
             runAsGroup: 65534
           resources:
-            requests:
-              cpu: "10m"
-              memory: "16Mi"
-            limits:
-              cpu: "50m"
-              memory: "32Mi"
+            cpu: "${{ values.cpuRequest }}"
+            memory: "${{ values.memRequest }}"
+          limits:
+            cpu: "${{ values.cpuLimit }}"
+            memory: "${{ values.memLimit }}"
 
       volumes:
         - name: code-stream-volume

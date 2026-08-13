@@ -19,7 +19,7 @@ spec:
       containers:
         # 1. Reverse Proxy Routing Engine (Nginx Unprivileged)
         - name: proxy-container
-          image: "nginx:1.25-alpine"
+          image: "${{ values.image }}"
           ports:
             - containerPort: ${{ values.port }}
           env:
