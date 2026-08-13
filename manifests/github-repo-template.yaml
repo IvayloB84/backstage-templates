@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Fixed Dynamic Text Replacements)
+    # PAGE 2: Web Server Configuration Profile (Fixed Using Pure Schema Constants)
     - title: Web Server Runtime Configuration
       required:
         - serviceCategory
@@ -70,69 +70,53 @@ spec:
           type: string
           description: Absolute destination path where the engine reads code files.
 
-      # [THE PRECISION OVERWRITE ENGINE] This forces RJSF to dump old states and write fresh text
-      allOf:
-        # 1️⃣ Dynamic Overwrites for Nginx
-        - if:
-            properties:
-              serviceType:
-                const: nginx
-          then:
-            properties:
-              image:
-                default: "nginx:alpine"
-              port:
-                default: 80
-              webRootPath:
-                default: "/usr/share/nginx/html"
-              webServerMode:
-                title: Web Server Routing Profile
-                type: string
-                default: "standard-spa"
-                description: Select the execution layer pattern for asset delivery.
-                enum:
-                  - "standard-spa"
-                  - "reverse-proxy"
-                  - "static-assets"
-            required:
-              - webServerMode
+      # [THE ARCHITECTURAL FIX] Using exact const mapping forces the UI to overwrite stale text fields
+      dependencies:
+        serviceType:
+          oneOf:
+            # 1️⃣ Rule for Nginx
+            - properties:
+                serviceType:
+                  const: "nginx"
+                image:
+                  const: "nginx:alpine"
+                port:
+                  const: 80
+                webRootPath:
+                  const: "/usr/share/nginx/html"
+                webServerMode:
+                  title: Web Server Routing Profile
+                  type: string
+                  default: "standard-spa"
+                  description: Select the execution layer pattern for asset delivery.
+                  enum:
+                    - "standard-spa"
+                    - "reverse-proxy"
+                    - "static-assets"
+              required:
+                - webServerMode
 
-        # 2️⃣ Dynamic Overwrites for Apache HTTPD
-        - if:
-            properties:
-              serviceType:
-                const: httpd
-          then:
-            properties:
-              image:
-                default: "httpd:alpine"
-              port:
-                default: 80
-              webRootPath:
-                default: "/usr/local/apache2/htdocs"
+            # 2️⃣ Rule for Apache HTTPD
+            - properties:
+                serviceType:
+                  const: "httpd"
+                image:
+                  const: "httpd:alpine"
+                port:
+                  const: 80
+                webRootPath:
+                  const: "/usr/local/apache2/htdocs"
 
-        # 3️⃣ Dynamic Overwrites for Caddy
-        - if:
-            properties:
-              serviceType:
-                const: caddy
-          then:
-            properties:
-              image:
-                default: "caddy:alpine"
-              port:
-                default: 80
-              webRootPath:
-                default: "/usr/share/caddy"
-
-      # This section tells the UI layout layer to listen for changes and wipe the stale values instantly
-      uiSchema:
-        image:
-          ui:options:
-            updateOnChange: true
-        webRootPath:
-          ui:options:
-            updateOnChange: true
+            # 3️⃣ Rule for Caddy
+            - properties:
+                serviceType:
+                  const: "caddy"
+                image:
+                  const: "caddy:alpine"
+                port:
+                  const: 80
+                webRootPath:
+                  const: "/usr/share/caddy"
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
