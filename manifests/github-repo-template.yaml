@@ -13,30 +13,19 @@ spec:
     # --- PAGE 1: Repository Ownership Details ---
     - title: Provide Repository Information
       required:
-        - repoName
-        - repoOwner
+        - repoUrl
       properties:
-        repoName:
-          title: Repository Name
+        repoUrl:
+          title: Repository Location
           type: string
-          maxLength: 50
-          pattern: '^([a-z][a-z0-9]*)(-[a-z0-9]+)*$'
-          description: Choose a unique name for your new code repository.
-        repoOwner:
-          title: Repository Owner
-          type: string
-          description: Automatically locked and assigned to your active authenticated GitHub identity profile.
-        description:
-          title: Description
-          type: string
-          description: A brief summary explaining the purpose of this microservice.
-
-      # [OFFICIAL ROADMAP STANDARD] Bypasses native HTML string limitations by embedding the user data payload context inside uiSchema options
-      uiSchema:
-        repoOwner:
-          ui:disabled: true
+          ui:field: RepoUrlPicker
           ui:options:
-            default: ${{ user.entity.metadata.name }}
+            # Explicitly restricts deployment targets to GitHub
+            allowedHosts:
+              - github.com
+            # CANONICAL FIX: Injects exactly ONE dynamic user identity option, forcing the component to turn read-only/greyed-out
+            allowedOwners:
+              - ${{ user.entity.metadata.name }}
 
     # PAGE 2: Web Server Configuration Profile (Kept exactly as you wrote it)
     - title: Web Server Runtime Configuration
