@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Fixed Auto-Selection Defaults)
+    # PAGE 2: Web Server Runtime Configuration (Fixed Auto-Populating Defaults)
     - title: Web Server Runtime Configuration
       required:
         - serviceType
@@ -65,23 +65,20 @@ spec:
           type: string
           description: Absolute destination path where the engine reads code files.
 
-      # [AUTO-SELECT MATRIX] Combining single-item enums with const forces instant default activation
+      # [TRUE AUTO-POPULATE FIX] Pure const definitions force immediate value placement without manual selection
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ Automated Defaults for Nginx
+            # 1️⃣ Presets for Nginx
             - properties:
                 serviceType:
                   const: "nginx"
                 image:
                   const: "nginx:alpine"
-                  enum: ["nginx:alpine"]
                 port:
                   const: 80
-                  enum: [80]
                 webRootPath:
                   const: "/usr/share/nginx/html"
-                  enum: ["/usr/share/nginx/html"]
                 webServerMode:
                   title: Web Server Routing Profile
                   type: string
@@ -94,33 +91,27 @@ spec:
               required:
                 - webServerMode
 
-            # 2️⃣ Automated Defaults for Apache HTTPD
+            # 2️⃣ Presets for Apache HTTPD
             - properties:
                 serviceType:
                   const: "httpd"
                 image:
                   const: "httpd:alpine"
-                  enum: ["httpd:alpine"]
                 port:
                   const: 80
-                  enum: [80]
                 webRootPath:
                   const: "/usr/local/apache2/htdocs"
-                  enum: ["/usr/local/apache2/htdocs"]
 
-            # 3️⃣ Automated Defaults for Caddy
+            # 3️⃣ Presets for Caddy
             - properties:
                 serviceType:
                   const: "caddy"
                 image:
                   const: "caddy:alpine"
-                  enum: ["caddy:alpine"]
                 port:
                   const: 80
-                  enum: [80]
                 webRootPath:
                   const: "/usr/share/caddy"
-                  enum: ["/usr/share/caddy"]
 
       # Keeps architecture hidden and forces the selection layout engine to run
       uiSchema:
