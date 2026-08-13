@@ -4,12 +4,13 @@ metadata:
   name: github-repo-template
   title: Create a New GitHub Repository
   description: Scaffolds a baseline source code workspace with GitOps webhooks
+
 spec:
-  owner: user:default/IvayloB84
+  owner: "user:default/IvayloB84"
   type: service
 
   parameters:
-    # PAGE 1: Repository Ownership Details
+    # --- PAGE 1: Repository Ownership Details ---
     - title: Provide Repository Information
       required:
         - repoName
@@ -24,21 +25,19 @@ spec:
         repoOwner:
           title: Repository Owner
           type: string
-          default: IvayloB84
-          description: Your GitHub organization or personal profile username.
+          # Canonical Backstage session injector: dynamically pulls active profile username string
+          default: ${{ user.entity.metadata.name }}
+          description: Automatically assigned to your active authenticated GitHub identity profile.
         description:
           title: Description
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
+      # Modern Backstage UI schema rule tracking: now locks down flawlessly because it is a base string field
       uiSchema:
         repoOwner:
-          ui:field: OwnerPicker
           ui:disabled: true
           ui:readonly: true
-          ui:options:
-            allowedKinds:
-              - User
 
     # PAGE 2: Web Server Configuration Profile (Kept exactly as you wrote it)
     - title: Web Server Runtime Configuration
