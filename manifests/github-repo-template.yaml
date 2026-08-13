@@ -32,14 +32,11 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Configuration Profile (Fixed Using Pure Schema Constants)
-    - title: Web Server Runtime Configuration
+    # PAGE 2: Select Server Engine Node
+    - title: Select Web Server Engine
       required:
         - serviceCategory
         - serviceType
-        - image
-        - port
-        - webRootPath
       properties:
         serviceCategory:
           title: Architecture Classification
@@ -57,6 +54,13 @@ spec:
             - httpd
             - caddy
 
+    # PAGE 3: Web Server Details (Evaluated on Step Transition to Prevent Text Freezing)
+    - title: Web Server Runtime Configuration
+      required:
+        - image
+        - port
+        - webRootPath
+      properties:
         image:
           title: Base Container Image
           type: string
@@ -70,20 +74,20 @@ spec:
           type: string
           description: Absolute destination path where the engine reads code files.
 
-      # [THE ARCHITECTURAL FIX] Using exact const mapping forces the UI to overwrite stale text fields
+      # [THE ARCHITECTURAL FIX] Evaluates dependencies cleanly because Page 2 state is already locked
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ Rule for Nginx
+            # 1️⃣ Rules applied if Nginx was chosen on Page 2
             - properties:
                 serviceType:
                   const: "nginx"
                 image:
-                  const: "nginx:alpine"
+                  type: string
+                  default: "nginx:alpine"
                 port:
-                  const: 80
-                webRootPath:
-                  const: "/usr/share/nginx/html"
+                  type: integer
+                  default: 80
                 webServerMode:
                   title: Web Server Routing Profile
                   type: string
@@ -93,30 +97,39 @@ spec:
                     - "standard-spa"
                     - "reverse-proxy"
                     - "static-assets"
+                webRootPath:
+                  type: string
+                  default: "/usr/share/nginx/html"
               required:
                 - webServerMode
 
-            # 2️⃣ Rule for Apache HTTPD
+            # 2️⃣ Rules applied if Apache HTTPD was chosen on Page 2
             - properties:
                 serviceType:
                   const: "httpd"
                 image:
-                  const: "httpd:alpine"
+                  type: string
+                  default: "httpd:alpine"
                 port:
-                  const: 80
+                  type: integer
+                  default: 80
                 webRootPath:
-                  const: "/usr/local/apache2/htdocs"
+                  type: string
+                  default: "/usr/local/apache2/htdocs"
 
-            # 3️⃣ Rule for Caddy
+            # 3️⃣ Rules applied if Caddy was chosen on Page 2
             - properties:
                 serviceType:
                   const: "caddy"
                 image:
-                  const: "caddy:alpine"
+                  type: string
+                  default: "caddy:alpine"
                 port:
-                  const: 80
+                  type: integer
+                  default: 80
                 webRootPath:
-                  const: "/usr/share/caddy"
+                  type: string
+                  default: "/usr/share/caddy"
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
