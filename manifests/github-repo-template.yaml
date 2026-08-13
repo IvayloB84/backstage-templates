@@ -34,6 +34,8 @@ spec:
       uiSchema:
         repoOwner:
           ui:field: OwnerPicker
+          ui:disabled: true
+          ui:readonly: true
           ui:options:
             allowedKinds:
               - User
