@@ -32,12 +32,6 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-      # [THE PRECISE FIX] This forces a standard text input to grey out cleanly on screen
-      uiSchema:
-        repoOwner:
-          ui:disabled: true
-          ui:readonly: true
-
     # PAGE 2: Web Server Configuration Profile (Kept exactly as you wrote it)
     - title: Web Server Runtime Configuration
       required:
