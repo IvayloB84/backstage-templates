@@ -157,10 +157,10 @@ spec:
           serviceCategory: ${{ parameters.serviceCategory }}
           serviceType: ${{ parameters.serviceType }}
           
-          # Dynamic server runtime parameters
-          image: ${{ parameters.nginxImage or parameters.httpdImage or parameters.caddyImage }}
-          port: ${{ parameters.port or parameters.httpdPort or parameters.caddyPort }}
-          webRootPath: ${{ parameters.webRootPath or parameters.httpdWebRootPath or parameters.caddyWebRootPath }}
+          # Dynamic server runtime parameters (FIXED EVALUATION ORDER)
+          image: ${{ parameters.httpdImage or parameters.caddyImage or parameters.nginxImage }}
+          port: ${{ parameters.httpdPort or parameters.caddyPort or parameters.port }}
+          webRootPath: ${{ parameters.httpdWebRootPath or parameters.caddyWebRootPath or parameters.webRootPath }}
           webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
           # Dynamic execution layer commands
@@ -172,7 +172,6 @@ spec:
           cpuLimit: ${{ parameters.cpuLimit or '150m' }}
           memRequest: ${{ parameters.memRequest or '16Mi' }}
           memLimit: ${{ parameters.memLimit or '32Mi' }}
-
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
