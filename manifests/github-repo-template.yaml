@@ -32,8 +32,8 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # 📑 PAGE 2: Web Server Runtime Configuration
-    - title: Web Server Runtime Configuration
+    # 📑 PAGE 2: Choose Web Server Engine
+    - title: Choose Web Server Engine
       required:
         - serviceType
       properties:
@@ -48,7 +48,12 @@ spec:
           enum:
             - nginx
             - httpd
+      uiSchema:
+        serviceCategory:
+          ui:widget: hidden
 
+    # 📑 PAGE 3: Web Server Runtime Configuration (Isolates and Cleans Review Table)
+    - title: Web Server Runtime Configuration
       dependencies:
         serviceType:
           oneOf:
@@ -104,10 +109,6 @@ spec:
                 - httpdPort
                 - httpdWebRootPath
 
-      uiSchema:
-        serviceCategory:
-          ui:widget: hidden
-
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
@@ -122,10 +123,10 @@ spec:
       action: fetch:template
       input:
         url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
-              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
-               ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
-                'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
+          ${{ 'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
+              ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
+               ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
+                'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
