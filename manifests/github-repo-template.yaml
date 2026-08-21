@@ -48,7 +48,6 @@ spec:
           enum:
             - nginx
             - httpd
-            - caddy
 
       # [THE UNMOUNT PATTERN] Uses unique keys to force the browser to clear and update the text boxes
       dependencies:
@@ -106,27 +105,6 @@ spec:
                 - httpdPort
                 - httpdWebRootPath
 
-            # 3️⃣ Selection rules for Caddy
-            - properties:
-                serviceType:
-                  const: "caddy"
-                caddyImage:
-                  title: Base Container Image
-                  type: string
-                  default: "caddy:alpine"
-                caddyPort:
-                  title: Container Port Allocation
-                  type: integer
-                  default: 80
-                caddyWebRootPath:
-                  title: Container Document Root Path
-                  type: string
-                  default: "/usr/share/caddy"
-              required:
-                - caddyImage
-                - caddyPort
-                - caddyWebRootPath
-
       uiSchema:
         serviceCategory:
           ui:widget: hidden
@@ -158,9 +136,9 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           
           # Dynamic server runtime parameters (FIXED EVALUATION ORDER)
-          image: ${{ parameters.httpdImage or parameters.caddyImage or parameters.nginxImage }}
-          port: ${{ parameters.httpdPort or parameters.caddyPort or parameters.port }}
-          webRootPath: ${{ parameters.httpdWebRootPath or parameters.caddyWebRootPath or parameters.webRootPath }}
+          image: ${{ parameters.httpdImage or parameters.nginxImage }}
+          port: ${{ parameters.httpdPort or parameters.port }}
+          webRootPath: ${{ parameters.httpdWebRootPath or parameters.webRootPath }}
           webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
           # Dynamic execution layer commands
@@ -168,10 +146,10 @@ spec:
           runArgs: ${{ ([] if parameters.webServerMode == 'standard-spa' else ['echo Initializing custom web routing profile...']) | dump }}
 
           # Resource allocation parameters
-          cpuRequest: ${{ parameters.cpuRequest or '25m' }}
-          cpuLimit: ${{ parameters.cpuLimit or '150m' }}
-          memRequest: ${{ parameters.memRequest or '16Mi' }}
-          memLimit: ${{ parameters.memLimit or '32Mi' }}
+          cpuRequest: ${{ parameters.cpuRequest or '50m' }}
+          cpuLimit: ${{ parameters.cpuLimit or '300m' }}
+          memRequest: ${{ parameters.memRequest or '32Mi' }}
+          memLimit: ${{ parameters.memLimit or '64Mi' }}
 
     # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
