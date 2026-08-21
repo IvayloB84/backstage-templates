@@ -32,63 +32,41 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # 📑 PAGE 2: Choose Web Server Engine
-    - title: Web Server Configuration
-      required:
-        - serviceType
-        - image
-        - port
-        - webRootPath
-      properties:
-        serviceCategory:
-          type: string
-          default: "webserver"
-        serviceType:
-          title: Web Server Engine
-          type: string
-          description: Select the technology stack container profile.
-          default: nginx
-          enum:
-            - nginx
-            - httpd
-        image:
-          title: Base Container Image
-          type: string
-          default: "nginx:alpine"
-        port:
-          title: Container Port Allocation
-          type: integer
-          default: 80
-        webRootPath:
-          title: Container Document Root Path
-          type: string
-          default: "/usr/share/nginx/html"
-      uiSchema:
-        serviceCategory:
-          ui:widget: hidden
+    # 📑 PAGE 2: Web Server Runtime Configuration
+    - title: Web Server Runtime Configuration
+      type: object
+      anyOf:
+        # 🟢 ENGINE OPTION A: Nginx with its 3 sub-choices
+        - title: Nginx Web Server
+          properties:
+            serviceType:
+              type: string
+              enum: [nginx]
+              default: nginx
+              title: Web Server Engine
+            webServerMode:
+              title: Web Server Routing Profile
+              type: string
+              default: "standard-spa"
+              description: Select the execution layer pattern for asset delivery.
+              enum:
+                - "standard-spa"
+                - "reverse-proxy"
+                - "static-assets"
+          required:
+            - serviceType
+            - webServerMode
 
-    # 📑 PAGE 3: Nginx Extended Settings (Skipped completely if HTTPD is selected)
-    - title: Web Server Runtime Routing
-      dependencies:
-        serviceType:
-          oneOf:
-            - properties:
-                serviceType:
-                  const: "nginx"
-                webServerMode:
-                  title: Web Server Routing Profile
-                  type: string
-                  default: "standard-spa"
-                  description: Select the execution layer pattern for asset delivery.
-                  enum:
-                    - "standard-spa"
-                    - "reverse-proxy"
-                    - "static-assets"
-              required:
-                - webServerMode
-            - properties:
-                serviceType:
-                  const: "httpd" # This empty property block forces Backstage to show an empty, skippable page for HTTPD with zero fields.
+        # 🔵 ENGINE OPTION B: Apache HTTPD (Hides the 3 routing choices completely)
+        - title: Apache HTTPD Server
+          properties:
+            serviceType:
+              type: string
+              enum: [httpd]
+              default: httpd
+              title: Web Server Engine
+          required:
+            - serviceType
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
@@ -104,10 +82,10 @@ spec:
       action: fetch:template
       input:
         url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
-              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
-               ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
-                'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
+          ${{ 'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
+              ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
+               ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
+                'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
@@ -115,10 +93,10 @@ spec:
           description: ${{ parameters.description or 'Freshly generated web application.' }}
           serviceType: ${{ parameters.serviceType }}
           
-          # Simplified baseline variables
-          image: ${{ parameters.image }}
-          port: ${{ parameters.port }}
-          webRootPath: ${{ parameters.webRootPath }}
+          # Stable baseline fallbacks assigned inside the step logic
+          image: ${{ 'httpd:alpine' if parameters.serviceType == 'httpd' else 'nginx:alpine' }}
+          port: 80
+          webRootPath: ${{ '/usr/local/apache2/htdocs' if parameters.serviceType == 'httpd' else '/usr/share/nginx/html' }}
           webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
           # Dynamic execution layer commands (SAFE CONDITIONS)
