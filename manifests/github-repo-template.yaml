@@ -110,32 +110,37 @@ spec:
 
     # --- PAGE 3: Clean Dynamic Review Summary ---
     - title: Review Summary
+      description: |
+        Please verify your template specifications before initiating the pipeline workspace creation.
+
+        ### 📦 Repository Baseline
+        * **Owner Profile:** `{{ formData.repoOwner }}`
+        * **Target Repository Name:** `{{ formData.repoName }}`
+        * **Project Purpose:** {{ formData.description or '*No summary details provided.*' }}
+
+        ### ⚙️ Runtime Specifications
+        * **Engine Platform Type:** `{{ formData.serviceType | upper }}`
+        {% if formData.serviceType == 'nginx' %}
+        * **Operation Runtime Mode:** `{{ formData.webServerMode }}`
+        * **Target Container Base:** `{{ formData.nginxImage }}`
+        * **Traffic Network Port:** `{{ formData.port }}`
+        * **Container Path Location:** `{{ formData.webRootPath }}`
+        {% else %}
+        * **Target Container Base:** `{{ formData.httpdImage }}`
+        * **Traffic Network Port:** `{{ formData.httpdPort }}`
+        * **Container Path Location:** `{{ formData.httpdWebRootPath }}`
+        {% endif %}
+
+        If everything looks correct, click **Create** below to initialize your repository workspace.
       properties:
-        reviewSummaryLayout:
-          type: string
-          title: Selected Configuration Verification
-          ui:field: Markdown
-          ui:options:
-            content: |
-              ### 📦 Repository Baseline
-              * **Owner Profiles:** `{{ formData.repoOwner }}`
-              * **Target Repository Name:** `{{ formData.repoName }}`
-              * **Project Purpose:** {{ formData.description or '*No summary details provided.*' }}
-
-              ### ⚙️ Runtime Specifications
-              * **Engine Platform Type:** `{{ formData.serviceType | upper }}`
-              {% if formData.serviceType == 'nginx' %}
-              * **Operation Runtime Mode:** `{{ formData.webServerMode }}`
-              * **Target Container Base:** `{{ formData.nginxImage }}`
-              * **Traffic Network Port:** `{{ formData.port }}`
-              * **Container Path Location:** `{{ formData.webRootPath }}`
-              {% else %}
-              * **Target Container Base:** `{{ formData.httpdImage }}`
-              * **Traffic Network Port:** `{{ formData.httpdPort }}`
-              * **Container Path Location:** `{{ formData.httpdWebRootPath }}`
-              {% endif %}
-
-              Please verify these parameters before initiating your pipeline automation.
+        # We declare a single dummy parameter to hold the page wrapper layout intact
+        summaryConfirmationCheck:
+          type: boolean
+          title: I have verified that all configurations above are accurate.
+          default: true
+      uiSchema:
+        summaryConfirmationCheck:
+          ui:widget: hidden # Hides the dummy checkbox, leaving only your beautiful dynamic markdown text visible
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
