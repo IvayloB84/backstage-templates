@@ -110,15 +110,34 @@ spec:
 
     # --- PAGE 3: Review Configuration Summary ---
     - title: Review Summary
-      description: |
-        Please verify your template specifications before initiating the pipeline workspace creation.
       properties:
-        reviewField:
+        reviewSummary:
           type: string
           title: Chosen Configuration Overview
-          # Backstage allows custom components or empty fields with uiSchema descriptions to show markdown
-          description: |
-            Review your configuration details below. If everything looks correct, click **Create** to initialize your repository.
+          ui:field: Markdown
+          ui:options:
+            content: |
+              Please verify your template specifications before initiating the pipeline workspace creation.
+
+              ### Repository Information
+              * **Repository Name:** `{{ formData.repoName }}`
+              * **Repository Owner:** `{{ formData.repoOwner }}`
+              * **Description:** {{ formData.description or '*No description provided*' }}
+
+              ### Web Server Runtime
+              * **Engine:** `{{ formData.serviceType | upper }}`
+              {% if formData.serviceType == 'nginx' %}
+              * **Routing Profile:** `{{ formData.webServerMode }}`
+              * **Image Allocation:** `{{ formData.nginxImage }}`
+              * **Container Port:** `{{ formData.port }}`
+              * **Document Root:** `{{ formData.webRootPath }}`
+              {% else %}
+              * **Image Allocation:** `{{ formData.httpdImage }}`
+              * **Container Port:** `{{ formData.httpdPort }}`
+              * **Document Root:** `{{ formData.httpdWebRootPath }}`
+              {% endif %}
+
+              If everything looks correct, click **Create** below to initialize your repository.
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
