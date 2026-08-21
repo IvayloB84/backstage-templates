@@ -108,36 +108,34 @@ spec:
         serviceCategory:
           ui:widget: hidden
 
-    # --- PAGE 3: Review Configuration Summary ---
+    # --- PAGE 3: Clean Dynamic Review Summary ---
     - title: Review Summary
       properties:
-        reviewSummary:
+        reviewSummaryLayout:
           type: string
-          title: Chosen Configuration Overview
+          title: Selected Configuration Verification
           ui:field: Markdown
           ui:options:
             content: |
-              Please verify your template specifications before initiating the pipeline workspace creation.
+              ### 📦 Repository Baseline
+              * **Owner Profiles:** `{{ formData.repoOwner }}`
+              * **Target Repository Name:** `{{ formData.repoName }}`
+              * **Project Purpose:** {{ formData.description or '*No summary details provided.*' }}
 
-              ### Repository Information
-              * **Repository Name:** `{{ formData.repoName }}`
-              * **Repository Owner:** `{{ formData.repoOwner }}`
-              * **Description:** {{ formData.description or '*No description provided*' }}
-
-              ### Web Server Runtime
-              * **Engine:** `{{ formData.serviceType | upper }}`
+              ### ⚙️ Runtime Specifications
+              * **Engine Platform Type:** `{{ formData.serviceType | upper }}`
               {% if formData.serviceType == 'nginx' %}
-              * **Routing Profile:** `{{ formData.webServerMode }}`
-              * **Image Allocation:** `{{ formData.nginxImage }}`
-              * **Container Port:** `{{ formData.port }}`
-              * **Document Root:** `{{ formData.webRootPath }}`
+              * **Operation Runtime Mode:** `{{ formData.webServerMode }}`
+              * **Target Container Base:** `{{ formData.nginxImage }}`
+              * **Traffic Network Port:** `{{ formData.port }}`
+              * **Container Path Location:** `{{ formData.webRootPath }}`
               {% else %}
-              * **Image Allocation:** `{{ formData.httpdImage }}`
-              * **Container Port:** `{{ formData.httpdPort }}`
-              * **Document Root:** `{{ formData.httpdWebRootPath }}`
+              * **Target Container Base:** `{{ formData.httpdImage }}`
+              * **Traffic Network Port:** `{{ formData.httpdPort }}`
+              * **Container Path Location:** `{{ formData.httpdWebRootPath }}`
               {% endif %}
 
-              If everything looks correct, click **Create** below to initialize your repository.
+              Please verify these parameters before initiating your pipeline automation.
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
