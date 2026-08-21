@@ -115,6 +115,9 @@ spec:
                       default: "/usr/local/apache2/htdocs"
 
       uiSchema:
+        # Force the form engine to delete hidden conditional fields from state memory
+        ui:omitExtraData: true
+        
         serviceCategory:
           ui:widget: hidden
 
