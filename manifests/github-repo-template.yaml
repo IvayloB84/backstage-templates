@@ -10,7 +10,7 @@ spec:
   type: service
 
   parameters:
-    # --- PAGE 1: Provide Repository Information ---
+    # 📑 PAGE 1: Provide Repository Information
     - title: Provide Repository Information
       required:
         - repoName
@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # --- PAGE 2: Web Server Runtime Configuration ---
+    # 📑 PAGE 2: Web Server Runtime Configuration
     - title: Web Server Runtime Configuration
       required:
         - serviceType
@@ -108,40 +108,6 @@ spec:
         serviceCategory:
           ui:widget: hidden
 
-    # --- PAGE 3: Clean Dynamic Review Summary ---
-    - title: Review Summary
-      description: |
-        Please verify your template specifications before initiating the pipeline workspace creation.
-
-        ### 📦 Repository Baseline
-        * **Owner Profile:** `{{ formData.repoOwner }}`
-        * **Target Repository Name:** `{{ formData.repoName }}`
-        * **Project Purpose:** {{ formData.description or '*No summary details provided.*' }}
-
-        ### ⚙️ Runtime Specifications
-        * **Engine Platform Type:** `{{ formData.serviceType | upper }}`
-        {% if formData.serviceType == 'nginx' %}
-        * **Operation Runtime Mode:** `{{ formData.webServerMode }}`
-        * **Target Container Base:** `{{ formData.nginxImage }}`
-        * **Traffic Network Port:** `{{ formData.port }}`
-        * **Container Path Location:** `{{ formData.webRootPath }}`
-        {% else %}
-        * **Target Container Base:** `{{ formData.httpdImage }}`
-        * **Traffic Network Port:** `{{ formData.httpdPort }}`
-        * **Container Path Location:** `{{ formData.httpdWebRootPath }}`
-        {% endif %}
-
-        If everything looks correct, click **Create** below to initialize your repository workspace.
-      properties:
-        # We declare a single dummy parameter to hold the page wrapper layout intact
-        summaryConfirmationCheck:
-          type: boolean
-          title: I have verified that all configurations above are accurate.
-          default: true
-      uiSchema:
-        summaryConfirmationCheck:
-          ui:widget: hidden # Hides the dummy checkbox, leaving only your beautiful dynamic markdown text visible
-
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
@@ -156,10 +122,10 @@ spec:
       action: fetch:template
       input:
         url: >-
-          ${{ 'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
-              ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
-               ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
-                'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
+          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
+              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
+               ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
+                'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
