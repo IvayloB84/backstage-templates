@@ -10,7 +10,7 @@ spec:
   type: service
 
   parameters:
-    # 📑 PAGE 1: Provide Repository Information
+    # PAGE 1: Provide Repository Information
     - title: Provide Repository Information
       required:
         - repoName
@@ -32,11 +32,11 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # 📑 PAGE 2: Web Server Runtime Configuration
+    # PAGE 2: Web Server Runtime Configuration
     - title: Web Server Runtime Configuration
       type: object
       anyOf:
-        # 🟢 ENGINE OPTION A: Nginx with its 3 sub-choices
+        # 🟢 ENGINE OPTION A: Nginx with its 3 sub-choices and parameters
         - title: Nginx Web Server
           properties:
             serviceType:
@@ -44,6 +44,14 @@ spec:
               enum: [nginx]
               default: nginx
               title: Web Server Engine
+            nginxImage:
+              title: Base Container Image
+              type: string
+              default: "nginx:alpine"
+            port:
+              title: Container Port Allocation
+              type: integer
+              default: 80
             webServerMode:
               title: Web Server Routing Profile
               type: string
@@ -53,11 +61,18 @@ spec:
                 - "standard-spa"
                 - "reverse-proxy"
                 - "static-assets"
+            webRootPath:
+              title: Container Document Root Path
+              type: string
+              default: "/usr/share/nginx/html"
           required:
             - serviceType
+            - nginxImage
+            - port
             - webServerMode
+            - webRootPath
 
-        # 🔵 ENGINE OPTION B: Apache HTTPD (Hides the 3 routing choices completely)
+        # ENGINE OPTION B: Apache HTTPD (Hides the 3 routing choices completely)
         - title: Apache HTTPD Server
           properties:
             serviceType:
@@ -65,8 +80,23 @@ spec:
               enum: [httpd]
               default: httpd
               title: Web Server Engine
+            httpdImage:
+              title: Base Container Image
+              type: string
+              default: "httpd:alpine"
+            httpdPort:
+              title: Container Port Allocation
+              type: integer
+              default: 80
+            httpdWebRootPath:
+              title: Container Document Root Path
+              type: string
+              default: "/usr/local/apache2/htdocs"
           required:
             - serviceType
+            - httpdImage
+            - httpdPort
+            - httpdWebRootPath
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
@@ -93,10 +123,10 @@ spec:
           description: ${{ parameters.description or 'Freshly generated web application.' }}
           serviceType: ${{ parameters.serviceType }}
           
-          # Stable baseline fallbacks assigned inside the step logic
-          image: ${{ 'httpd:alpine' if parameters.serviceType == 'httpd' else 'nginx:alpine' }}
-          port: 80
-          webRootPath: ${{ '/usr/local/apache2/htdocs' if parameters.serviceType == 'httpd' else '/usr/share/nginx/html' }}
+          # Pipelines cleanly pick the value that is active from the parameter memory space
+          image: ${{ parameters.httpdImage or parameters.nginxImage }}
+          port: ${{ parameters.httpdPort or parameters.port }}
+          webRootPath: ${{ parameters.httpdWebRootPath or parameters.webRootPath }}
           webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
           # Dynamic execution layer commands (SAFE CONDITIONS)
