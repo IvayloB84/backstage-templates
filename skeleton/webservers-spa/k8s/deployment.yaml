@@ -57,11 +57,11 @@ spec:
             runAsGroup: 65534
           resources:
             requests:
-              cpu: "10m"
-              memory: "16Mi"
+              cpu: "${{ values.cpuRequest }}"
+              memory: "${{ values.memRequest }}"
             limits:
-              cpu: "50m"
-              memory: "32Mi"
+              cpu: "${{ values.cpuLimit }}"
+              memory: "${{ values.memLimit }}"
 
       volumes:
         - name: code-stream-volume

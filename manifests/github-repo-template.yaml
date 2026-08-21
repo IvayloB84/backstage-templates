@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Runtime Configuration (Fixed Dynamic Field Isolation)
+    # PAGE 2: Web Server Runtime Configuration
     - title: Web Server Runtime Configuration
       required:
         - serviceType
@@ -49,7 +49,6 @@ spec:
             - nginx
             - httpd
 
-      # [THE UNMOUNT PATTERN] Uses unique keys to force the browser to clear and update the text boxes
       dependencies:
         serviceType:
           oneOf:
@@ -57,53 +56,63 @@ spec:
             - properties:
                 serviceType:
                   const: "nginx"
-                nginxImage:
-                  title: Base Container Image
-                  type: string
-                  default: "nginx:alpine"
-                port:
-                  title: Container Port Allocation
-                  type: integer
-                  default: 80
-                webServerMode:
-                  title: Web Server Routing Profile
-                  type: string
-                  default: "standard-spa"
-                  description: Select the execution layer pattern for asset delivery.
-                  enum:
-                    - "standard-spa"
-                    - "reverse-proxy"
-                    - "static-assets"
-                webRootPath:
-                  title: Container Document Root Path
-                  type: string
-                  default: "/usr/share/nginx/html"
-              required:
-                - nginxImage
-                - port
-                - webServerMode
-                - webRootPath
+                # We nest the changing fields inside a dynamic schema wrapper
+                nginxConfig:
+                  type: object
+                  title: Nginx Engine Options
+                  required:
+                    - nginxImage
+                    - port
+                    - webServerMode
+                    - webRootPath
+                  properties:
+                    nginxImage:
+                      title: Base Container Image
+                      type: string
+                      default: "nginx:alpine"
+                    port:
+                      title: Container Port Allocation
+                      type: integer
+                      default: 80
+                    webServerMode:
+                      title: Web Server Routing Profile
+                      type: string
+                      default: "standard-spa"
+                      description: Select the execution layer pattern for asset delivery.
+                      enum:
+                        - "standard-spa"
+                        - "reverse-proxy"
+                        - "static-assets"
+                    webRootPath:
+                      title: Container Document Root Path
+                      type: string
+                      default: "/usr/share/nginx/html"
 
             # 2️⃣ Selection rules for Apache HTTPD
             - properties:
                 serviceType:
                   const: "httpd"
-                httpdImage:
-                  title: Base Container Image
-                  type: string
-                  default: "httpd:alpine"
-                httpdPort:
-                  title: Container Port Allocation
-                  type: integer
-                  default: 80
-                httpdWebRootPath:
-                  title: Container Document Root Path
-                  type: string
-                  default: "/usr/local/apache2/htdocs"
-              required:
-                - httpdImage
-                - httpdPort
-                - httpdWebRootPath
+                # Wrapping the HTTPD options isolates them completely from Nginx defaults
+                httpdConfig:
+                  type: object
+                  title: Apache HTTPD Options
+                  required:
+                    - httpdImage
+                    - httpdPort
+                    - httpdWebRootPath
+                  properties:
+                    httpdImage:
+                      title: Base Container Image
+                      type: string
+                      default: "httpd:alpine"
+                    httpdPort:
+                      title: Container Port Allocation
+                      type: integer
+                      default: 80
+                    httpdWebRootPath:
+                      title: Container Document Root Path
+                      type: string
+                      default: "/usr/local/apache2/htdocs"
 
       uiSchema:
         serviceCategory:
@@ -123,10 +132,10 @@ spec:
       action: fetch:template
       input:
         url: >-
-          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.webServerMode == 'reverse-proxy' else 
-              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
-               ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.webServerMode == 'static-assets' else 
-                'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
+          ${{ 'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
+              ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if parameters.nginxConfig.webServerMode == 'reverse-proxy' else 
+               ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if parameters.nginxConfig.webServerMode == 'static-assets' else 
+                'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
