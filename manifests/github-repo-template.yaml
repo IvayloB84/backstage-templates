@@ -10,7 +10,7 @@ spec:
   type: service
 
   parameters:
-    # ─── 📄 PAGE 1: REPOSITORY INFO ──────────────────────────────────────────
+    # --- PAGE 1: Provide Repository Information ---
     - title: Provide Repository Information
       required:
         - repoName
@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # ─── 📄 PAGE 2: ENGINE RUNTIME INFO (DYNAMIC SHIFTING) ────────────────────
+    # PAGE 2: Web Server Runtime Configuration
     - title: Web Server Runtime Configuration
       required:
         - serviceType
@@ -49,11 +49,10 @@ spec:
             - nginx
             - httpd
 
-      # This dependencies block safely toggles root-level unique keys on this page
       dependencies:
         serviceType:
           oneOf:
-            # 1️⃣ If user selected Nginx
+            # 1️⃣ Selection rules for Nginx
             - properties:
                 serviceType:
                   const: "nginx"
@@ -84,7 +83,7 @@ spec:
                 - webServerMode
                 - webRootPath
 
-            # 2️⃣ If user selected Apache HTTPD
+            # 2️⃣ Selection rules for Apache HTTPD
             - properties:
                 serviceType:
                   const: "httpd"
@@ -109,10 +108,6 @@ spec:
         serviceCategory:
           ui:widget: hidden
 
-  uiSchema:
-    serviceCategory:
-      ui:widget: hidden
-
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
@@ -128,7 +123,7 @@ spec:
       input:
         url: >-
           ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
-              ('https://github.com/'~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
+              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
                ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
                 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
@@ -139,15 +134,15 @@ spec:
           serviceCategory: ${{ parameters.serviceCategory }}
           serviceType: ${{ parameters.serviceType }}
           
-          # Dynamic server runtime parameters (Aligned with Page 2 UI Keys)
-          image: ${{ parameters.httpdImage if parameters.serviceType == 'httpd' else parameters.nginxImage }}
-          port: ${{ parameters.httpdPort if parameters.serviceType == 'httpd' else parameters.port }}
-          webRootPath: ${{ parameters.httpdWebRootPath if parameters.serviceType == 'httpd' else parameters.webRootPath }}
-          webServerMode: ${{ 'static-assets' if parameters.serviceType == 'httpd' else parameters.webServerMode }}
+          # Dynamic server runtime parameters
+          image: ${{ parameters.httpdImage or parameters.nginxImage }}
+          port: ${{ parameters.httpdPort or parameters.port }}
+          webRootPath: ${{ parameters.httpdWebRootPath or parameters.webRootPath }}
+          webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
-          # Dynamic execution layer commands
+          # Dynamic execution layer commands (SAFE CONDITIONS)
           runCommand: ${{ ([] if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'standard-spa') else ['sh', '-c']) | dump }}
-          runArgs: ${{ ([] if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'standard-spa') else ['echo Initializing custom web routing profile...']) | dump }}
+          runArgs: ${{ ([] if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'standard-spa') else ['echo', 'Initializing custom web routing profile...']) | dump }}
 
           # Resource allocation parameters
           cpuRequest: ${{ parameters.cpuRequest or '50m' }}
