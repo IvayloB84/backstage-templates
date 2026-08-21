@@ -10,7 +10,7 @@ spec:
   type: service
 
   parameters:
-    # PAGE 1: Provide Repository Information
+    # 📑 PAGE 1: Provide Repository Information
     - title: Provide Repository Information
       required:
         - repoName
@@ -32,11 +32,11 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Runtime Configuration
+    # 📑 PAGE 2: Web Server Engine Selection
     - title: Web Server Runtime Configuration
       type: object
       anyOf:
-        # 🟢 ENGINE OPTION A: Nginx with its 3 sub-choices and parameters
+        # 🟢 ENGINE OPTION A: Nginx
         - title: Nginx Web Server
           properties:
             serviceType:
@@ -44,7 +44,7 @@ spec:
               enum: [nginx]
               default: nginx
               title: Web Server Engine
-            nginxImage:
+            image:
               title: Base Container Image
               type: string
               default: "nginx:alpine"
@@ -67,12 +67,12 @@ spec:
               default: "/usr/share/nginx/html"
           required:
             - serviceType
-            - nginxImage
+            - image
             - port
             - webServerMode
             - webRootPath
 
-        # ENGINE OPTION B: Apache HTTPD (Hides the 3 routing choices completely)
+        # 🔵 ENGINE OPTION B: Apache HTTPD
         - title: Apache HTTPD Server
           properties:
             serviceType:
@@ -80,23 +80,23 @@ spec:
               enum: [httpd]
               default: httpd
               title: Web Server Engine
-            httpdImage:
+            image:
               title: Base Container Image
               type: string
               default: "httpd:alpine"
-            httpdPort:
+            port:
               title: Container Port Allocation
               type: integer
               default: 80
-            httpdWebRootPath:
+            webRootPath:
               title: Container Document Root Path
               type: string
               default: "/usr/local/apache2/htdocs"
           required:
             - serviceType
-            - httpdImage
-            - httpdPort
-            - httpdWebRootPath
+            - image
+            - port
+            - webRootPath
 
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
@@ -123,10 +123,10 @@ spec:
           description: ${{ parameters.description or 'Freshly generated web application.' }}
           serviceType: ${{ parameters.serviceType }}
           
-          # Pipelines cleanly pick the value that is active from the parameter memory space
-          image: ${{ parameters.httpdImage or parameters.nginxImage }}
-          port: ${{ parameters.httpdPort or parameters.port }}
-          webRootPath: ${{ parameters.httpdWebRootPath or parameters.webRootPath }}
+          # Cleaned uniform pipeline parameters mapping directly to shared fields
+          image: ${{ parameters.image }}
+          port: ${{ parameters.port }}
+          webRootPath: ${{ parameters.webRootPath }}
           webServerMode: ${{ parameters.webServerMode or 'static-assets' }}
                  
           # Dynamic execution layer commands (SAFE CONDITIONS)
