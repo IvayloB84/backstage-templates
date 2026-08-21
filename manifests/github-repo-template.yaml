@@ -4,7 +4,7 @@ metadata:
   name: github-repo-template
   title: Create a New GitHub Repository
   description: Scaffolds a baseline source code workspace with GitOps webhooks
-
+  
 spec:
   owner: "user:default/IvayloB84"
   type: service
@@ -32,7 +32,7 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # PAGE 2: Web Server Runtime Configuration
+    # --- PAGE 2: Web Server Runtime Configuration ---
     - title: Web Server Runtime Configuration
       required:
         - serviceType
@@ -108,6 +108,25 @@ spec:
         serviceCategory:
           ui:widget: hidden
 
+    # --- PAGE 3: Deployment Targeting Configuration ---
+    - title: Deployment Targets Configuration
+      required:
+        - targetEnvironments
+      properties:
+        targetEnvironments:
+          title: Target Environments
+          type: array
+          description: Select all environments where your GitOps workflows should initialize resources.
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - development
+              - integration
+              - staging
+              - production
+          ui:widget: select # Switches the UI from visible checkboxes to a native multi-select dropdown field
+
   steps:
     # 🎲 Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
@@ -115,7 +134,6 @@ spec:
       action: debug:log
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
-
     # 📝 Step 1: Dynamic Folder Fetch Switch
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
@@ -133,7 +151,10 @@ spec:
           description: ${{ parameters.description or 'Freshly generated web application.' }}
           serviceCategory: ${{ parameters.serviceCategory }}
           serviceType: ${{ parameters.serviceType }}
-          
+
+          # Deployment targeting parameter (Injected Array)
+          targetEnvironments: ${{ parameters.targetEnvironments }}
+
           # Dynamic server runtime parameters
           image: ${{ parameters.httpdImage or parameters.nginxImage }}
           port: ${{ parameters.httpdPort or parameters.port }}
