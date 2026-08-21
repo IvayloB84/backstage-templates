@@ -55,7 +55,7 @@ spec:
             webServerMode:
               title: Web Server Routing Profile
               type: string
-              default: "standard-spa"
+              default: "standard-spa" # 🚀 THE FIX: Sets pre-selected option on initial load
               description: Select the execution layer pattern for asset delivery.
               enum:
                 - "standard-spa"
@@ -112,10 +112,10 @@ spec:
       action: fetch:template
       input:
         url: >-
-          ${{ 'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
-              ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
-               ('https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
-                'https://github.com' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
+          ${{ 'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-httpd' if parameters.serviceType == 'httpd' else 
+              ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/proxy-nginx' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'reverse-proxy') else 
+               ('https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-static' if (parameters.serviceType == 'nginx' and parameters.webServerMode == 'static-assets') else 
+                'https://github.com/' ~ parameters.repoOwner ~ '/backstage-templates/tree/main/skeleton/webservers-spa')) }}
         targetPath: '.'
         values:
           repoName: ${{ parameters.repoName }}
