@@ -99,7 +99,7 @@ spec:
       input:
         method: 'DELETE'
         # Natively routes inside your cluster namespace to wipe out all metadata records instantly
-        path: 'http://127.0.0.1:7007/api/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
+        path: 'http://backstage-pilot:7007/api/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
 
   output:
     links:
