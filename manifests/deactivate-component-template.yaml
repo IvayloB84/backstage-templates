@@ -95,10 +95,10 @@ spec:
     # FINAL STEP: Native built-in framework unregistration that bypasses Keycloak token limits
     - id: purge-from-catalog
       name: Complete End-to-End Database Purge
-      action: catalog:unregister
+      action: http:backstage:request
       input:
         # Dynamically matches the exact entity string format to drop the registration row instantly
-        entityRef: 'component:default/${{ parameters.repoName }}'
+        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
 
   output:
     links:
