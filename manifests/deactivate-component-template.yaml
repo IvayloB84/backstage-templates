@@ -91,7 +91,6 @@ spec:
           * Target pods, configurations, and folders are removed from the cluster.
         targetBranchName: main
 
-
   output:
     links:
       - title: Review Deletion Pull Request
