@@ -188,12 +188,12 @@ spec:
       input:
         seconds: 15
 
-    # # 📁 Step 5: REGISTER
-    # - id: register
-    #   name: Register in Backstage Catalog
-    #   action: catalog:register
-    #   input:
-    #     catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
+    # 📁 Step 5: REGISTER
+    - id: register
+      name: Register in Backstage Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: 'https://github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}/blob/main/catalog-info.yaml'
 
   output:
     links:
