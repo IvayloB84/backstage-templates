@@ -99,6 +99,7 @@ spec:
       input:
         method: 'DELETE'
         # Natively routes inside your cluster namespace to wipe out all metadata records instantly
+        baseUrl: 'http://127.0.0.1:7007'
         path: '/api/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
 
 
