@@ -92,21 +92,7 @@ spec:
           * Target pods, configurations, and folders are removed from the cluster.
         targetBranchName: main
 
-    # FINAL STEP: Native built-in framework unregistration that bypasses Keycloak token limits
-    - id: purge-from-catalog
-      name: Complete End-to-End Database Purge
-      action: http:backstage:request
-      input:
-        method: 'DELETE'
-        # Dynamically matches the exact entity string format to drop the registration row instantly
-        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
-
   output:
-    getResponse: '{{ steps["purge-from-catalog"].output.body }}'
-    getCode: '{{ steps["purge-from-catalog"].output.code }}'
-    getHeaders: '{{ steps["purge-from-catalog"].output.headers }}'
-
-  # output:
-  #   links:
-  #     - title: Review Deletion Pull Request
-  #       url: ${{ steps['create-pr'].output.remoteUrl }}
+    links:
+      - title: Review Deletion Pull Request
+        url: ${{ steps['create-pr'].output.remoteUrl }}
