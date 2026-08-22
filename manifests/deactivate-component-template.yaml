@@ -73,6 +73,7 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
+        update: true 
         filesToDelete:
           - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'
           - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
