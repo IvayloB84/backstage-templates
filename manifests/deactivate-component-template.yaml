@@ -96,7 +96,7 @@ spec:
     - id: purge-from-catalog
       name: Complete End-to-End Database Purge
       action: http:backstage:request
-      method: 'DELETE'
+      method: "DELETE"
       input:
         # Dynamically matches the exact entity string format to drop the registration row instantly
         path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
