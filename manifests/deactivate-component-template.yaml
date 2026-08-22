@@ -75,14 +75,14 @@ spec:
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
         update: true 
         filesToDelete:
-          - 'argocd-apps/${{ parameters.repoName }}/**'
-          # - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
-          # - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
-          # - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
-          # - 'argocd-apps/${{ parameters.repoName }}/index.html'
-          # - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
-          # - 'argocd-apps/${{ parameters.repoName }}/nginx.conf'
-          # - 'argocd-apps/${{ parameters.repoName }}/httpd.conf'
+          - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/index.html'
+          - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/nginx.conf'
+          - 'argocd-apps/${{ parameters.repoName }}/httpd.conf'
         description: |
           ### Automated Component Deletion Request
           This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
@@ -96,6 +96,7 @@ spec:
     - id: purge-from-catalog
       name: Complete End-to-End Database Purge
       action: http:backstage:request
+      method: 'DELETE'
       input:
         # Dynamically matches the exact entity string format to drop the registration row instantly
         path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
