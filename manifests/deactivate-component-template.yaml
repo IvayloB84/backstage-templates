@@ -102,6 +102,11 @@ spec:
         path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
 
   output:
-    links:
-      - title: Review Deletion Pull Request
-        url: ${{ steps['create-pr'].output.remoteUrl }}
+    getResponse: '{{ steps["purge-from-catalog"].output.body }}'
+    getCode: '{{ steps["purge-from-catalog"].output.code }}'
+    getHeaders: '{{ steps["purge-from-catalog"].output.headers }}'
+
+  # output:
+  #   links:
+  #     - title: Review Deletion Pull Request
+  #       url: ${{ steps['create-pr'].output.remoteUrl }}
