@@ -92,14 +92,13 @@ spec:
           * Target pods, configurations, and folders are removed from the cluster.
         targetBranchName: main
 
-    # FINAL STEP: Programmatically delete the component and locations records from the database via REST API
+    # FINAL STEP: Native built-in framework unregistration that bypasses Keycloak token limits
     - id: purge-from-catalog
       name: Complete End-to-End Database Purge
-      action: http:backstage:request
+      action: catalog:unregister
       input:
-        method: 'DELETE'
-        # Natively routes inside your cluster namespace to wipe out all metadata records instantly
-        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
+        # Dynamically matches the exact entity string format to drop the registration row instantly
+        entityRef: 'component:default/${{ parameters.repoName }}'
 
   output:
     links:
