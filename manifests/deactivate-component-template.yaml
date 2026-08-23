@@ -65,23 +65,11 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # STEP 1: Fetch the component details to read its explicit location metadata tag
-    - id: get-component-details
-      name: Retrieve Component Metadata Anchors
-      action: http:backstage:request
+    - id: purge-backstage-leftovers
+      name: Purge Component Page and Location Anchors from Database
+      action: platform:catalog:purge
       input:
-        method: 'GET'
-        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
-
-    # STEP 2: DELETE targeting the specific location ID
-    - id: purge-backstage-location
-      name: Evict Location Anchor from Backstage Database
-      action: http:backstage:request
-      input:
-        method: 'DELETE'
-        # Automatically extracts the EXACT location entry ID natively assigned by Backstage
-        path: >-
-          /catalog/locations/${{ steps['get-component-details'].output.body.metadata.annotations['backstage.io/managed-by-location'] | replace('location:default/', '') }}
+        repoName: ${{ parameters.repoName }}
 
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
