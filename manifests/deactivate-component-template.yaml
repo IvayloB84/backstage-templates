@@ -65,6 +65,24 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
+    # STEP 1: Fetch the component details to read its explicit location metadata tag
+    - id: get-component-details
+      name: Retrieve Component Metadata Anchors
+      action: http:backstage:request
+      input:
+        method: 'GET'
+        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
+
+    # STEP 2: DELETE targeting the specific location ID
+    - id: purge-backstage-location
+      name: Evict Location Anchor from Backstage Database
+      action: http:backstage:request
+      input:
+        method: 'DELETE'
+        # Automatically extracts the EXACT location entry ID natively assigned by Backstage
+        path: >-
+          /catalog/locations/${{ steps['get-component-details'].output.body.metadata.annotations['backstage.io/managed-by-location'] | replace('location:default/', '') }}
+
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
@@ -91,22 +109,6 @@ spec:
           * Argo CD auto-pruning triggers immediately.
           * Target pods, configurations, and folders are removed from the cluster.
         targetBranchName: main
-
-    # STEP 1: Fetch the component details (Fixed Path: removed '/api')
-    - id: get-component-details
-      name: Retrieve Component Metadata Anchors
-      action: http:backstage:request
-      input:
-        method: GET
-        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
-
-    # STEP 2: Evict Parent Location (Fixed Path: removed '/api')
-    - id: purge-backstage-location
-      name: Evict Parent Bootstrap Location from Database
-      action: http:backstage:request
-      input:
-        method: DELETE
-        path: '/catalog/entities/by-name/${{ steps["get-component-details"].output.body.metadata.annotations["backstage.io/managed-by-location"] }}'
 
   output:
     links:
