@@ -24,45 +24,12 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # NATIVE UI SCHEMA: This maps pre-filled query data cleanly and prevents form freezes
-      uiSchema:
-        repoName:
-          'ui:disabled': true # Locks the field so incoming data cannot be broken
-          'ui:autofocus': false
-        repoOwner:
-          'ui:disabled': true
-
-    # PAGE 2: Corporate Safety Gate
-    - title: Corporate Safety Gate
-      required:
-        - confirmDestruction
-      properties:
-        confirmDestruction:
-          title: "Infrastructure Destruction Authorization"
-          type: boolean
-          default: false
-          enum:
-            - true
-      uiSchema:
-        confirmDestruction:
-          ui:widget: "checkbox"
-          ui:description: |
-            ### ⚠️ WARNING
-            I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
-
   steps:
     - id: generate-uuid
       name: Generating Unique Session Token
       action: debug:log
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
-
-    # STEP 1: Calls your compiled backend TypeScript code to cleanly evict the component page and location anchors
-    - id: purge-leftovers
-      name: Evict Component Page and Location Anchors from Database
-      action: platform:catalog:purge
-      input:
-        repoName: ${{ parameters.repoName }}
 
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
