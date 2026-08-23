@@ -65,11 +65,24 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    - id: purge-backstage-leftovers
-      name: Purge Component Page and Location Anchors from Database
-      action: platform:catalog:purge
+    # STEP 1: Fetch the global locations dictionary directly
+    - id: fetch-location-data
+      name: Fetch Backstage Location Database Mappings
+      action: http:backstage:request
       input:
-        repoName: ${{ parameters.repoName }}
+        method: 'GET'
+        path: '/catalog/locations'
+
+    # STEP 2: Extract the actual internal database UUID and trigger a native delete
+    - id: purge-backstage-location
+      name: Evict Location Anchor from Backstage Database
+      action: http:backstage:request
+      input:
+        method: 'DELETE'
+        # Uses explicit, non-conflicting Nunjucks syntax to loop over the JSON body array, 
+        # matches your repository name string, maps the ID parameter, and passes the raw UUID
+        path: >-
+          /catalog/locations/${{ steps['fetch-location-data'].output.body | filter(attribute='target', contains=parameters.repoName) | map(attribute='id') | first }}
 
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
