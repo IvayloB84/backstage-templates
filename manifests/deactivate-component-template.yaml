@@ -24,22 +24,6 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
-      # Conditional logic dependencies block evaluated cleanly by the form builder engine
-      dependencies:
-        repoName:
-          oneOf:
-            - properties:
-                repoName:
-                  type: string
-                  minLength: 1 # Triggers instantly if data lands via frontend redirection
-              uiSchema:
-                repoName:
-                  ui:disabled: true # Turns input grey and locks editing immediately
-            - properties:
-                repoName:
-                  type: string
-                  maxLength: 0 # Fallback default matches direct user menu navigation
-
     # PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
@@ -57,7 +41,6 @@ spec:
           ui:description: |
             ### ⚠️ WARNING
             I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
-
 
   steps:
     - id: generate-uuid
