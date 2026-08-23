@@ -57,15 +57,15 @@ spec:
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
         update: true 
-        # filesToDelete:
-        #   - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'
-        #   - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
-        #   - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
-        #   - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
-        #   - 'argocd-apps/${{ parameters.repoName }}/index.html'
-        #   - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
-        #   - 'argocd-apps/${{ parameters.repoName }}/nginx.conf'
-        #   - 'argocd-apps/${{ parameters.repoName }}/httpd.conf'
+        filesToDelete:
+          - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/index.html'
+          - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
+          - 'argocd-apps/${{ parameters.repoName }}/nginx.conf'
+          - 'argocd-apps/${{ parameters.repoName }}/httpd.conf'
         description: |
           ### Automated Component Deletion Request
           This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.

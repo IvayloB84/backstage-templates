@@ -10,7 +10,7 @@ spec:
   type: service
 
   parameters:
-    # 📑 PAGE 1: Provide Repository Information
+    # PAGE 1: Provide Repository Information
     - title: Provide Repository Information
       required:
         - repoName
@@ -32,11 +32,11 @@ spec:
           type: string
           description: A brief summary explaining the purpose of this microservice.
 
-    # 📑 PAGE 2: Web Server Engine Selection
+    # PAGE 2: Web Server Engine Selection
     - title: Web Server Runtime Configuration
       type: object
       anyOf:
-        # 🟢 ENGINE OPTION A: Nginx
+        # ENGINE OPTION A: Nginx
         - title: Nginx Web Server
           properties:
             serviceType:
@@ -55,7 +55,7 @@ spec:
             webServerMode:
               title: Web Server Routing Profile
               type: string
-              default: "standard-spa" # 🚀 THE FIX: Sets pre-selected option on initial load
+              default: "standard-spa" # Sets pre-selected option on initial load
               description: Select the execution layer pattern for asset delivery.
               enum:
                 - "standard-spa"
@@ -72,7 +72,7 @@ spec:
             - webServerMode
             - webRootPath
 
-        # 🔵 ENGINE OPTION B: Apache HTTPD
+        # ENGINE OPTION B: Apache HTTPD
         - title: Apache HTTPD Server
           properties:
             serviceType:
@@ -99,14 +99,14 @@ spec:
             - webRootPath
 
   steps:
-    # 🎲 Step 0: CACHE BUSTER - Initialize task session token
+    # Step 0: CACHE BUSTER - Initialize task session token
     - id: generate-uuid
       name: Generating Unique Session Token
       action: debug:log
       input:
         message: "Session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # 📝 Step 1: Dynamic Folder Fetch Switch
+    # Step 1: Dynamic Folder Fetch Switch
     - id: fetch-skeleton-app
       name: Render Codebase Repository Skeleton
       action: fetch:template
@@ -139,7 +139,7 @@ spec:
           memRequest: ${{ parameters.memRequest or '32Mi' }}
           memLimit: ${{ parameters.memLimit or '64Mi' }}
 
-    # 🚀 Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
+    # Step 2A: Publishes the isolated app folder safely to GitHub as a fresh repo
     - id: publish
       name: Provision Production Repository on GitHub and Stamp GitOps Topics
       action: publish:github
@@ -155,7 +155,7 @@ spec:
         gitAuthorEmail: "scaffolder@localhost"
         topics: ['backstage-managed']
 
-    # 🔗 Step 2B: Instantly wire up your permanent Smee.io link
+    # Step 2B: Instantly wire up your permanent Smee.io link
     - id: create-webhook
       name: Link Developer Repo to ArgoCD Webhook
       action: github:webhook
@@ -168,7 +168,7 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
 
 
-    # 🚀 Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
+    # Step 3: Submits the completely un-cleared gitops folder payload tree to your central infrastructure repository
     - id: append-to-roster
       name: Submit Automated Deployment Manifest to Central GitOps Hub
       action: publish:github:pull-request
@@ -181,14 +181,14 @@ spec:
         sourcePath: '.'
         targetPath: 'argocd-apps/${{ parameters.repoName }}'
 
-    # ⏳ Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
+    # Step 4: STATE SYNC - Wait for GitHub APIs to fully propagate
     - id: wait-for-github
       name: Synchronizing Cloud Repository State
       action: debug:wait
       input:
         seconds: 15
 
-    # 📁 Step 5: REGISTER
+    # Step 5: REGISTER
     - id: register
       name: Register in Backstage Catalog
       action: catalog:register
