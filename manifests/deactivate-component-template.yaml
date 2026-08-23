@@ -24,6 +24,14 @@ spec:
           default: IvayloB84
           description: Your GitHub organization or personal profile username
 
+      # NATIVE UI SCHEMA: This maps pre-filled query data cleanly and prevents form freezes
+      uiSchema:
+        repoName:
+          'ui:disabled': true # Locks the field so incoming data cannot be broken
+          'ui:autofocus': false
+        repoOwner:
+          'ui:disabled': true
+
     # PAGE 2: Corporate Safety Gate
     - title: Corporate Safety Gate
       required:
