@@ -49,20 +49,21 @@ spec:
       input:
         message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
 
-    # STEP 1: Safely fetch the entity metadata using the built-in action
-    - id: get-component
-      name: Read Active Catalog Entry
-      action: catalog:fetch
+    # STEP 1: Fetch the component details cleanly using the verified http request plugin
+    - id: get-component-details
+      name: Retrieve Component Metadata Anchors
+      action: http:backstage:request
       input:
-        entityRef: 'component:default/${{ parameters.repoName }}'
+        method: 'GET'
+        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
 
-    # STEP 2: Issue a hard DELETE against the exact parent location target
+    # STEP 2: Issue a hard DELETE against the component's absolute database UID
     - id: purge-backstage-location
       name: Evict Location Anchor from Backstage Database
       action: http:backstage:request
       input:
         method: 'DELETE'
-        path: '/catalog/entities/by-name/${{ steps["get-component"].output.entity.metadata.annotations["backstage.io/managed-by-location"] }}'
+        path: '/catalog/entities/by-uid/${{ steps["get-component-details"].output.body.metadata.uid }}'
 
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
