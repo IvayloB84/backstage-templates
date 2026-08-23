@@ -92,23 +92,21 @@ spec:
           * Target pods, configurations, and folders are removed from the cluster.
         targetBranchName: main
 
-    # STEP 1: Fetch the component details from the official catalog API
+    # STEP 1: Fetch the component details (Fixed Path: removed '/api')
     - id: get-component-details
       name: Retrieve Component Metadata Anchors
       action: http:backstage:request
       input:
         method: GET
-        path: '/api/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
+        path: '/catalog/entities/by-name/component/default/${{ parameters.repoName }}'
 
-    # STEP 2: Extract the parent location name and issue a target unregister DELETE
+    # STEP 2: Evict Parent Location (Fixed Path: removed '/api')
     - id: purge-backstage-location
       name: Evict Parent Bootstrap Location from Database
       action: http:backstage:request
       input:
         method: DELETE
-        # The official API maps the tracking location under metadata.annotations.
-        # This deletes the location entity, clearing the 'Unable to read url' loop forever.
-        path: '/api/catalog/entities/by-name/${{ steps["get-component-details"].output.body.metadata.annotations["backstage.io/managed-by-location"] }}'
+        path: '/catalog/entities/by-name/${{ steps["get-component-details"].output.body.metadata.annotations["backstage.io/managed-by-location"] }}'
 
   output:
     links:
