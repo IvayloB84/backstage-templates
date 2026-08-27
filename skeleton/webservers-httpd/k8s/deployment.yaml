@@ -21,6 +21,15 @@ spec:
         # 1. Web Server Engine Application Core Runtime Layer
         - name: app-container
           image: "${{ values.image }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for git-sync sidecar to populate directory..."
+              while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
+                sleep 1
+              done
+              echo "Directory found! Launching Apache server..."
+              exec httpd -D FOREGROUND
           ports:
             - containerPort: ${{ values.port }}
           env:
