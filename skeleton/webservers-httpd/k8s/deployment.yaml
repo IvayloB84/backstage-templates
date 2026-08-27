@@ -79,6 +79,7 @@ data:
     ServerRoot "/usr/local/apache2"
     Listen ${{ values.port }}
 
+    # 1. Load the core modules first
     LoadModule mpm_event_module modules/mod_mpm_event.so
     LoadModule authn_core_module modules/mod_authn_core.so
     LoadModule authz_core_module modules/mod_authz_core.so
@@ -89,6 +90,11 @@ data:
     LoadModule headers_module modules/mod_headers.so
     LoadModule rewrite_module modules/mod_rewrite.so
     LoadModule unixd_module modules/mod_unixd.so
+
+    <IfModule unixd_module>
+        User daemon
+        Group daemon
+    </IfModule>
 
     TypesConfig conf/mime.types
     CustomLog /proc/self/fd/1 combined

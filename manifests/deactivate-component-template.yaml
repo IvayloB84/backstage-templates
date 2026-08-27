@@ -68,7 +68,7 @@ spec:
           - 'argocd-apps/${{ parameters.repoName }}/httpd.conf'
         description: |
           ### Automated Component Deletion Request
-          This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/k8s/`.
+          This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/`.
 
           Expected Outcomes upon merging:
           * Argo CD auto-pruning triggers immediately.
