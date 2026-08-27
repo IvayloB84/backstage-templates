@@ -5,9 +5,6 @@ metadata:
   name: "${{ values.repoName }}"
   labels:
     app: "${{ values.repoName }}"
-  annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   replicas: 1
   selector:
