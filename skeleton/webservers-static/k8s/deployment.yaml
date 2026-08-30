@@ -26,6 +26,18 @@ spec:
                 echo "Waiting for git-sync directory..."
                 sleep 2
               done
+          volumeMounts:
+            - name: code-stream-volume
+              mountPath: "${{ value.webRoot }}"
+            - name: temp-fs
+              mountPath: /tmp
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsUser: 65534
+            runAsGroup: 65534 
 
       containers:
         # 1. Unprivileged Traditional Asset Server Layer
