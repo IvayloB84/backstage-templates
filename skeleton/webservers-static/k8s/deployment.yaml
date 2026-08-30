@@ -28,7 +28,7 @@ spec:
               done
           volumeMounts:
             - name: code-stream-volume
-              mountPath: "${{ value.webRoot }}"
+              mountPath: "${{ values.webRoot }}"
             - name: temp-fs
               mountPath: /tmp
           securityContext:
