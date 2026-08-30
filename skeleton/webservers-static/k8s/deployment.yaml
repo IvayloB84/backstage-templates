@@ -69,7 +69,7 @@ spec:
             - "--repo=https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
             - "--ref=main"
             - "--depth=1"
-            - "--period=10"
+            - "--period=10s"
             - "--root=/tmp/git"
             - "--link=${{ values.repoName }}"
           env:
