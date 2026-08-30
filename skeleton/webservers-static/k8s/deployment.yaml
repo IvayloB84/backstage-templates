@@ -16,19 +16,23 @@ spec:
     spec:
       securityContext:
         fsGroup: 65534
+      initContainers:
+        name: wait-for-gitsync
+        image: busybox:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Waiting for git-sync sidecar to populate directory..."
+            while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
+              sleep 1
+            done
+            echo "Directory found! Starting nginx asset server."
+            nginx -g 'daemon off;'
+
       containers:
         # 1. Unprivileged Traditional Asset Server Layer
         - name: static-container
           image: "${{ values.image }}"
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              echo "Waiting for git-sync sidecar to populate directory..."
-              while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
-                sleep 1
-              done
-              echo "Directory found! Starting nginx asset server."
-              nginx -g 'daemon off;'
           ports:
             - containerPort: ${{ values.port }}
           env:
