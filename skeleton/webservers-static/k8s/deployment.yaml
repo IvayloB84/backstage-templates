@@ -29,7 +29,7 @@ spec:
           volumeMounts:
             - name: code-stream-volume
               mountPath: "${{ values.webRootPath }}"
-            - name: temp-fs
+            - name: tmp-fs
               mountPath: /tmp
           securityContext:
             allowPrivilegeEscalation: false
