@@ -20,6 +20,15 @@ spec:
         # 1. Web Server Engine Application Core Runtime Layer
         - name: app-container
           image: "${{ values.image }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for git-sync sidecar to populate directory..."
+              while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
+                sleep 2
+              done
+              echo "Directory found! Launching asset server."
+              nginx -g 'daemon off;'
           ports:
             - containerPort: ${{ values.port }}
           env:
@@ -44,11 +53,11 @@ spec:
           image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
           args:
             - "--repo=https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
-            - "--branch=main"
+            - "--ref=main"
             - "--depth=1"
-            - "--wait=10"
+            - "--period=10s"
             - "--root=/tmp/git"
-            - "--dest=${{ values.repoName }}"
+            - "--link=${{ values.repoName }}"
           volumeMounts:
             - name: code-stream-volume
               mountPath: /tmp/git

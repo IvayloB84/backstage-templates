@@ -54,11 +54,11 @@ spec:
           image: "registry.k8s.io/git-sync/git-sync:v4.7.1"
           args:
             - "--repo=https://github.com/${{ values.repoOwner }}/${{ values.repoName }}.git"
-            - "--branch=main"
+            - "--ref=main"
             - "--depth=1"
-            - "--wait=10"
+            - "--period=10s"
             - "--root=/tmp/git"
-            - "--dest=${{ values.repoName }}"
+            - "--link=${{ values.repoName }}"
           volumeMounts:
             - name: code-stream-volume
               mountPath: /tmp/git
