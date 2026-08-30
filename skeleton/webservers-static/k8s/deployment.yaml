@@ -17,15 +17,15 @@ spec:
       securityContext:
         fsGroup: 65534
       initContainers:
-        name: wait-for-gitsync
-        image: busybox:1.38
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
-              echo "Waiting for git-sync directory..."
-              sleep 2
-            done
+        - name: wait-for-gitsync
+          image: busybox:1.38
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
+                echo "Waiting for git-sync directory..."
+                sleep 2
+              done
 
       containers:
         # 1. Unprivileged Traditional Asset Server Layer
