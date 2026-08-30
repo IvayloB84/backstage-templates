@@ -26,7 +26,6 @@ spec:
               while [ ! -d "${{ values.webRootPath }}/${{ values.repoName }}" ]; do
                 sleep 1
               done
-              echo "Directory found! Launching Nginx server..."
           ports:
             - containerPort: ${{ values.port }}
           env:
