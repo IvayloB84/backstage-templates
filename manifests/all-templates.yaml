@@ -4,7 +4,6 @@ metadata:
   name: remote-centralized-templates
   description: Index of all pipeline scaffolding template cards
 spec:
-  type: url
   targets:
     - https://github.com/IvayloB84/backstage-templates/blob/main/manifests/github-repo-template.yaml
     - https://github.com/IvayloB84/backstage-templates/blob/main/manifests/spring-boot-template.yaml
