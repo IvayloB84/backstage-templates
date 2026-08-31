@@ -1,0 +1,30 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: spring-boot-template
+  title: Create a New Spring Boot Microservice
+  description: Seeds a fresh Spring Boot project directly from start.spring.io and provisions GitOps tracking.
+spec:
+  owner: group:default/development
+  type: service
+
+  parameters:
+    - title: Provide Repository Information
+      required:
+        - repoName
+        - repoOwner
+      properties:
+        repoName:
+          title: Repository Name
+          type: string
+        
+        repoOwner:
+          title: Repository Owner
+          type: string
+          description: The GitHub organization or personal profile that will own this repository.
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+              - User
+
