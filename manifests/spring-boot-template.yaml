@@ -27,4 +27,9 @@ spec:
             allowedKinds:
               - Group
               - User
-
+  steps:
+    - id: fetch-spring
+      name: Fetch Spring Boot Project
+      action: fetch:plain
+      input:
+        url: https://start.spring.io/starter.zip?type=${{ parameters.projectType }}&language=${{ parameters.language }}&bootVersion=${{ parameters.bootVersion }}&javaVersion=${{ parameters.javaVersion }}&groupId=${{ parameters.groupId }}&artifactId=${{ parameters.repoName }}&name=${{ parameters.repoName }}&packageName=${{ parameters.packageName }}&packaging=${{ parameters.packaging }}
