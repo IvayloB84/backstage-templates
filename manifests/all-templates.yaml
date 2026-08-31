@@ -6,6 +6,6 @@ metadata:
 spec:
   type: url
   targets:
-    - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/github-repo-template.yaml
-    - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/spring-boot-template.yaml
-    - https://raw.githubusercontent.com/IvayloB84/backstage-templates/refs/heads/main/manifests/deactivate-component-template.yaml
+    - https://github.com/IvayloB84/backstage-templates/blob/main/manifests/github-repo-template.yaml
+    - https://github.com/IvayloB84/backstage-templates/blob/main/manifests/spring-boot-template.yaml
+    - https://github.com/IvayloB84/backstage-templates/blob/main/manifests/deactivate-component-template.yaml
