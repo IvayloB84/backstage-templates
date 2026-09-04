@@ -1,0 +1,171 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: spring-boot-4-gitops-service
+  title: Java Microservice Platform Onboarding
+  description: Provisions a Spring Boot 4 service via start.spring.io, provisions a Git repo, and registers ArgoCD GitOps tracking.
+  tags:
+    - java
+    - spring-boot-4
+    - gitops
+    - argocd
+
+spec:
+  owner: platform-engineering
+  type: service
+
+  parameters:
+    - title: "Step 1: Java Core Settings"
+      required:
+        - artifactId
+        - javaVersion
+        - repoOwner
+      properties:
+        groupId:
+          title: Group ID
+          type: string
+          default: com.yourcompany.platform
+        artifactId:
+          title: Artifact ID / Repo Name
+          type: string
+          default: my-modern-java-service
+        javaVersion:
+          title: Java Version
+          type: string
+          default: "21"
+          enum:
+            - "17"
+            - "21"
+        dependencies:
+          title: Starters
+          type: array
+          items:
+            type: string
+            # Real start.spring.io dependency IDs only.
+            # Full current list: https://start.spring.io/metadata/client
+            enum:
+              - web
+              - security
+              - actuator
+              - validation
+              - lombok
+              - data-jpa
+          default:
+            - web
+            - security
+        repoOwner:
+          title: GitHub User/Org
+          type: string
+          default: IvayloB84
+      ui:schema:
+        dependencies:
+          ui:widget: checkboxes
+
+  steps:
+    # STEP 1: Generate the project via the public start.spring.io API and auto-extract it
+    - id: fetch-initializr-archive
+      name: Generate & Extract Spring Boot 4 Project Archive
+      action: http:backstage:request
+      input:
+        url: 'https://start.spring.io/starter.zip'
+        method: 'GET'
+        headers:
+          Accept: 'application/zip'
+        queryParams:
+          type: 'maven-project'
+          language: 'java'
+          # Pin to a known-good 4.x release; bump periodically.
+          # Verify current version at https://start.spring.io/actuator/info
+          bootVersion: '4.1.1'
+          javaVersion: ${{ parameters.javaVersion }}
+          groupId: ${{ parameters.groupId }}
+          artifactId: ${{ parameters.artifactId }}
+          dependencies: ${{ parameters.dependencies | join(',') }}
+        # Omitting 'outputFile' auto-unzips the payload into the workspace.
+
+    # STEP 2: Merge Backstage catalog metadata / Dockerfile / catalog-info.yaml from your skeleton repo
+    - id: append-catalog-metadata
+      name: Inject Backstage Catalog Descriptor
+      action: fetch:template
+      input:
+        url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/app
+        values:
+          name: ${{ parameters.artifactId }}
+          owner: ${{ parameters.repoOwner }}
+          javaVersion: ${{ parameters.javaVersion }}
+
+    # STEP 3: Create the GitHub repository and push the generated code
+    - id: publish-github-repository
+      name: Provision New GitHub Repository
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: 'Spring Boot 4 service scaffolded from the Internal Developer Platform'
+        repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
+        defaultBranch: main
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # STEP 4: Local-cluster workaround — forward the GitHub webhook to ArgoCD via smee.io.
+    # Not strictly required (ArgoCD self-heals via a ~3min poll by default), but since
+    # ArgoCD can't reach a public webhook target from your localhost setup, this is the
+    # only way to get near-instant sync instead of waiting on the poll interval.
+    - id: create-webhook
+      name: Link Developer Repo to ArgoCD Webhook (via smee.io)
+      action: github:webhook
+      input:
+        repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
+        webhookUrl: 'https://smee.io/vVvKlKpQsKv5zv0W'
+        contentType: 'json'
+        secret: ${{ secrets.ARGOCD_WEBHOOK_SECRET }}
+        events:
+          - push
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # STEP 5a: Clone the centralized GitOps/ArgoCD root-apps repo
+    - id: clone-centralized-gitops
+      name: Fetch Centralized GitOps Infrastructure Repository
+      action: fetch:plain
+      input:
+        url: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps"
+        targetPath: './gitops-workspace'
+
+    # STEP 5b: Render the ArgoCD Application manifest INTO ITS OWN per-service subfolder
+    # so it doesn't collide with other services' manifests.
+    - id: render-argocd-manifest
+      name: Generate ArgoCD Application Registration Descriptor
+      action: fetch:template
+      input:
+        url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/gitops
+        targetPath: "./gitops-workspace/argocd-apps/${{ parameters.artifactId }}"
+        values:
+          appName: ${{ parameters.artifactId }}
+          repoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.artifactId }}"
+          # Deployment, not StatefulSet — this is a stateless REST service.
+          # If it ever needs persistent local storage, mount a shared PVC
+          # from the Deployment spec rather than switching to a StatefulSet.
+          workloadKind: Deployment
+
+    # STEP 5c: Submit a PR to the centralized GitOps repo with the new subfolder
+    - id: submit-gitops-pull-request
+      name: Submit Cluster State Pull Request to ArgoCD Repository
+      action: publish:github:pull-request
+      input:
+        repoUrl: "github.com?owner=${{ parameters.repoOwner }}&repo=ArgoCD-RootApps"
+        branchName: "infra-onboard-${{ parameters.artifactId }}"
+        title: "feat(argocd): onboard service tracking for ${{ parameters.artifactId }}"
+        description: 'Automated platform PR registering application manifests under argocd-apps/${{ parameters.artifactId }}/.'
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # STEP 6: Register the new repository into the Backstage Catalog
+    - id: register-catalog-entry
+      name: Bind Resource to Software Platform Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.artifactId }}/blob/main/catalog-info.yaml"
+
+  output:
+    links:
+      - title: Go to App Source Repository
+        url: ${{ steps['publish-github-repository'].output.remoteUrl }}
+      - title: Review Infrastructure Sync PR (ArgoCD Tracker)
+        url: ${{ steps['submit-gitops-pull-request'].output.pullRequestUrl }}
