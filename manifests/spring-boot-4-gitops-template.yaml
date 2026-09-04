@@ -62,30 +62,11 @@ spec:
           ui:widget: checkboxes
 
   steps:
-    # STEP 1: Generate the project via the public start.spring.io API and auto-extract it
-    - id: fetch-initializr-archive
-      name: Generate & Extract Spring Boot 4 Project Archive
-      action: http:backstage:request
-      input:
-        url: 'https://start.spring.io/starter.zip'
-        method: 'GET'
-        headers:
-          Accept: 'application/zip'
-        queryParams:
-          type: 'maven-project'
-          language: 'java'
-          # Pin to a known-good 4.x release; bump periodically.
-          # Verify current version at https://start.spring.io/actuator/info
-          bootVersion: '4.1.1'
-          javaVersion: ${{ parameters.javaVersion }}
-          groupId: ${{ parameters.groupId }}
-          artifactId: ${{ parameters.artifactId }}
-          dependencies: ${{ parameters.dependencies | join(',') }}
-        # Omitting 'outputFile' auto-unzips the payload into the workspace.
-
-    # STEP 2: Merge Backstage catalog metadata / Dockerfile / catalog-info.yaml from your skeleton repo
+    # Renders pom.xml, Application.java, application.yml, catalog-info.yaml,
+    # Dockerfile, the k8s kustomize overlays, and the GH Actions workflow —
+    # all from your backstage-templates skeleton. No live Initializr call.
     - id: append-catalog-metadata
-      name: Inject Backstage Catalog Descriptor
+      name: Generate Project From Skeleton
       action: fetch:template
       input:
         url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/app
@@ -97,7 +78,9 @@ spec:
         values:
           name: ${{ parameters.artifactId }}
           owner: ${{ parameters.repoOwner }}
+          groupId: ${{ parameters.groupId }}
           javaVersion: ${{ parameters.javaVersion }}
+          dependencies: ${{ parameters.dependencies }}
 
     # STEP 3: Create the GitHub repository and push the generated code
     - id: publish-github-repository
