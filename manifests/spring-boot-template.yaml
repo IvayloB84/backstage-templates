@@ -1,35 +1,141 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: spring-boot-template
-  title: Create a New Spring Boot Microservice
-  description: Seeds a fresh Spring Boot project directly from start.spring.io and provisions GitOps tracking.
-spec:
-  owner: group:default/development
-  type: service
+  name: spring-boot-4-gitops-service
+  title: Java Microservice Platform Onboarding
+  description: Provisions a Spring Boot 4 service, provisions a Git repo, and triggers ArgoCD GitOps tracking.
+  tags:
+    - java
+    - spring-boot-4
+    - gitops
+    - argocd
 
+spec:
+  owner: platform-engineering
+  type: service
+  
   parameters:
-    - title: Provide Repository Information
+    - title: "Step 1: Predefined Variables & Java Core Settings"
       required:
-        - repoName
+        - artifactId
+        - javaVersion
         - repoOwner
       properties:
-        repoName:
-          title: Repository Name
+        groupId:
+          title: Group ID
           type: string
-        
+          default: com.yourcompany.platform
+        artifactId:
+          title: Artifact ID
+          type: string
+          default: my-modern-java-service
+        javaVersion:
+          title: Java Engine Target
+          type: string
+          default: "21"
+          enum:
+            - "17"
+            - "21"
+        dependencies:
+          title: Select Platform Curated Starters
+          type: array
+          items:
+            type: string
+            enum:
+              - web
+              - company-security-starter
+          default:
+            - web
+            - company-security-starter
         repoOwner:
-          title: Repository Owner
+          title: GitHub User Account
           type: string
-          description: The GitHub organization or personal profile that will own this repository.
-          ui:field: OwnerPicker
-          ui:options:
-            allowedKinds:
-              - Group
-              - User
+          default: IvayloB84
+      uiSchema:
+        dependencies:
+          ui:widget: checkboxes
+
   steps:
-    - id: fetch-spring
-      name: Fetch Spring Boot Project
+    # STEP 1 & 2: Download and automatically extract the Spring Boot 4 Project Archive
+    - id: fetch-initializr-archive
+      name: Generate & Extract Spring Boot 4 Project Archive
+      action: http:backstage:request
+      input:
+        url: 'http://localhost:8090/starter.zip'
+        method: 'GET'
+        headers:
+          Accept: 'application/zip'
+        queryParams:
+          type: 'maven-project'
+          language: 'java'
+          bootVersion: '4.1.0'
+          javaVersion: ${{ parameters.javaVersion }}
+          groupId: ${{ parameters.groupId }}
+          artifactId: ${{ parameters.artifactId }}
+          dependencies: ${{ parameters.dependencies | join(',') }}
+        # 🚀 By omitting 'outputFile', Backstage automatically unzips the payload directly into the workspace!
+
+    # STEP 2a: Merge your local skeleton metadata file layouts into the repository path
+    - id: append-catalog-metadata
+      name: Inject Backstage Catalog Descriptor
+      action: fetch:template
+      input:
+        url: ../skeleton/spring-boot-4
+        values:
+          name: ${{ parameters.artifactId }}
+          owner: ${{ parameters.repoOwner }}
+
+    # STEP 3: Create the brand new GitHub repository and push the code
+    - id: publish-github-repository
+      name: Provision New GitHub Repository
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: 'Production Spring Boot 4 service built from Internal Developer Platform'
+        repoUrl: "github.com/${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
+        defaultBranch: main
+
+    # STEP 4a: Clone your real centralized GitOps/ArgoCD manifest repository
+    - id: clone-centralized-gitops
+      name: Fetch Centralized GitOps Infrastructure Repository
       action: fetch:plain
       input:
-        url: https://start.spring.io/starter.zip?type=${{ parameters.projectType }}&language=${{ parameters.language }}&bootVersion=${{ parameters.bootVersion }}&javaVersion=${{ parameters.javaVersion }}&groupId=${{ parameters.groupId }}&artifactId=${{ parameters.repoName }}&name=${{ parameters.repoName }}&packageName=${{ parameters.packageName }}&packaging=${{ parameters.packaging }}
+        url: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps"
+        targetPath: './gitops-workspace'
+
+    # STEP 4b: Generate the ArgoCD Application manifest file inside argocd-apps/
+    - id: render-argocd-manifest
+      name: Generate ArgoCD Application Registration Descriptor
+      action: fetch:template
+      input:
+        url: ../skeleton/spring-boot-4
+        targetPath: "./gitops-workspace/argocd-apps/${{ parameters.artifactId }}.yaml"
+        templateFileExtension: '.yaml'
+        values:
+          appName: ${{ parameters.artifactId }}
+          repoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.artifactId }}"
+
+    # STEP 4c: Submit a Pull Request to your centralized GitOps repository
+    - id: submit-gitops-pull-request
+      name: Submit Cluster State Pull Request to ArgoCD Repository
+      action: publish:github:pull-request
+      input:
+        repoUrl: "github.com/${{ parameters.repoOwner }}/${{ parameters.repoName }}"
+        branchName: "infra-onboard-${{ parameters.artifactId }}"
+        title: "feat(argocd): onboard service tracking for ${{ parameters.artifactId }}"
+        description: 'Automated platform PR registering application manifests to cluster routing loops.'
+
+    # STEP 5: Register the newly created repository into the Backstage live Catalog
+    - id: register-catalog-entry
+      name: Bind Resource to Software Platform Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.artifactId }}/blob/main/catalog-info.yaml"
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Go to App Source Repository
+        url: ${{ steps['publish-github-repository'].output.remoteUrl }}
+      - title: Review Infrastructure Sync PR (ArgoCD Tracker)
+        url: ${{ steps['submit-gitops-pull-request'].output.pullRequestUrl }}
