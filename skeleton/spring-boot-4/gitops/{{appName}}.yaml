@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ values.appName }} # 🚀 FIXED: Removed the '$' sign to conform to standard skeleton Nunjucks template properties
+  name: {{ values.appName }}
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: {{ values.repoUrl }} # 🚀 FIXED: Reads directly from step 4b values object map context
+    repoURL: {{ values.repoUrl }}
     targetRevision: HEAD
     path: k8s/overlays/production
   destination:
-    server: https://default.svc
+    server: https://kubernetes.default.svc
     namespace: target-production-apps
   syncPolicy:
     automated:

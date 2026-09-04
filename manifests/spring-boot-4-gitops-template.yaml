@@ -89,6 +89,11 @@ spec:
       action: fetch:template
       input:
         url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/app
+        # This file uses GitHub Actions' own ${{ }} expressions
+        # (github.actor, secrets.GITHUB_TOKEN, etc.) — copy it verbatim
+        # instead of running it through Nunjucks, or those get corrupted.
+        copyWithoutRender:
+          - .github/workflows/build-and-push.yml
         values:
           name: ${{ parameters.artifactId }}
           owner: ${{ parameters.repoOwner }}
