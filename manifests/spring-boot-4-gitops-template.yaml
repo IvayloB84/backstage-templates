@@ -87,7 +87,6 @@ spec:
       name: Provision New GitHub Repository
       action: publish:github
       input:
-        allowedHosts: ['github.com']
         description: 'Spring Boot 4 service scaffolded from the Internal Developer Platform'
         repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
         defaultBranch: main
