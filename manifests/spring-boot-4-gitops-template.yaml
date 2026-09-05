@@ -65,7 +65,7 @@ spec:
           title: GitOps Push Token
           description: Fine-grained PAT scoped to ArgoCD-RootApps with Contents Read/write — injected into the new repo automatically so its CI can commit deploy updates back.
           type: string
-          ui:widget: Secret
+          ui:widget: secret
       ui:schema:
         dependencies:
           ui:widget: checkboxes
