@@ -97,7 +97,6 @@ spec:
         repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
         defaultBranch: main
         repoVisibility: public
-        topics: ['backstage-managed']
         token: ${{ secrets.GITHUB_TOKEN }}
 
     # STEP 4: Local-cluster workaround — forward the GitHub webhook to ArgoCD via smee.io.
@@ -130,16 +129,13 @@ spec:
           name: ${{ parameters.artifactId }}
           owner: ${{ parameters.repoOwner }}
           port: ${{ parameters.port }}
-          # Deployment, not StatefulSet — this is a stateless REST service.
-          # If it ever needs persistent local storage, mount a shared PVC
-          # from the Deployment spec rather than switching to a StatefulSet.
-          workloadKind: Deployment
 
     # STEP 5b: Submit a PR to the centralized GitOps repo.
     # sourcePath + targetPath are both set to "argocd-apps" explicitly —
     # sourcePath scopes what gets read from the workspace, targetPath pins
     # exactly where it lands in the target repo. Setting both removes any
-    # ambiguity about the destination path.
+    # ambiguity about the destination path (this is what caused the earlier
+    # full-workspace dump into the repo root).
     - id: submit-gitops-pull-request
       name: Submit Cluster State Pull Request to ArgoCD Repository
       action: publish:github:pull-request
