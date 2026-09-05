@@ -97,6 +97,7 @@ spec:
         repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
         defaultBranch: main
         repoVisibility: public
+        topics: ['backstage-managed']
         token: ${{ secrets.GITHUB_TOKEN }}
 
     # STEP 4: Local-cluster workaround — forward the GitHub webhook to ArgoCD via smee.io.
