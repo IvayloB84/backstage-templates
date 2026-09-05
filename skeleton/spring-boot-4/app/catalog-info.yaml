@@ -6,6 +6,8 @@ metadata:
   annotations:
     github.com/project-slug: ${{ values.owner }}/${{ values.name }}
     argocd/app-name: ${{ values.name }}
+    backstage.io/kubernetes-label-selector: "app=${{ values.name }}"
+
 spec:
   type: service
   lifecycle: production
