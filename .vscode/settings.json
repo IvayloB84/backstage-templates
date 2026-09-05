@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "**/skeleton/**/Dockerfile": "plaintext",
+    "**/skeleton/**/*.java": "plaintext"
+  },
+  "java.project.sourcePaths": [],
+  "java.project.exclude": [
+    "**/skeleton/**"
+  ]
+}

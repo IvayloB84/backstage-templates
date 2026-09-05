@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${{ values.port }}
 spring:
   application:
-    name: {{ values.name }}
+    name: ${{ values.name }}

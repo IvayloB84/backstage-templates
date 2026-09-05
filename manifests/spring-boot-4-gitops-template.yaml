@@ -57,14 +57,19 @@ spec:
           title: GitHub User/Org
           type: string
           default: IvayloB84
+        port:
+          title: Container Port Allocation
+          type: integer
+          default: 8080
       ui:schema:
         dependencies:
           ui:widget: checkboxes
 
   steps:
     # Renders pom.xml, Application.java, application.yml, catalog-info.yaml,
-    # Dockerfile, the k8s kustomize overlays, and the GH Actions workflow —
-    # all from your backstage-templates skeleton. No live Initializr call.
+    # Dockerfile, and the GH Actions workflow — the developer-facing source
+    # repo ONLY. K8s/ArgoCD manifests live separately, rendered by the
+    # gitops step below into ArgoCD-RootApps instead of this repo.
     - id: append-catalog-metadata
       name: Generate Project From Skeleton
       action: fetch:template
@@ -81,6 +86,7 @@ spec:
           groupId: ${{ parameters.groupId }}
           javaVersion: ${{ parameters.javaVersion }}
           dependencies: ${{ parameters.dependencies }}
+          port: ${{ parameters.port }}
 
     # STEP 3: Create the GitHub repository and push the generated code
     - id: publish-github-repository
@@ -109,9 +115,9 @@ spec:
           - push
         token: ${{ secrets.GITHUB_TOKEN }}
 
-    # STEP 5a: Render the ArgoCD Application manifest into a fresh local folder.
-    # No need to clone ArgoCD-RootApps first — publish:github:pull-request
-    # diffs against the remote repo itself, it doesn't need a local checkout.
+    # STEP 5a: Render the ArgoCD Application manifest + k8s Deployment/Service
+    # into a fresh local folder. This is now the ONLY place k8s manifests
+    # live — the developer's repo (app/ above) never sees them.
     - id: render-argocd-manifest
       name: Generate ArgoCD Application Registration Descriptor
       action: fetch:template
@@ -120,7 +126,9 @@ spec:
         targetPath: "./gitops-pr/argocd-apps/${{ parameters.artifactId }}"
         values:
           appName: ${{ parameters.artifactId }}
-          repoUrl: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.artifactId }}"
+          name: ${{ parameters.artifactId }}
+          owner: ${{ parameters.repoOwner }}
+          port: ${{ parameters.port }}
           # Deployment, not StatefulSet — this is a stateless REST service.
           # If it ever needs persistent local storage, mount a shared PVC
           # from the Deployment spec rather than switching to a StatefulSet.
