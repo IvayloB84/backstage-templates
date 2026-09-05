@@ -61,6 +61,11 @@ spec:
           title: Container Port Allocation
           type: integer
           default: 8080
+        gitopsToken:
+          title: GitOps Push Token
+          description: Fine-grained PAT scoped to ArgoCD-RootApps with Contents Read/write — injected into the new repo automatically so its CI can commit deploy updates back.
+          type: string
+          ui:widget: password
       ui:schema:
         dependencies:
           ui:widget: checkboxes
@@ -97,7 +102,38 @@ spec:
         repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
         defaultBranch: main
         repoVisibility: public
-        topics: ['backstage-managed']
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    # STEP 3a: Flip GITHUB_TOKEN to read/write for this repo's own Actions
+    # runs. New personal-account repos default to read-only, which silently
+    # caps what a workflow's own `permissions:` block can request — this is
+    # the fix for the GHCR "permission_denied: write_package" error, and it
+    # can't be done from the workflow YAML alone. Requires the /github-api
+    # proxy entry added to app-config.yaml (see accompanying note).
+    - id: enable-workflow-write
+      name: Enable Read/Write Actions Permissions
+      action: http:backstage:request
+      input:
+        method: PUT
+        path: "/proxy/github-api/repos/${{ parameters.repoOwner }}/${{ parameters.artifactId }}/actions/permissions/workflow"
+        headers:
+          Content-Type: application/json
+        body:
+          default_workflow_permissions: write
+          can_approve_pull_request_reviews: false
+
+    # STEP 3b: Inject the GitOps push token as a repo secret via a
+    # dedicated "production" Environment, so build-and-push.yml's
+    # update-gitops-manifest job can authenticate without any manual
+    # per-repo secret setup in the GitHub UI.
+    - id: provision-gitops-secret
+      name: Provision GitOps Push Secret
+      action: github:environment:create
+      input:
+        repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
+        name: production
+        secrets:
+          GITOPS_PAT: ${{ parameters.gitopsToken }}
         token: ${{ secrets.GITHUB_TOKEN }}
 
     # STEP 4: Local-cluster workaround — forward the GitHub webhook to ArgoCD via smee.io.

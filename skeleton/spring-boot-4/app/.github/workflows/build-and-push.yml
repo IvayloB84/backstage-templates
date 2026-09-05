@@ -12,6 +12,8 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -36,7 +38,46 @@ jobs:
         with:
           context: .
           push: true
+          # :latest is kept for convenience only (e.g. manual `docker pull`).
+          # The commit-SHA tag is what actually gets deployed — see the next
+          # job — because a floating tag never changes the manifest text
+          # ArgoCD diffs against, so it can never trigger an auto-sync.
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ github.sha }}
+
+  # Writes the new immutable image tag into ArgoCD-RootApps. This commit is
+  # what ArgoCD actually reacts to — without it, ArgoCD has no way to know
+  # a new image exists, since ":latest" never changes as text.
+  update-gitops-manifest:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout GitOps repo
+        uses: actions/checkout@v7
+        with:
+          repository: IvayloB84/ArgoCD-RootApps
+          # GITHUB_TOKEN only has access to THIS repo — a cross-repo push
+          # needs a PAT with write access to ArgoCD-RootApps, stored as a
+          # secret named GITOPS_PAT on this repo (Settings > Secrets >
+          # Actions > New repository secret).
+          token: ${{ secrets.GITOPS_PAT }}
+          path: gitops-repo
+
+      - name: Bump image tag in Deployment manifest
+        run: |
+          cd gitops-repo
+          sed -i "s#image: ghcr.io/.*#image: ${{ needs.build-and-push.outputs.image }}:${{ github.sha }}#" \
+            argocd-apps/${{ github.event.repository.name }}/deployment.yaml
+
+      - name: Commit and push
+        run: |
+          cd gitops-repo
+          git config user.name "backstage-bot"
+          git config user.email "backstage-bot@users.noreply.github.com"
+          git add argocd-apps/${{ github.event.repository.name }}/deployment.yaml
+          git diff --cached --quiet && echo "No image change to commit" || \
+            git commit -m "chore(deploy): ${{ github.event.repository.name }}@${{ github.sha }}"
+          git push origin main
 {% endraw %}

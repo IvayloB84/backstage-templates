@@ -18,7 +18,7 @@ spec:
         - name: ${{ values.name }}
           # This image must exist in the registry before ArgoCD syncs — a CI
           # pipeline (not part of this scaffolder) needs to build and push it.
-          image: ghcr.io/${{ values.owner }}/${{ values.name }}:latest
+          image: ghcr.io/${{ values.owner | lower }}/${{ values.name | lower }}:latest
           ports:
             - containerPort: ${{ values.port }}
           # TCP probes work regardless of whether 'actuator' was selected as
