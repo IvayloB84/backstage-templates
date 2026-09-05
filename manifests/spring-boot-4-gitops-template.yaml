@@ -123,7 +123,7 @@ spec:
       action: fetch:template
       input:
         url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/gitops
-        targetPath: "./gitops-pr/argocd-apps/${{ parameters.artifactId }}"
+        targetPath: "./argocd-apps/${{ parameters.artifactId }}"
         values:
           appName: ${{ parameters.artifactId }}
           name: ${{ parameters.artifactId }}
@@ -135,9 +135,11 @@ spec:
           workloadKind: Deployment
 
     # STEP 5b: Submit a PR to the centralized GitOps repo.
-    # sourcePath scopes the diff to ONLY what's inside ./gitops-pr — its
-    # contents become the root of the PR branch, so this writes exactly
-    # argocd-apps/<service>/, nothing else, no full-repo duplication.
+    # sourcePath + targetPath are both set to "argocd-apps" explicitly —
+    # sourcePath scopes what gets read from the workspace, targetPath pins
+    # exactly where it lands in the target repo. Setting both removes any
+    # ambiguity about the destination path (this is what caused the earlier
+    # full-workspace dump into the repo root).
     - id: submit-gitops-pull-request
       name: Submit Cluster State Pull Request to ArgoCD Repository
       action: publish:github:pull-request
@@ -146,7 +148,8 @@ spec:
         branchName: "infra-onboard-${{ parameters.artifactId }}"
         title: "feat(argocd): onboard service tracking for ${{ parameters.artifactId }}"
         description: 'Automated platform PR registering application manifests under argocd-apps/${{ parameters.artifactId }}/.'
-        sourcePath: gitops-pr
+        sourcePath: argocd-apps
+        targetPath: argocd-apps
         token: ${{ secrets.GITHUB_TOKEN }}
 
     # STEP 6: Register the new repository into the Backstage Catalog
@@ -161,4 +164,4 @@ spec:
       - title: Go to App Source Repository
         url: ${{ steps['publish-github-repository'].output.remoteUrl }}
       - title: Review Infrastructure Sync PR (ArgoCD Tracker)
-        url: ${{ steps['submit-gitops-pull-request'].output.pullRequestUrl }}
+        url: ${{ steps['submit-gitops-pull-request'].output.remoteUrl }}

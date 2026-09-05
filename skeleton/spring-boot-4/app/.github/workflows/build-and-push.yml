@@ -1,3 +1,4 @@
+{% raw %}
 name: Build and Push Container Image
 
 on:
@@ -15,27 +16,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      # A single recent JDK can compile+package for either Java 17 or 21
-      # targets (Maven's release flag in pom.xml, set by Initializr, handles
-      # the actual target version) — so this doesn't need to be templated.
-      - name: Set up JDK
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
-
-      - name: Verify Actor and Token
-        run: |
-          echo "The github.actor is: ${{ github.actor }}"
-          
-          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
-            echo "❌ ERROR: GITHUB_TOKEN is completely EMPTY or not passed!"
-          else
-            echo "✅ GITHUB_TOKEN is present."
-            echo "Token character count: $(echo -n '${{ secrets.GITHUB_TOKEN }}' | wc -c)"
-          fi
-
       - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
@@ -47,7 +27,9 @@ jobs:
       # the repo's actual casing, so normalize it first.
       - name: Compute lowercase image name
         id: image
-        run: echo "name=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+        run: |
+          IMAGE_PATH="ghcr.io/${{ github.repository }}"
+          echo "name=$(echo "$IMAGE_PATH" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Build and push image
         uses: docker/build-push-action@v7
@@ -57,3 +39,4 @@ jobs:
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ github.sha }}
+{% endraw %}
