@@ -42,11 +42,19 @@ spec:
             I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
 
   steps:
-    - id: generate-uuid
-      name: Generating Unique Session Token
-      action: debug:log
+    - id: fetch-gitops-repo
+      name: Fetch Full GitOps Repository
+      action: fetch:plain
       input:
-        message: "Deactivation session identifier instantiated for repo: ${{ parameters.repoName }}"
+        url: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps"
+        targetPath: './gitops-checkout'
+
+    - id: delete-component-folder
+      name: Delete Component Directory
+      action: fs:delete
+      input:
+        files:
+          - './gitops-checkout/argocd-apps/${{ parameters.repoName }}'
 
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
@@ -56,23 +64,13 @@ spec:
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
-        update: true 
-        filesToDelete:
-          - 'argocd-apps/${{ parameters.repoName }}/argocd-app.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/deployment.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/k8s/service.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/catalog-info.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/index.html'
-          - 'argocd-apps/${{ parameters.repoName }}/config.yaml'
-          - 'argocd-apps/${{ parameters.repoName }}/nginx.conf'
-          - 'argocd-apps/${{ parameters.repoName }}/httpd.conf'
+        sourcePath: gitops-checkout
+        targetPath: '.'
+        update: true
         description: |
           ### Automated Component Deletion Request
-          This PR cleanly removes the application and service manifests inside `./argocd-apps/${{ parameters.repoName }}/`.
-
-          Expected Outcomes upon merging:
-          * Argo CD auto-pruning triggers immediately.
-          * Target pods, configurations, and folders are removed from the cluster.
+          Removes the entire `argocd-apps/${{ parameters.repoName }}/` directory,
+          whatever files currently happen to be inside it.
         targetBranchName: main
 
   output:
