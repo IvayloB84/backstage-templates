@@ -51,8 +51,8 @@ parameters:
         default:
           - web
           - security
-      repoUrl:
-        title: Repository Location
+      repoOwner:
+        title: Repository Owner
         type: string
         ui:field: RepoUrlPicker
         ui:options:
