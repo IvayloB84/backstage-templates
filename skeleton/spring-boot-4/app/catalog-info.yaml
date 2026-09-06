@@ -10,5 +10,4 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: ${{ values.owner }}
-  system: java-platform
+  owner: "user:default/IvayloB84"
