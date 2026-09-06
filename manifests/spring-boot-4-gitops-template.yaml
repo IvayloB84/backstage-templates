@@ -20,7 +20,6 @@ parameters:
       - artifactId
       - javaVersion
       - repoOwner
-      - repoUrl
     properties:
       groupId:
         title: Group ID
