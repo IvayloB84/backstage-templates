@@ -19,7 +19,7 @@ spec:
       required:
         - artifactId
         - javaVersion
-        - repoOwner
+        - repoUrl
       properties:
         groupId:
           title: Group ID
@@ -41,8 +41,6 @@ spec:
           type: array
           items:
             type: string
-            # Real start.spring.io dependency IDs only.
-            # Full current list: https://start.spring.io/metadata/client
             enum:
               - web
               - security
@@ -53,16 +51,16 @@ spec:
           default:
             - web
             - security
-        ui:widget:
-      repoUrl:
-        title: Repository Location
-        type: string
-        ui:field: RepoUrlPicker
-        ui:options:
-          allowedHosts:
-            - github.com
-          allowedOwners:
-            - IvayloB84
+          ui:widget: checkboxes
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - IvayloB84
         port:
           title: Container Port Allocation
           type: integer
@@ -72,6 +70,7 @@ spec:
           description: Fine-grained PAT scoped to ArgoCD-RootApps with Contents Read/write — injected into the new repo automatically so its CI can commit deploy updates back.
           type: string
           ui:field: Secret
+
       ui:schema:
         dependencies:
           ui:widget: checkboxes
