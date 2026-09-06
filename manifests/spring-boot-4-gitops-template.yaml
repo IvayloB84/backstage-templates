@@ -53,7 +53,8 @@ spec:
           default:
             - web
             - security
-      repoOwner:
+        ui:widget:
+      repoUrl:
         title: Repository Location
         type: string
         ui:field: RepoUrlPicker
