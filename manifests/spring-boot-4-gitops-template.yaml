@@ -53,14 +53,15 @@ spec:
           default:
             - web
             - security
-        repoOwner:
-          title: Repository Owner
-          type: string
-          ui:field: RepoOwnerPicker
-          ui:options:
-            host: github.com
-            excludedOwners:
-              - IvayloB84
+      repoOwner:
+        title: Repository Location
+        type: string
+        ui:field: RepoUrlPicker
+        ui:options:
+          allowedHosts:
+            - github.com
+          allowedOwners:
+            - IvayloB84
         port:
           title: Container Port Allocation
           type: integer
