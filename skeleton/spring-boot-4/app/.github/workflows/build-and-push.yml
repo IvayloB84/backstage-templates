@@ -1,4 +1,4 @@
-{% raw %}
+# {% raw %}
 name: Build and Push Container Image
 
 on:
@@ -33,18 +33,35 @@ jobs:
           IMAGE_PATH="ghcr.io/${{ github.repository }}"
           echo "name=$(echo "$IMAGE_PATH" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push image
+      # push:false + load:true builds the image into the local Docker
+      # daemon only — nothing reaches GHCR yet. This is what lets us scan
+      # before anything vulnerable could ever be pushed.
+      - name: Build image (local only, not pushed yet)
         uses: docker/build-push-action@v7
         with:
           context: .
-          push: true
-          # :latest is kept for convenience only (e.g. manual `docker pull`).
-          # The commit-SHA tag is what actually gets deployed — see the next
-          # job — because a floating tag never changes the manifest text
-          # ArgoCD diffs against, so it can never trigger an auto-sync.
+          push: false
+          load: true
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ github.sha }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: '${{ steps.image.outputs.name }}:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          severity: 'critical,high'
+
+      # Only reached if Trivy passed. Image already exists locally from the
+      # build step above, so this just pushes the tags already built —
+      # no rebuild.
+      - name: Push image
+        run: |
+          docker push ${{ steps.image.outputs.name }}:latest
+          docker push ${{ steps.image.outputs.name }}:${{ github.sha }}
 
   # Writes the new immutable image tag into ArgoCD-RootApps. This commit is
   # what ArgoCD actually reacts to — without it, ArgoCD has no way to know
@@ -80,4 +97,4 @@ jobs:
           git diff --cached --quiet && echo "No image change to commit" || \
             git commit -m "chore(deploy): ${{ github.event.repository.name }}@${{ github.sha }}"
           git push origin main
-{% endraw %}
+# {% endraw %}
