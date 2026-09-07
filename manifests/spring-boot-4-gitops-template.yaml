@@ -65,7 +65,7 @@ spec:
           title: GitOps Push Token
           description: Fine-grained PAT scoped to ArgoCD-RootApps with Contents Read/write — injected into the new repo automatically so its CI can commit deploy updates back.
           type: string
-          ui:field: Secret
+          ui:widget: password
       ui:schema:
         dependencies:
           ui:widget: checkboxes
@@ -131,11 +131,9 @@ spec:
       action: github:environment:create
       input:
         repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
-        # name: production
-        name: GITOPS_PAT
-        # secrets:
-        #   GITOPS_PAT: ${{ parameters.gitopsToken }}
-        value: ${{ secrets.gitopsToken }}
+        name: production
+        secrets:
+          GITOPS_PAT: ${{ parameters.gitopsToken }}
         token: ${{ secrets.GITHUB_TOKEN }}
 
     # Local-cluster workaround — forward the GitHub webhook to ArgoCD via smee.io.

@@ -111,7 +111,7 @@ jobs:
   update-gitops-manifest:
     needs: [build-and-push, secret-scan, dockerfile-lint, sast-scan, iac-scan]
     runs-on: ubuntu-latest
-    # environment: production
+    environment: production
     steps:
       - name: Checkout GitOps repo
         uses: actions/checkout@v7
