@@ -85,6 +85,7 @@ spec:
     #       Authorization: ${{ 'Bearer ' + steps['lookup-catalog-location'].token }}
 
 
+    # Step 1: Safely pull the catalog record out of the database memory
     - id: lookup-catalog-item
       name: Look Up Catalog Item
       action: catalog:fetch
@@ -104,4 +105,4 @@ spec:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
       - title: Review Catalog Location
-        url: ${{ steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-origin-location'] }}
+        url: ${{ steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] }}
