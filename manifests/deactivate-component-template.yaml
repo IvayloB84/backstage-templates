@@ -59,7 +59,6 @@ spec:
           - './gitops-checkout/argocd-apps/${{ parameters.repoName }}'
 
     # STEP 3: Publish the PR. 
-    # CRITICAL: The title contains 'purge/', which triggers your simplified GraphQL curl workflow!
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
@@ -76,6 +75,21 @@ spec:
           Merging this PR automatically kicks off the GitHub Action workflow 
           to destroy the repository assets and clear the folder via GraphQL API.
         targetBranchName: main
+
+    - id: lookup-catalog-location
+      name: Look Up Catalog Location ID
+      action: http:backstage:request
+      input:
+        method: GET
+        path: "/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
+
+    - id: delete-catalog-location
+      name: Unregister Explicit Catalog Location
+      action: http:backstage:request
+      input:
+        method: DELETE
+        path: "/catalog/locations/${{ steps['lookup-catalog-location'].output.body.id }}"
+
 
   output:
     links:
