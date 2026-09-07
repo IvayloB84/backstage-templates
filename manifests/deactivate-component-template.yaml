@@ -85,11 +85,8 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        # THE FIX: Loops through the matched entity to safely build the path without brackets
-        path: >-
-          {% for entity in steps['lookup-catalog-item'].output.entities %}
-          /api/catalog/locations/by-type/url/{{ entity.metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") | urlencode }}
-          {% endfor %}
+        # Bypasses the lookup step completely by building the exact URL-encoded path using parameters
+        path: ${{ "/api/catalog/locations/by-type/url/https%3A%2F%2Fgithub.com%2F" + parameters.repoOwner + "%2F" + parameters.repoName + "%2Ftree%2Fmain%2Fcatalog-info.yaml" }}
         headers:
           Accept: application/json
 
