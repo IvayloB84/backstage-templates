@@ -97,7 +97,7 @@ spec:
       name: Debug Catalog Output
       action: debug:log
       input:
-        extra: ${{ steps['lookup-catalog-item'].output.entities }}
+        message: ${{ steps['lookup-catalog-item'].output.entities | dump }}
 
   output:
     links:
