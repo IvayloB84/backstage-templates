@@ -73,22 +73,23 @@ spec:
           whatever files currently happen to be inside it.
         targetBranchName: main
 
-    - id: lookup-catalog-item
-      name: Retain Catalog Target Footprint
-      action: catalog:fetch
+    - id: lookup-catalog-location
+      name: Look Up Catalog Location ID
+      action: http:backstage:request
       input:
-        entityRefs:
-          - "component:default/${{ parameters.repoName }}"
+        method: GET
+        path: "/api/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
 
+    # Verify the actual response shape here before trusting the field path
+    # below — Backstage doesn't publish a strict schema for this response,
+    # so add a debug:log of steps['lookup-catalog-location'].output on your
+    # first run and confirm where the id actually sits before relying on it.
     - id: delete-catalog-location
-      name: Purge Catalog Item from Backstage
+      name: Delete Catalog Location
       action: http:backstage:request
       input:
         method: DELETE
-        # Bypasses the lookup step completely by building the exact URL-encoded path using parameters
-        path: ${{ "/api/catalog/locations/by-type/url/https%3A%2F%2Fgithub.com%2F" + parameters.repoOwner + "%2F" + parameters.repoName + "%2Ftree%2Fmain%2Fcatalog-info.yaml" }}
-        headers:
-          Accept: application/json
+        path: "/api/catalog/locations/${{ steps['lookup-catalog-location'].output.body.data.id }}"
 
   output:
     links:
