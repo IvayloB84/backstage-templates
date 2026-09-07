@@ -73,7 +73,6 @@ spec:
           whatever files currently happen to be inside it.
         targetBranchName: main
 
-    # Captures the local entity database tracking footprint right before ending the run
     - id: lookup-catalog-item
       name: Retain Catalog Target Footprint
       action: catalog:fetch
@@ -86,8 +85,8 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        # Combines the verified base endpoint with the exact URL text string path we just tested
-        path: ${{ "/api/catalog/locations/by-type/url/" + steps['lookup-catalog-item'].output.entities.metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
+        # FIX: Added '[0]' to safely map the array item within a step action block
+        path: ${{ "/api/catalog/locations/by-type/url/" + steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
         headers:
           Accept: application/json
 
