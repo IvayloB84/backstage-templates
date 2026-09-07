@@ -84,10 +84,17 @@ spec:
     #       # Explicitly pass the Scaffolder's execution token to authorize backend-to-backend reading
     #       Authorization: ${{ 'Bearer ' + steps['lookup-catalog-location'].token }}
 
+    - id: lookup-catalog-item
+      name: Look Up Catalog Item
+      action: catalog:fetch
+      input:
+        entityRefs:
+          - "component:default/${{ parameters.repoName }}"
+
 
   output:
     links:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
       - title: Review Catalog Location
-        url: ${{ ('Component:default/' + parameters.repoName) | catalogEntity('metadata.annotations["backstage.io/managed-by-location"]') }}
+        url: ${{ steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] }}
