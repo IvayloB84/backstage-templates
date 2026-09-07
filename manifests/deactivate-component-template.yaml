@@ -85,8 +85,11 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        # FIX: Directly targets the system database UUID tracking key instead of the URL string path
-        path: ${{ "/api/catalog/locations/" + steps['lookup-catalog-item'].output.locationId }}
+        # THE FIX: Loops through the matched entity to safely build the path without brackets
+        path: >-
+          {% for entity in steps['lookup-catalog-item'].output.entities %}
+          /api/catalog/locations/by-type/url/{{ entity.metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") | urlencode }}
+          {% endfor %}
         headers:
           Accept: application/json
 
