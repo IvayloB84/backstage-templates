@@ -85,8 +85,8 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        # FIX: Added parentheses around the string calculation and appended '| urlencode'
-        path: ${{ "/api/catalog/locations/by-type/url/" + ((steps['lookup-catalog-item'].output.entities | first).metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") | urlencode) }}
+        # FIX: Directly targets the system database UUID tracking key instead of the URL string path
+        path: ${{ "/api/catalog/locations/" + steps['lookup-catalog-item'].output.locationId }}
         headers:
           Accept: application/json
 
