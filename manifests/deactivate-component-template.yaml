@@ -78,11 +78,12 @@ spec:
       action: http:backstage:request
       input:
         method: GET
-        path: "/api/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
+        # path: "/api/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
+        path: "/api/catalog/entities/by-name/component/default/${{ parameters.repoName }}"
 
   output:
     links:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
       - title: Review Catalog Location
-        url: ${{ steps['lookup-catalog-location'].output.url }}
+        url: ${{ steps['lookup-catalog-location'].output.body.metadata.annotations['backstage.io/managed-by-location'] }}
