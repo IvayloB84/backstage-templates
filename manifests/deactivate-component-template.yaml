@@ -73,36 +73,29 @@ spec:
           whatever files currently happen to be inside it.
         targetBranchName: main
 
-    # - id: lookup-catalog-location
-    #   name: Look Up Catalog Location ID
-    #   action: http:backstage:request
-    #   input:
-    #     method: GET
-    #     path: ${{ "/api/catalog/entities/by-name/Component/default/" + parameters.repoName }}
-    #     headers:
-    #       Accept: application/json
-    #       # Explicitly pass the Scaffolder's execution token to authorize backend-to-backend reading
-    #       Authorization: ${{ 'Bearer ' + steps['lookup-catalog-location'].token }}
-
-
-    # Step 1: Safely pull the catalog record out of the database memory
+    # Captures the local entity database tracking footprint right before ending the run
     - id: lookup-catalog-item
-      name: Look Up Catalog Item
+      name: Retain Catalog Target Footprint
       action: catalog:fetch
       input:
         entityRefs:
           - "component:default/${{ parameters.repoName }}"
 
-    # Step 2: Debug log to inspect the response body in the task UI
-    - id: log-catalog-output
-      name: Debug Catalog Output
-      action: debug:log
-      input:
-        message: ${{ steps['lookup-catalog-item'].output.entities | dump }}
+    # # Executes a clean internal loopback call to erase the tracking location from your localhost instance
+    # - id: delete-catalog-location
+    #   name: Delete Catalog Location
+    #   action: http:backstage:request
+    #   input:
+    #     method: DELETE
+    #     # Extracts from the verified array layout and slices off the "url:" prefix to form a proper REST path
+    #     path: ${{ "/api/catalog/locations/by-type/url/" + steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
+    #     headers:
+    #       Accept: application/json
 
   output:
     links:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
       - title: Review Catalog Location
-        url: ${{ steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] }}
+        # FIX: Explicitly index into the array [0] and strip the "url:" prefix so it's a valid link layout
+        url: ${{ steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
