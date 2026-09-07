@@ -81,21 +81,17 @@ spec:
         entityRefs:
           - "component:default/${{ parameters.repoName }}"
 
-    # # Executes a clean internal loopback call to erase the tracking location from your localhost instance
-    # - id: delete-catalog-location
-    #   name: Delete Catalog Location
-    #   action: http:backstage:request
-    #   input:
-    #     method: DELETE
-    #     # Extracts from the verified array layout and slices off the "url:" prefix to form a proper REST path
-    #     path: ${{ "/api/catalog/locations/by-type/url/" + steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
-    #     headers:
-    #       Accept: application/json
+    - id: delete-catalog-location
+      name: Purge Catalog Item from Backstage
+      action: http:backstage:request
+      input:
+        method: DELETE
+        # Combines the verified base endpoint with the exact URL text string path we just tested
+        path: ${{ "/api/catalog/locations/by-type/url/" + steps['lookup-catalog-item'].output.entities.metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
+        headers:
+          Accept: application/json
 
   output:
     links:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
-      - title: Review Catalog Location
-        # FIX: Explicitly index into the array [0] and strip the "url:" prefix so it's a valid link layout
-        url: ${{ steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
