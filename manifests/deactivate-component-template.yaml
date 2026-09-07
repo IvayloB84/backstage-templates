@@ -85,11 +85,10 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        # Bypasses bracket syntax entirely using the Nunjucks 'first' filter
-        path: ${{ "/api/catalog/locations/by-type/url/" + (steps['lookup-catalog-item'].output.entities | first).metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
+        # FIX: Added parentheses around the string calculation and appended '| urlencode'
+        path: ${{ "/api/catalog/locations/by-type/url/" + ((steps['lookup-catalog-item'].output.entities | first).metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") | urlencode) }}
         headers:
           Accept: application/json
-
 
   output:
     links:
