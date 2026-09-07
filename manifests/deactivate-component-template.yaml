@@ -73,16 +73,16 @@ spec:
           whatever files currently happen to be inside it.
         targetBranchName: main
 
-    - id: lookup-catalog-location
-      name: Look Up Catalog Location ID
-      action: http:backstage:request
-      input:
-        method: GET
-        path: ${{ "/api/catalog/entities/by-name/Component/default/" + parameters.repoName }}
-        headers:
-          Accept: application/json
-          # Explicitly pass the Scaffolder's execution token to authorize backend-to-backend reading
-          Authorization: ${{ 'Bearer ' + steps['lookup-catalog-location'].token }}
+    # - id: lookup-catalog-location
+    #   name: Look Up Catalog Location ID
+    #   action: http:backstage:request
+    #   input:
+    #     method: GET
+    #     path: ${{ "/api/catalog/entities/by-name/Component/default/" + parameters.repoName }}
+    #     headers:
+    #       Accept: application/json
+    #       # Explicitly pass the Scaffolder's execution token to authorize backend-to-backend reading
+    #       Authorization: ${{ 'Bearer ' + steps['lookup-catalog-location'].token }}
 
 
   output:
@@ -90,4 +90,4 @@ spec:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
       - title: Review Catalog Location
-        url: ${{ steps['lookup-catalog-location'].output.body.metadata.annotations['backstage.io/managed-by-location'] }}
+        url: ${{ ('Component:default/' + parameters.repoName) | catalogEntity('metadata.annotations["backstage.io/managed-by-location"]') }}
