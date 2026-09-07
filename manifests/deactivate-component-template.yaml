@@ -92,6 +92,13 @@ spec:
         entityRefs:
           - "component:default/${{ parameters.repoName }}"
 
+    # Step 2: Debug log to inspect the response body in the task UI
+    - id: log-catalog-output
+      name: Debug Catalog Output
+      action: debug:log
+      input:
+        extra: ${{ steps['lookup-catalog-item'].output.entities }}
+
   output:
     links:
       - title: Review Deletion Pull Request
