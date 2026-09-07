@@ -78,7 +78,7 @@ spec:
       action: http:backstage:request
       input:
         method: GET
-        path: "/api/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
+        path: "/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
 
     # Verify the actual response shape here before trusting the field path
     # below — Backstage doesn't publish a strict schema for this response,
@@ -89,7 +89,7 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        path: "/api/catalog/locations/${{ steps['lookup-catalog-location'].output.body.data.id }}"
+        path: "/catalog/locations/${{ steps['lookup-catalog-location'].output.body.data.id }}"
 
   output:
     links:
