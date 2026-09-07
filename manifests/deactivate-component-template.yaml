@@ -89,7 +89,7 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        path: "/catalog/locations/${{ steps['lookup-catalog-location'].output.body.data.id }}"
+        path: "/catalog/locations/${{ steps['lookup-catalog-location'].output.body.id }}"
 
   output:
     links:
