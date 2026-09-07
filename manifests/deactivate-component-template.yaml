@@ -79,7 +79,14 @@ spec:
       input:
         method: GET
         # path: "/api/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
-        path: "/api/catalog/entities/by-name/component/default/${{ parameters.repoName }}"
+        path: "/api/catalog/entities/by-name"
+        # Let the Scaffolder map your parameters cleanly to prevent 404 parsing errors
+        params:
+          kind: Component
+          namespace: default
+          name: ${{ parameters.repoName }}
+        headers:
+          Accept: application/json
 
   output:
     links:
