@@ -73,6 +73,13 @@ spec:
           whatever files currently happen to be inside it.
         targetBranchName: main
 
+    - id: lookup-catalog-location
+      name: Look Up Catalog Location ID
+      action: http:backstage:request
+      input:
+        method: GET
+        path: "/api/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
+
   output:
     links:
       - title: Review Deletion Pull Request
