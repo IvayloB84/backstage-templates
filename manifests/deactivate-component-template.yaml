@@ -78,10 +78,12 @@ spec:
       action: http:backstage:request
       input:
         method: GET
-        # Capitalize Component and format string exactly inside the template statement
         path: ${{ "/api/catalog/entities/by-name/Component/default/" + parameters.repoName }}
         headers:
           Accept: application/json
+          # Explicitly pass the Scaffolder's execution token to authorize backend-to-backend reading
+          Authorization: ${{ 'Bearer ' + steps['lookup-catalog-location'].token }}
+
 
   output:
     links:
