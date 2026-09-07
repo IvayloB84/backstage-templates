@@ -42,6 +42,7 @@ spec:
             I explicitly authorize the total destruction of this component repository and all its infrastructure pipelines. Checking this box is mandatory to proceed.
 
   steps:
+    # STEP 1: Download the root configurations to prepare a modification
     - id: fetch-gitops-repo
       name: Fetch Full GitOps Repository
       action: fetch:plain
@@ -49,6 +50,7 @@ spec:
         url: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps"
         targetPath: './gitops-checkout'
 
+    # STEP 2: Clear out the local workspace directory so it registers as an empty/deleted state
     - id: delete-component-folder
       name: Delete Component Directory
       action: fs:delete
@@ -56,6 +58,8 @@ spec:
         files:
           - './gitops-checkout/argocd-apps/${{ parameters.repoName }}'
 
+    # STEP 3: Publish the PR. 
+    # CRITICAL: The title contains 'purge/', which triggers your simplified GraphQL curl workflow!
     - id: create-pr
       name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
@@ -63,33 +67,15 @@ spec:
         repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
-        title: "fix(gitops): purge infrastructure files for ${{ parameters.repoName }}"
+        title: "purge/${{ parameters.repoName }} - Automatic Infrastructure Purge"
         sourcePath: gitops-checkout
         targetPath: '.'
         update: true
         description: |
           ### Automated Component Deletion Request
-          Removes the entire `argocd-apps/${{ parameters.repoName }}/` directory,
-          whatever files currently happen to be inside it.
+          Merging this PR automatically kicks off the GitHub Action workflow 
+          to destroy the repository assets and clear the folder via GraphQL API.
         targetBranchName: main
-
-    - id: lookup-catalog-location
-      name: Look Up Catalog Location ID
-      action: http:backstage:request
-      input:
-        method: GET
-        path: "/catalog/locations/by-entity/component/default/${{ parameters.repoName }}"
-
-    # Verify the actual response shape here before trusting the field path
-    # below — Backstage doesn't publish a strict schema for this response,
-    # so add a debug:log of steps['lookup-catalog-location'].output on your
-    # first run and confirm where the id actually sits before relying on it.
-    - id: delete-catalog-location
-      name: Delete Catalog Location
-      action: http:backstage:request
-      input:
-        method: DELETE
-        path: "/catalog/locations/${{ steps['lookup-catalog-location'].output.body.id }}"
 
   output:
     links:
