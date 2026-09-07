@@ -85,10 +85,11 @@ spec:
       action: http:backstage:request
       input:
         method: DELETE
-        # FIX: Added '[0]' to safely map the array item within a step action block
-        path: ${{ "/api/catalog/locations/by-type/url/" + steps['lookup-catalog-item'].output.entities[0].metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
+        # Bypasses bracket syntax entirely using the Nunjucks 'first' filter
+        path: ${{ "/api/catalog/locations/by-type/url/" + (steps['lookup-catalog-item'].output.entities | first).metadata.annotations['backstage.io/managed-by-location'] | replace("url:", "") }}
         headers:
           Accept: application/json
+
 
   output:
     links:
