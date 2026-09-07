@@ -84,3 +84,5 @@ spec:
     links:
       - title: Review Deletion Pull Request
         url: ${{ steps['create-pr'].output.remoteUrl }}
+      - title: Review Catalog Location
+        url: ${{ steps['lookup-catalog-location'].output.url }}
