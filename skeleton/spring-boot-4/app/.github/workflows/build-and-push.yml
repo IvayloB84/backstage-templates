@@ -127,12 +127,6 @@ jobs:
           token: ${{ secrets.GITOPS_PAT }}
           path: gitops-repo
 
-      - name: Bump image tag in Deployment manifest
-        run: |
-          cd gitops-repo
-          sed -i "s#image: ghcr.io/.*#image: ${{ needs.build-and-push.outputs.image }}:${{ github.sha }}#" \
-            argocd-apps/${{ github.event.repository.name }}/deployment.yaml
-
       - name: Wait for GitOps Folder Creation
         run: |
           TARGET_DIR="gitops-repo/argocd-apps/${{ github.event.repository.name }}"
@@ -160,6 +154,12 @@ jobs:
           done
           
           echo "Success! GitOps target folder detected."
+
+      - name: Bump image tag in Deployment manifest
+        run: |
+          cd gitops-repo
+          sed -i "s#image: ghcr.io/.*#image: ${{ needs.build-and-push.outputs.image }}:${{ github.sha }}#" \
+            argocd-apps/${{ github.event.repository.name }}/deployment.yaml
 
       - name: Commit and push
         run: |
