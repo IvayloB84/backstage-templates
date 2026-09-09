@@ -133,6 +133,34 @@ jobs:
           sed -i "s#image: ghcr.io/.*#image: ${{ needs.build-and-push.outputs.image }}:${{ github.sha }}#" \
             argocd-apps/${{ github.event.repository.name }}/deployment.yaml
 
+      - name: Wait for GitOps Folder Creation
+        run: |
+          TARGET_DIR="gitops-repo/argocd-apps/${{ github.event.repository.name }}"
+          
+          counter=0
+          max_retry=40 # 40 retries * 30 seconds = 20 minutes max execution time limit
+          
+          echo "Checking if GitOps directory exists: $TARGET_DIR"
+          
+          # Loop locally using the cloned repository path to verify the folder's existence
+          until [ -d "$TARGET_DIR" ]; do
+            counter=$((counter+1))
+            if [ $counter -ge $max_retry ]; then
+              echo "Error: Timed out waiting for the GitOps folder. Has the Backstage PR been merged?"
+              exit 1
+            fi
+            
+            echo "Folder not found yet. Pulling latest Git changes and retrying in 30 seconds... ($counter/$max_retry)"
+            sleep 30
+            
+            # Fetch and pull down any changes merged to main while this runner was waiting
+            cd gitops-repo
+            git pull origin main
+            cd ..
+          done
+          
+          echo "Success! GitOps target folder detected."
+
       - name: Commit and push
         run: |
           cd gitops-repo
