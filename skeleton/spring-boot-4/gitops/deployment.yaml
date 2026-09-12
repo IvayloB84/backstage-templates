@@ -13,6 +13,11 @@ spec:
     metadata:
       labels:
         app: ${{ values.name }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
     spec:
       containers:
         - name: ${{ values.name }}
@@ -24,13 +29,43 @@ spec:
           # TCP probes work regardless of whether 'actuator' was selected as
           # a dependency. If you did select actuator, swap these for
           # httpGet on /actuator/health/{liveness,readiness} instead.
-          readinessProbe:
-            tcpSocket:
+          # Resource requests and limits
+          resources:
+            requests:
+              # Minimum resources guaranteed to the pod
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              # Maximum resources the pod can use
+              cpu: "1000m"
+              memory: "512Mi"
+          # Startup probe: allows slow JVM startup
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
               port: ${{ values.port }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            # Check every 5 seconds, allow up to 60 attempts (5 min)
+            periodSeconds: 5
+            failureThreshold: 60
+          # Liveness probe: restarts pod if unhealthy
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /actuator/health/liveness
               port: ${{ values.port }}
-            initialDelaySeconds: 20
             periodSeconds: 15
+            failureThreshold: 3
+          # Readiness probe: removes pod from service if not ready
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: ${{ values.port }}
+            periodSeconds: 10
+            failureThreshold: 3
+          # Allow graceful shutdown
+          lifecycle:
+            preStop:
+              exec:
+                # Sleep before SIGTERM to allow load balancer to update
+                command: ["sh", "-c", "sleep 10"]
+      # Grace period must exceed preStop sleep + shutdown timeout
+      terminationGracePeriodSeconds: 60
