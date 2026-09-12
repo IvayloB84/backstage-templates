@@ -9,63 +9,53 @@ spec:
   selector:
     matchLabels:
       app: ${{ values.name }}
-  template:
-    metadata:
-      labels:
-        app: ${{ values.name }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: ${{ values.name }}
     spec:
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       containers:
         - name: ${{ values.name }}
-          # This image must exist in the registry before ArgoCD syncs — a CI
-          # pipeline (not part of this scaffolder) needs to build and push it.
           image: ghcr.io/${{ values.owner | lower }}/${{ values.name | lower }}:latest
+          env:
+            - name: SERVER_PORT
+              value: "${{ values.port }}"
           ports:
-            - containerPort: ${{ values.port }}
-          # TCP probes work regardless of whether 'actuator' was selected as
-          # a dependency. If you did select actuator, swap these for
-          # httpGet on /actuator/health/{liveness,readiness} instead.
-          # Resource requests and limits
+            - name: http
+              containerPort: ${{ values.port }}
           resources:
             requests:
-              # Minimum resources guaranteed to the pod
               cpu: "250m"
               memory: "256Mi"
             limits:
-              # Maximum resources the pod can use
               cpu: "1000m"
               memory: "512Mi"
-          # Startup probe: allows slow JVM startup
           startupProbe:
-            httpGet:
-              path: /actuator/health/liveness
+            tcpSocket:
               port: ${{ values.port }}
-            # Check every 5 seconds, allow up to 60 attempts (5 min)
             periodSeconds: 5
             failureThreshold: 60
-          # Liveness probe: restarts pod if unhealthy
           livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
+            tcpSocket:
               port: ${{ values.port }}
             periodSeconds: 15
             failureThreshold: 3
-          # Readiness probe: removes pod from service if not ready
           readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
+            tcpSocket:
               port: ${{ values.port }}
             periodSeconds: 10
             failureThreshold: 3
-          # Allow graceful shutdown
           lifecycle:
             preStop:
               exec:
-                # Sleep before SIGTERM to allow load balancer to update
                 command: ["sh", "-c", "sleep 10"]
-      # Grace period must exceed preStop sleep + shutdown timeout
       terminationGracePeriodSeconds: 60
