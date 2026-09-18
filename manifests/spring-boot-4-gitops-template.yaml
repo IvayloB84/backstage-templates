@@ -102,6 +102,7 @@ spec:
         repoUrl: "github.com?repo=${{ parameters.artifactId }}&owner=${{ parameters.repoOwner }}"
         defaultBranch: main
         repoVisibility: public
+        topics: ['backstage-managed']
         token: ${{ secrets.GITHUB_TOKEN }}
 
     # Flip GITHUB_TOKEN to read/write for this repo's own Actions
