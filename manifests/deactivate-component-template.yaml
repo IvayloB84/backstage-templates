@@ -22,7 +22,13 @@ spec:
           title: Repository Owner
           type: string
           default: IvayloB84
+          ui:widget: hidden
           description: Your GitHub organization or personal profile username
+        gitopsRepo:
+          title: GitOps Repo
+          type: string
+          default: ArgoCD-RootApps
+          ui:widget: hidden
 
     - title: Corporate Safety Gate
       required:
@@ -47,7 +53,7 @@ spec:
       name: Fetch Full GitOps Repository
       action: fetch:plain
       input:
-        url: "https://github.com/${{ parameters.repoOwner }}/ArgoCD-RootApps"
+        url: "https://github.com/${{ parameters.repoOwner }}/${{ parameters.gitopsRepo }}"
         targetPath: './gitops-checkout'
 
     # STEP 2: Clear out the local workspace directory so it registers as an empty/deleted state
@@ -63,7 +69,7 @@ spec:
       name: Generate GitOps Deletion Pull Request
       action: publish:github:pull-request
       input:
-        repoUrl: 'github.com?repo=ArgoCD-RootApps&owner=${{ parameters.repoOwner }}'
+        repoUrl: 'github.com?repo=${{ parameters.gitopsRepo }}&owner=${{ parameters.repoOwner }}'
         token: ${{ secrets.GITHUB_TOKEN }}
         branchName: purge/${{ parameters.repoName }}
         title: "purge/${{ parameters.repoName }} - Automatic Infrastructure Purge"
