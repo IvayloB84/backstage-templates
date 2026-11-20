@@ -57,6 +57,15 @@ spec:
           title: GitHub User/Org
           type: string
           default: IvayloB84
+          ui:widget: hidden
+        templateRepo:
+          type: string
+          default: backstage-templates
+          ui:widget: hidden
+        gitopsRepo:
+          type: string
+          default: ArgoCD-RootApps
+          ui:widget: hidden
         port:
           title: Container Port Allocation
           type: integer
@@ -79,7 +88,7 @@ spec:
       name: Generate Project From Skeleton
       action: fetch:template
       input:
-        url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/app
+        url: https://github.com/${{ parameters.repoOwner }}/${{ parameters.templateRepo }}/tree/main/skeleton/spring-boot-4/app
         # This file uses GitHub Actions' own ${{ }} expressions
         # (github.actor, secrets.GITHUB_TOKEN, etc.) — copy it verbatim
         # instead of running it through Nunjucks, or those get corrupted.
@@ -161,7 +170,7 @@ spec:
       name: Generate ArgoCD Application Registration Descriptor
       action: fetch:template
       input:
-        url: https://github.com/IvayloB84/backstage-templates/tree/main/skeleton/spring-boot-4/gitops
+        url: https://github.com/${{ parameters.repoOwner }}/${{ parameters.templateRepo }}/tree/main/skeleton/spring-boot-4/gitops
         targetPath: "./argocd-apps/${{ parameters.artifactId }}"
         values:
           appName: ${{ parameters.artifactId }}
@@ -179,7 +188,7 @@ spec:
       name: Submit Cluster State Pull Request to ArgoCD Repository
       action: publish:github:pull-request
       input:
-        repoUrl: "github.com?owner=${{ parameters.repoOwner }}&repo=ArgoCD-RootApps"
+        repoUrl: "github.com?owner=${{ parameters.repoOwner }}&repo=${{ parameters.gitopsRepo }}"
         branchName: "infra-onboard-${{ parameters.artifactId }}"
         title: "feat(argocd): onboard service tracking for ${{ parameters.artifactId }}"
         description: 'Automated platform PR registering application manifests under argocd-apps/${{ parameters.artifactId }}/.'
